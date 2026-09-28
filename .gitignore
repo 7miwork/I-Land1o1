@@ -1,0 +1,14 @@
+# ============================================================
+# Videos sind zu gross fuer GitHub (GitHub-Limit: 100 MB/Datei)
+# Sie werden weiterhin per FTP hochgeladen:  .\upload-videos.ps1
+# ============================================================
+Videos/
+
+# FTP-Helper-Skript (enthaelt Zugangsdaten) - bleibt lokal
+upload-videos.ps1
+
+# OS / Editor-Reste
+Thumbs.db
+ehthumbs.db
+.DS_Store
+Desktop.ini
