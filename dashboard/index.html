@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>I-Land1o1 – Deine Schatzkarte | Level 1</title>
+  <meta name="description" content="Dein Level-1-Dashboard: 11 Coding-Abenteuer als Video-Lektionen für junge Piraten." />
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&family=Press+Start+2P&family=Pirata+One&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+
+<body>
+  <header class="topbar">
+    <a class="logo" href="/">🏴‍☠️ I-Land<span>1o1</span></a>
+    <nav class="topnav">
+      <a href="/">Zurück zur Webseite</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <p class="kicker">⚓ Level 1 – Das neue Abenteuer</p>
+      <h1>Deine Schatzkarte</h1>
+      <p class="sub">Sieh dir die Lektionen in Ruhe an, probiere alles in <strong>Minecraft Education</strong> aus
+        und markiere jede Lektion als <strong>erledigt</strong>, wenn du den Schatz gefunden hast!</p>
+
+      <div class="progress-card">
+        <div class="progress-head">
+          <span class="progress-label">🗺️ Dein Fortschritt</span>
+          <span class="progress-count" id="progressCount">0 / 0</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <p class="progress-msg" id="progressMsg">Lege los, kleiner Pirat!</p>
+      </div>
+    </section>
+
+    <section class="lessons">
+      <h2 class="section-title">📜 Deine Lektionen</h2>
+      <div class="grid" id="lessonGrid">
+        <!-- wird von dashboard.js gefüllt -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Video-Modal -->
+  <div class="modal" id="videoModal" hidden>
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-box" role="dialog" aria-modal="true" aria-label="Video-Lektion">
+      <div class="modal-head">
+        <h3 id="modalTitle">Lektion</h3>
+        <button class="btn-close" id="modalClose" aria-label="Schließen">✕</button>
+      </div>
+      <video id="modalVideo" controls playsinline preload="none"></video>
+      <div class="modal-foot">
+        <button class="btn btn-done" id="modalDone">✅ Als erledigt markieren</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>🏴‍☠️ I-Land1o1 Learning Platform – Coding-Abenteuer für junge Piraten</p>
+  </footer>
+
+  <script src="dashboard.js"></script>
+</body>
+
+</html>
