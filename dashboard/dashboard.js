@@ -31,7 +31,10 @@ const LESSONS = [
   }),
 ];
 
-const STORAGE_KEY = 'iland-progress-de-level1';
+// Fortschritt wird pro Account (Supabase-User-ID) getrennt gespeichert
+const STORAGE_PREFIX = 'iland-progress-de-level1:';
+let storageKey = STORAGE_PREFIX + 'anon';
+
 
 const grid = document.getElementById('lessonGrid');
 const progressCount = document.getElementById('progressCount');
@@ -49,14 +52,14 @@ let currentLesson = null;
 
 function loadDone() {
   try {
-    return new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+    return new Set(JSON.parse(localStorage.getItem(storageKey) || '[]'));
   } catch {
     return new Set();
   }
 }
 
 function saveDone(done) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify([...done]));
+  localStorage.setItem(storageKey, JSON.stringify([...done]));
 }
 
 let done = loadDone();
@@ -139,4 +142,9 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !modal.hidden) closeModal();
 });
 
-render();
+// Start erfolgt durch auth.js -> initDashboard(userId)
+window.initDashboard = function (userId) {
+  storageKey = STORAGE_PREFIX + (userId || 'anon');
+  done = loadDone();
+  render();
+};

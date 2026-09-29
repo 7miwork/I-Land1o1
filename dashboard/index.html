@@ -19,11 +19,35 @@
   <header class="topbar">
     <a class="logo" href="/">🏴‍☠️ I-Land<span>1o1</span></a>
     <nav class="topnav">
+      <span class="who" id="authWho" hidden></span>
+      <button class="btn btn-ghost" id="btnLogout" hidden>Abmelden</button>
       <a href="/">Zurück zur Webseite</a>
     </nav>
   </header>
 
-  <main class="wrap">
+  <!-- Login / Registrierung (wird von auth.js ein-/ausgeblendet) -->
+  <div class="auth-overlay" id="authOverlay" hidden>
+    <div class="auth-card">
+      <p class="kicker">⚓ Crew-Bereich</p>
+      <h2 class="auth-title">Willkommen zurück!</h2>
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" id="tabLogin">Anmelden</button>
+        <button type="button" class="auth-tab" id="tabSignup">Registrieren</button>
+      </div>
+      <form id="authForm" novalidate>
+        <label class="auth-label" for="authEmail">E-Mail</label>
+        <input id="authEmail" type="email" autocomplete="email" required placeholder="du@beispiel.de" />
+        <label class="auth-label" for="authPassword">Passwort</label>
+        <input id="authPassword" type="password" autocomplete="current-password" required minlength="6"
+          placeholder="••••••••" />
+        <button type="submit" class="btn btn-play auth-submit" id="authSubmit">Anmelden ⚓</button>
+      </form>
+      <p class="auth-error" id="authError" hidden></p>
+    </div>
+  </div>
+
+  <main class="wrap" id="appContent" hidden>
+
     <section class="hero">
       <p class="kicker">⚓ Level 1 – Das neue Abenteuer</p>
       <h1>Deine Schatzkarte</h1>
@@ -69,7 +93,10 @@
     <p>🏴‍☠️ I-Land1o1 Learning Platform – Coding-Abenteuer für junge Piraten</p>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <script src="dashboard.js"></script>
+  <script src="auth.js"></script>
 </body>
 
 </html>
