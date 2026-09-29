@@ -18,6 +18,52 @@ create table if not exists public.profiles (
   created_at   timestamptz not null default now()
 );
 
+-- Selbstreparatur: falls eine profiles-Tabelle schon existierte (z. B. von
+-- einem früheren Setup) bekommen fehlende Spalten automatisch ihren Default.
+alter table public.profiles add column if not exists display_name text        not null default 'Pirat';
+alter table public.profiles add column if not exists role         public.app_role not null default 'student';
+alter table public.profiles add column if not exists created_at   timestamptz not null default now();
+
+-- Falls eine alte Tabelle "role" als text/int statt Enum hatte: neu als Enum
+do $$ begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'profiles'
+      and column_name = 'role' and data_type <> 'USER-DEFINED'
+  ) then
+    alter table public.profiles drop column role cascade;
+    alter table public.profiles add column role public.app_role not null default 'student';
+    raise notice 'Alte role-Spalte (kein Enum) wurde durch die Rollen-Spalte ersetzt';
+  end if;
+end $$;
+
+-- FK auf auth.users nachtragen, falls die alte Tabelle ihn nicht hatte
+do $$ begin
+  alter table public.profiles
+    add constraint profiles_id_fkey foreign key (id)
+    references auth.users (id) on delete cascade;
+exception
+  when duplicate_object then null;   -- existiert schon (anders benannt o. ä.)
+  when others then
+    raise notice 'FK auth.users nicht gesetzt: %', sqlerrm;
+end $$;
+
+-- Störende NOT-NULL-Fremdspalten einer alten Tabelle (z. B. "username" aus
+-- einem Tutorial-Setup) entblockieren, damit der Signup-Trigger einfügen kann
+do $$
+declare c text;
+begin
+  for c in
+    select column_name from information_schema.columns
+    where table_schema = 'public' and table_name = 'profiles'
+      and is_nullable = 'NO' and column_default is null
+      and column_name not in ('id', 'display_name', 'role', 'created_at')
+  loop
+    execute format('alter table public.profiles alter column %I drop not null', c);
+    raise notice 'Alte Pflichtspalte entschärft: %', c;
+  end loop;
+end $$;
+
 -- 3) parent_links: welches Elternteil gehört zu welchem Kind?
 --    (Eltern-Dashboard liest später darüber die Kinder-Fortschritte)
 create table if not exists public.parent_links (
