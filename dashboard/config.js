@@ -12,6 +12,6 @@
    Clients gedacht (Datenschutz regelt Supabase RLS).
    ============================================================ */
 window.ILAND_CONFIG = {
-  SUPABASE_URL: 'HIER_SUPABASE_URL_EINFUEGEN',        // z.B. https://abcdefgh.supabase.co
-  SUPABASE_ANON_KEY: 'HIER_ANON_PUBLIC_KEY_EINFUEGEN' // langer JWT-String (anon public)
+  SUPABASE_URL: 'https://lmlbjtazgcylsrtzzisr.supabase.co',
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtbGJqdGF6Z2N5bHNydHp6aXNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5NzU0NjQsImV4cCI6MjEwMDU1MTQ2NH0.np0bxuYpelOukoaN1ywHbwMFIR_BSTl8qXyk6ab-pxM'
 };
