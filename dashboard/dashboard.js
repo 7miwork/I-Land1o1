@@ -12,6 +12,8 @@ const TYPE_ICONS = { start: '🏴‍☠️', kapitel: '⛵', lektion: '⛏️' }
 // Fortschritt wird pro Account (Supabase-User-ID) getrennt gespeichert
 const STORAGE_PREFIX = 'iland-progress-de-level1:';
 let storageKey = STORAGE_PREFIX + 'anon';
+let sbClient = null; // Supabase-Client (von auth.js übergeben), null = nur lokal
+let currentUserId = 'anon';
 
 
 const grid = document.getElementById('lessonGrid');
@@ -94,10 +96,56 @@ function closeModal() {
 }
 
 function toggleDone(id) {
-  if (done.has(id)) done.delete(id);
-  else done.add(id);
+  const nowDone = !done.has(id);
+  if (nowDone) done.add(id);
+  else done.delete(id);
   saveDone(done);
   render();
+  syncToServer(id, nowDone);
+}
+
+/* ---- Server-Sync (Supabase-Tabelle lesson_progress) ----
+   Lokal speichern ist sofort da (optimistisch), der Server folgt im Hintergrund. */
+
+async function syncToServer(lessonId, isDone) {
+  if (!sbClient || currentUserId === 'anon') return;
+  const { error } = await sbClient
+    .from('lesson_progress')
+    .upsert(
+      { user_id: currentUserId, lesson_id: lessonId, done: isDone, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id,lesson_id' }
+    );
+  if (error) console.warn('Fortschritt nicht synchronisiert:', error.message);
+}
+
+async function hydrateFromServer() {
+  if (!sbClient || currentUserId === 'anon') return;
+  try {
+    const { data, error } = await sbClient
+      .from('lesson_progress')
+      .select('lesson_id, done')
+      .eq('user_id', currentUserId);
+    if (error) throw error;
+    const rows = data || [];
+    const serverDone = new Set(rows.filter((r) => r.done).map((r) => r.lesson_id));
+    const known = new Set(rows.map((r) => r.lesson_id));
+    // Lokal bereits geschafft, aber dem Server noch unbekannt -> einmalig hochladen
+    const missing = [...done].filter((id) => !known.has(id));
+    done = new Set([...serverDone, ...done]);
+    saveDone(done);
+    if (missing.length) {
+      await sbClient
+        .from('lesson_progress')
+        .upsert(
+          missing.map((id) => ({ user_id: currentUserId, lesson_id: id, done: true })),
+          { onConflict: 'user_id,lesson_id' }
+        );
+    }
+    render();
+  } catch (err) {
+    // Tabelle fehlt o.ä. -> Dashboard läuft lokal einfach weiter
+    console.warn('Server-Fortschritt nicht geladen:', err.message);
+  }
 }
 
 grid.addEventListener('click', (e) => {
@@ -121,9 +169,12 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !modal.hidden) closeModal();
 });
 
-// Start erfolgt durch auth.js -> initDashboard(userId)
-window.initDashboard = function (userId) {
-  storageKey = STORAGE_PREFIX + (userId || 'anon');
+// Start erfolgt durch auth.js -> initDashboard(userId, supabaseClient)
+window.initDashboard = function (userId, client) {
+  sbClient = client || null;
+  currentUserId = userId || 'anon';
+  storageKey = STORAGE_PREFIX + currentUserId;
   done = loadDone();
   render();
+  hydrateFromServer();
 };

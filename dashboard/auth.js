@@ -61,7 +61,7 @@
     }
     if (!window.ilandDashboardInited && typeof window.initDashboard === 'function') {
       window.ilandDashboardInited = true;
-      window.initDashboard(user.id);
+      window.initDashboard(user.id, client);
     }
   }
 
