@@ -13,6 +13,25 @@ Dieses Repo enthält den **Deploy-Stand** der Live-Website auf Hostinger
 | `__manus__/`      | Manus Debug-Collector                           |
 | `.htaccess`       | Apache SPA-Rewrite (React Router)               |
 | `Videos/`         | ⛔ NICHT im Repo – zu groß, nur per FTP auf dem Server |
+| `dashboard/`      | Schüler-Dashboard (Level 1) – eigene statische App     |
+
+## Schüler-Dashboard (`/dashboard/`)
+
+Eigene, statische App (kein Build-Schritt) im Piraten-Design der Hauptseite.
+
+| Datei          | Zweck                                                              |
+|----------------|--------------------------------------------------------------------|
+| `index.html`   | Login-Overlay + Seitenlayout                                       |
+| `auth.js`      | Supabase-Auth (Login / Registrierung / Session / Logout)           |
+| `config.js`    | ⚠️ Supabase `SUPABASE_URL` + `SUPABASE_ANON_KEY` hier eintragen     |
+| `lessons.js`   | **Kurs-Inhalte pflegen** (`window.ILAND_LESSONS`)                   |
+| `dashboard.js` | Rendert Lektionsraster, Video-Modal, Fortschritt                   |
+| `dashboard.css`| Styles (Fonts + Farbpalette aus dem Hauptbundle übernommen)        |
+
+- **Inhalte ändern:** einfach `dashboard/lessons.js` bearbeiten
+  (`title`, `desc`, `task`, `video`). Neue Lektion = neues Objekt oder `length: 11` anpassen.
+- **Fortschritt:** pro Supabase-User-ID in `localStorage` (`iland-progress-de-level1:<id>`).
+- **Ohne ausgefüllte `config.js`-Werte** bleibt das Dashboard offen erreichbar (praktisch zum Testen).
 
 ## Deployment
 
