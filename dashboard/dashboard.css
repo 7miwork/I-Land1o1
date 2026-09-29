@@ -449,3 +449,14 @@ h1 {
 @media (max-width: 520px) {
   .who { display: none; }
 }
+
+.card-task {
+  margin: 0 0 12px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(0, 12, 28, .45);
+  border: 1px dashed rgba(243, 186, 37, .5);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--gold);
+}

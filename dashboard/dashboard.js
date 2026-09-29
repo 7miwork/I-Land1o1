@@ -4,32 +4,10 @@
    ============================================================ */
 
 // Videos liegen auf dem Server unter /Videos/... (FTP-Bereich, nicht im Git)
-const LESSONS = [
-  {
-    id: 'start',
-    num: 'Intro',
-    title: 'Willkommen an Bord',
-    desc: 'Lerne deine Crew, dein Schiff und Minecraft Education kennen – der perfekte Start in dein erstes Abenteuer!',
-    video: '/Videos/DE/DE Start.mp4',
-  },
-  {
-    id: 'schiff',
-    num: 'Kapitel',
-    title: 'Das Schiff',
-    desc: 'Zusammen bauen wir euer Klassen-Schiff – die Basis für alle weiteren Level-1-Abenteuer.',
-    video: '/Videos/DE/DE Schiff.mp4',
-  },
-  ...Array.from({ length: 11 }, (_, i) => {
-    const n = String(i + 1).padStart(2, '0');
-    return {
-      id: `l${n}`,
-      num: `Lektion ${n}`,
-      title: `Lektion ${n}`,
-      desc: 'Video ansehen, Aufgabe in Minecraft Education lösen und danach als erledigt markieren. ⛏️',
-      video: `/Videos/DE/Level 1/DE Level 1 Lesson ${n}.mp4`,
-    };
-  }),
-];
+// Die Inhalte selbst werden in lessons.js gepflegt (window.ILAND_LESSONS)
+const LESSONS = window.ILAND_LESSONS || [];
+
+const TYPE_ICONS = { start: '🏴‍☠️', kapitel: '⛵', lektion: '⛏️' };
 
 // Fortschritt wird pro Account (Supabase-User-ID) getrennt gespeichert
 const STORAGE_PREFIX = 'iland-progress-de-level1:';
@@ -82,9 +60,10 @@ function render() {
     card.className = 'card' + (isDone ? ' is-done' : '');
     card.innerHTML = `
       <span class="card-badge">${isDone ? 'ERLEDIGT ✓' : 'OFFEN'}</span>
-      <span class="card-num">${lesson.num}</span>
+      <span class="card-num">${TYPE_ICONS[lesson.type] || '🧭'} ${lesson.num}</span>
       <h3 class="card-title">${lesson.title}</h3>
       <p class="card-desc">${lesson.desc}</p>
+      ${lesson.task ? `<p class="card-task">🎯 ${lesson.task}</p>` : ''}
       <div class="card-actions">
         <button class="btn btn-play" data-action="play" data-id="${lesson.id}">▶ Video starten</button>
         <button class="btn btn-done" data-action="toggle" data-id="${lesson.id}">
