@@ -27,6 +27,14 @@ const modalVideo = document.getElementById('modalVideo');
 const modalClose = document.getElementById('modalClose');
 const modalBackdrop = document.getElementById('modalBackdrop');
 const modalDone = document.getElementById('modalDone');
+const resumeBtn = document.getElementById('resumeBtn');
+
+if (resumeBtn) {
+  resumeBtn.addEventListener('click', () => {
+    const next = LESSONS.find((l) => !done.has(l.id));
+    if (next) openModal(next);
+  });
+}
 
 let currentLesson = null;
 
@@ -52,6 +60,11 @@ function updateProgress() {
   if (count === 0) progressMsg.textContent = 'Lege los, kleiner Pirat! ⚓';
   else if (count < total) progressMsg.textContent = 'Stark! Jeder Schatz braucht Geduld – weiter geht\u2019s! 💪';
   else progressMsg.textContent = 'GRATULIERE! Level 1 gemeistert – du bist ein echter Coding-Pirat! 🏆🎉';
+  const next = LESSONS.find((l) => !done.has(l.id));
+  if (resumeBtn) {
+    resumeBtn.hidden = !next;
+    if (next) resumeBtn.textContent = count === 0 ? "⚓ Los geht's!" : '▶ Weiter geht\u2019s!';
+  }
 }
 
 function render() {

@@ -18,6 +18,8 @@
   const form = document.getElementById('authForm');
   const emailInput = document.getElementById('authEmail');
   const pwInput = document.getElementById('authPassword');
+  const nameInput = document.getElementById('authName');
+  const nameWrap = document.getElementById('authNameWrap');
   const errBox = document.getElementById('authError');
   const btnLogin = document.getElementById('tabLogin');
   const btnSignup = document.getElementById('tabSignup');
@@ -39,6 +41,7 @@
     btnLogin.classList.toggle('active', m === 'login');
     btnSignup.classList.toggle('active', m === 'signup');
     btnSubmit.textContent = m === 'login' ? 'Anmelden ⚓' : 'Registrieren 🏴‍☠️';
+    if (nameWrap) nameWrap.hidden = m !== 'signup';
     showError('');
   }
 
@@ -52,6 +55,15 @@
     overlay.hidden = true;
     document.getElementById('appContent').hidden = false;
     if (whoBox) whoBox.textContent = user.email;
+    // Piratenname aus profiles laden (Trigger legt die Zeile bei Signup an)
+    client
+      .from('profiles')
+      .select('display_name')
+      .eq('id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data && data.display_name && whoBox) whoBox.textContent = '🏴‍☠️ ' + data.display_name;
+      });
     if (btnLogout) {
       btnLogout.hidden = false;
       btnLogout.onclick = async () => {
@@ -92,7 +104,12 @@
     btnSubmit.disabled = true;
     try {
       if (mode === 'signup') {
-        const { data, error } = await client.auth.signUp({ email, password });
+        const pirateName = nameInput ? nameInput.value.trim() : '';
+        const { data, error } = await client.auth.signUp({
+          email,
+          password,
+          options: { data: pirateName ? { display_name: pirateName } : {} },
+        });
         if (error) throw error;
         if (data.session) {
           showApp(data.session.user); // E-Mail-Bestätigung deaktiviert

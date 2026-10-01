@@ -35,6 +35,10 @@
         <button type="button" class="auth-tab" id="tabSignup">Registrieren</button>
       </div>
       <form id="authForm" novalidate>
+        <div id="authNameWrap" hidden>
+          <label class="auth-label" for="authName">Dein Piratenname</label>
+          <input id="authName" type="text" maxlength="24" autocomplete="nickname" placeholder="z. B. kleine Piratin" />
+        </div>
         <label class="auth-label" for="authEmail">E-Mail</label>
         <input id="authEmail" type="email" autocomplete="email" required placeholder="du@beispiel.de" />
         <label class="auth-label" for="authPassword">Passwort</label>
@@ -63,6 +67,7 @@
           <div class="progress-fill" id="progressFill"></div>
         </div>
         <p class="progress-msg" id="progressMsg">Lege los, kleiner Pirat!</p>
+        <button class="btn btn-play" id="resumeBtn" hidden>⚓ Los geht's!</button>
       </div>
     </section>
 
