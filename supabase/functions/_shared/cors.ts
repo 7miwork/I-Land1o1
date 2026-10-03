@@ -24,7 +24,8 @@ export function preflight(req) {
 }
 
 // Klare Fehlermeldungen, ohne interne Details nach aussen zu geben.
+// `extra` wird mitgeschickt (z. B. { locked: true }).
 export function fail(message, status = 400, extra = {}) {
   console.error('[edge]', message, extra);
-  return json({ error: message }, status);
+  return json({ error: message, ...extra }, status);
 }

@@ -28,6 +28,24 @@ const modalClose = document.getElementById('modalClose');
 const modalBackdrop = document.getElementById('modalBackdrop');
 const modalDone = document.getElementById('modalDone');
 const resumeBtn = document.getElementById('resumeBtn');
+const modalLock = document.getElementById('modalLock');
+
+let hasAccess = null; // null = noch unbekannt, false = Abo nötig
+
+// Prüft (serverseitig per RLS/RPC), ob für dieses Konto ein Abo gilt –
+// beim Kind über den Eltern-Code, beim Elternteil über das eigene Abo.
+async function checkAccess() {
+  if (!sbClient || currentUserId === 'anon') return;
+  try {
+    const { data, error } = await sbClient.rpc('has_course_access');
+    if (!error) {
+      hasAccess = !!data;
+      render();
+    }
+  } catch (err) {
+    console.warn('Zugang nicht prüfbar:', err.message);
+  }
+}
 
 if (resumeBtn) {
   resumeBtn.addEventListener('click', () => {
@@ -71,8 +89,9 @@ function render() {
   grid.innerHTML = '';
   LESSONS.forEach((lesson) => {
     const isDone = done.has(lesson.id);
+    const locked = hasAccess === false;
     const card = document.createElement('article');
-    card.className = 'card' + (isDone ? ' is-done' : '');
+    card.className = 'card' + (isDone ? ' is-done' : '') + (locked ? ' is-locked' : '');
     card.innerHTML = `
       <span class="card-badge">${isDone ? 'ERLEDIGT ✓' : 'OFFEN'}</span>
       <span class="card-num">${TYPE_ICONS[lesson.type] || '🧭'} ${lesson.num}</span>
@@ -80,7 +99,9 @@ function render() {
       <p class="card-desc">${lesson.desc}</p>
       ${lesson.task ? `<p class="card-task">🎯 ${lesson.task}</p>` : ''}
       <div class="card-actions">
-        <button class="btn btn-play" data-action="play" data-id="${lesson.id}">▶ Video starten</button>
+        <button class="btn btn-play" data-action="play" data-id="${lesson.id}">${
+      locked ? '🔒 Gesperrt' : '▶ Video starten'
+    }</button>
         <button class="btn btn-done" data-action="toggle" data-id="${lesson.id}">
           ${isDone ? '✓ Erledigt' : 'Als erledigt markieren'}
         </button>
@@ -90,13 +111,55 @@ function render() {
   updateProgress();
 }
 
-function openModal(lesson) {
+async function openModal(lesson) {
   currentLesson = lesson;
   modalTitle.textContent = `${lesson.num}: ${lesson.title}`;
-  modalVideo.src = lesson.video;
   modal.hidden = false;
   document.body.style.overflow = 'hidden';
-  modalVideo.play().catch(() => {/* Auto-Play kann vom Browser blockiert werden */});
+  modalLock.hidden = true;
+  modalLock.textContent = '';
+  if (modalDone) modalDone.hidden = false;
+  modalVideo.removeAttribute('src');
+  modalVideo.load();
+
+  // Ohne Abo: kein Video, sondern Hinweis
+  if (hasAccess === false) {
+    showLock('🔒 Für diese Lektion brauchst du ein aktives Abo.\n'
+      + 'Deine Eltern können es unter „⚓ Abo & Zahlung“ buchen – '
+      + 'der Code im Bereich „👨‍👩‍👧 Familie“ schaltet dann alle Lektionen frei.');
+    return;
+  }
+
+  // Video-URL kommt serverseitig (nur mit Abo, nur 5 Minuten gültig)
+  if (sbClient) {
+    const { data, error } = await sbClient.functions.invoke('get-video-url', {
+      body: { lessonId: lesson.id },
+    });
+    if (error || !data || !data.url) {
+      if (data && data.locked) {
+        hasAccess = false;
+        render();
+        showLock('🔒 Für diese Lektion brauchst du ein aktives Abo.');
+      } else {
+        showLock('😢 Das Video konnte nicht geladen werden. Bitte kurz später nochmal versuchen.');
+      }
+      return;
+    }
+    modalVideo.src = data.url;
+    modalVideo.play().catch(() => {/* Auto-Play kann der Browser blockieren */});
+    return;
+  }
+
+  // Entwicklung ohne Supabase: direkt vom Server
+  modalVideo.src = lesson.video;
+  modalVideo.play().catch(() => {});
+}
+
+function showLock(text) {
+  if (!modalLock) return;
+  modalLock.hidden = false;
+  modalLock.textContent = text;
+  if (modalDone) modalDone.hidden = true; // gesperrte Lektion kann nicht abgehakt werden
 }
 
 function closeModal() {
@@ -190,4 +253,5 @@ window.initDashboard = function (userId, client) {
   done = loadDone();
   render();
   hydrateFromServer();
+  checkAccess();
 };

@@ -613,3 +613,25 @@ h1 {
 }
 
 .family-input:focus { outline: none; border-color: var(--gold); }
+
+/* ---------- Bezahlschranke ---------- */
+.card.is-locked .card-title,
+.card.is-locked .card-desc { opacity: .75; }
+
+.card.is-locked .btn-play {
+  background: transparent;
+  color: var(--sand);
+  border-color: var(--sand);
+}
+
+.modal-lock {
+  white-space: pre-line;
+  margin: 0;
+  padding: 22px 18px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  font-weight: 700;
+  color: var(--gold);
+  background: rgba(0, 12, 28, .6);
+  border-top: 2px solid rgba(243, 186, 37, .35);
+}
