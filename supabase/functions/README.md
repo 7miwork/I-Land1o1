@@ -46,19 +46,20 @@ Dashboard → **Project Settings → Edge Functions → Secrets** → **Add new 
 | `STRIPE_PRICE_LEVEL1_MONTHLY` | `price_…` aus Schritt 2 |
 | `STRIPE_PRICE_LEVEL1_YEARLY` | `price_…` aus Schritt 2 |
 | `SITE_URL` | `https://i-land1o1.com` |
-| `SUPABASE_SERVICE_ROLE_KEY` | Project Settings → API → **service_role** |
-
-> `SUPABASE_URL` und `SUPABASE_ANON_KEY` sind in Edge Functions automatisch gesetzt.
+> `SUPABASE_URL`, `SUPABASE_ANON_KEY` und `SUPABASE_SERVICE_ROLE_KEY` setzt
+> Supabase **automatisch** – die muss man nicht (und sollte nicht) von Hand anlegen.
+> Es sind also genau **5 Einträge** oben.
 
 ### 4. Functions deployen
 Dashboard → **Edge Functions → Create Function**
 
-Für jede der drei Funktionen (`create-checkout-session`, `create-portal-session`,
-`stripe-webhook`):
+Für jede der **vier** Funktionen (`create-checkout-session`, `create-portal-session`,
+`stripe-webhook`, `get-video-url`):
 
 1. Namen eingeben, **Deploy**
 2. Danach **Edit function** → Inhalt der jeweiligen `index.ts` einfügen → **Deploy**
-3. Bei den ersten beiden: **Verify JWT = AN** (Häkchen gesetzt)
+3. **Verify JWT**: bei `stripe-webhook` **Häkchen raus**,
+   bei allen anderen **Häkchen gesetzt lassen**
 
 ### 5. Webhook in Stripe eintragen
 1. <https://dashboard.stripe.com/test/webhooks> → **Add endpoint**
