@@ -63,13 +63,24 @@ Für jede der **vier** Funktionen (`create-checkout-session`, `create-portal-ses
    bei allen anderen **Häkchen gesetzt lassen**
 
 ### 5. Webhook in Stripe eintragen
-1. <https://dashboard.stripe.com/test/webhooks> → **Add endpoint**
-2. URL:
-   `https://lmlbjtazgcylsrtzzisr.supabase.co/functions/v1/stripe-webhook`
-3. Events:
+
+Stripe hat den Dialog als 3-Schritte-Assistenten umgebaut
+(**Select events → Choose destination type → Configure your destination**).
+
+1. **Select events:** in die Suchleiste tippen und diese 5 Events anhaken
+   (Reihenfolge egal, „Selected events" zählt mit):
    - `checkout.session.completed`
-   - `customer.subscription.created` / `.updated` / `.deleted`
+   - `customer.subscription.created`
+   - `customer.subscription.updated`
+   - `customer.subscription.deleted`
    - `invoice.payment_succeeded`
+2. **Choose destination type:** „Webhook endpoint" (AWS/Azure nicht nötig)
+3. **Configure your destination:**
+   - URL: `https://lmlbjtazgcylsrtzzisr.supabase.co/functions/v1/stripe-webhook`
+   - API-Version: **muss nicht** angepasst werden – der Webhook-Code liest das
+     Ablaufdatum ab Stripe-Version 2025-03-31 sowohl am Subscription-Objekt
+     als auch bei den Items. Falls du auf Nummer sicher gehen willst, wähle
+     `2024-06-20` (dann passt sie zum Code in den Functions).
 4. Nach dem Anlegen: **Signing secret** (`whsec_…`) als
    `STRIPE_WEBHOOK_SECRET` in Supabase eintragen
 

@@ -13,6 +13,20 @@ Deno.serve(async (req) => {
     return new Response('Method not allowed', { status: 405 });
   }
 
+  // ------------------------------------------------------------
+  // Achtung Stripe-API-Versionen: Ab 2025-03-31 ("basil") liegt
+  // current_period_end NICHT mehr am Subscription-Objekt, sondern
+  // bei den Items. Wir lesen deshalb beide Varianten, damit es
+  // egal ist, welche Version im Webhook-Endpoint eingestellt ist.
+  // ------------------------------------------------------------
+  function periodEndOf(sub) {
+    const ts =
+      sub?.current_period_end ??
+      sub?.items?.data?.[0]?.current_period_end ??
+      null;
+    return typeof ts === 'number' ? new Date(ts * 1000).toISOString() : null;
+  }
+
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
@@ -68,9 +82,7 @@ Deno.serve(async (req) => {
           subStatus = sub.status;
           subscriptionId = sub.id;
           cancelAtEnd = sub.cancel_at_period_end;
-          periodEnd = sub.current_period_end
-            ? new Date(sub.current_period_end * 1000).toISOString()
-            : null;
+          periodEnd = periodEndOf(sub);
         }
 
         if (userId) {
@@ -125,9 +137,7 @@ Deno.serve(async (req) => {
           stripe_subscription_id: sub.id,
           plan: sub.metadata?.plan || 'level1-monthly',
           status,
-          current_period_end: sub.current_period_end
-            ? new Date(sub.current_period_end * 1000).toISOString()
-            : null,
+          current_period_end: periodEndOf(sub),
           cancel_at_period_end: sub.cancel_at_period_end,
           updated_at: new Date().toISOString(),
         };
