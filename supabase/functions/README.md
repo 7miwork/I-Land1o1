@@ -52,15 +52,33 @@ Dashboard → **Project Settings → Edge Functions → Secrets** → **Add new 
 > Es sind also genau **6 Einträge** oben.
 
 ### 4. Functions deployen
-Dashboard → **Edge Functions → Create Function**
 
-Für jede der **vier** Funktionen (`create-checkout-session`, `create-portal-session`,
-`stripe-webhook`, `get-video-url`):
+Supabase Dashboard → **Edge Functions → Deploy a new function → Via Editor**
 
-1. Namen eingeben, **Deploy**
-2. Danach **Edit function** → Inhalt der jeweiligen `index.ts` einfügen → **Deploy**
-3. **Verify JWT**: bei `stripe-webhook` **Häkchen raus**,
-   bei allen anderen **Häkchen gesetzt lassen**
+Für jede der **vier** Funktionen:
+
+| Function-Name | Verify JWT | Datei zum Einfügen |
+|---------------|-----------|--------------------|
+| `create-checkout-session` | **AN** | `supabase/functions-deploy/create-checkout-session.ts` |
+| `create-portal-session` | **AN** | `supabase/functions-deploy/create-portal-session.ts` |
+| `get-video-url` | **AN** | `supabase/functions-deploy/get-video-url.ts` |
+| `stripe-webhook` | **AUS** | `supabase/functions-deploy/stripe-webhook.ts` |
+
+**Ablauf je Function:**
+1. Function name eintragen (exakt wie in der Tabelle)
+2. Den vorhandenen Beispielcode im Editor **komplett markieren** (`Strg+A`) und durch den Inhalt der Datei **ersetzen** (`Strg+V`)
+3. **Deploy function** klicken
+4. Verify JWT: **nur beim `stripe-webhook` ausschalten**
+   (danach: Function in der Liste öffnen → Einstellungen/Zahnrad → Verify JWT)
+
+> **Warum `functions-deploy/` und nicht `functions/<name>/index.ts`?**
+> Die Dateien in `functions/` importieren aus `functions/_shared/`.
+> Der Browser-Editor kennt diesen Ordner nicht und würde beim Deploy
+> einen Fehler werfen. Die Dateien in `functions-deploy/` haben
+> `_shared/cors.ts` und `_shared/plans.ts` schon eingebaut und
+> funktionieren daher als Einzeldatei.
+>
+> Nach Code-Änderungen: `node supabase/build-standalone.mjs` neu ausführen.
 
 ### 5. Webhook in Stripe eintragen
 
