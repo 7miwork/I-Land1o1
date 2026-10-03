@@ -463,3 +463,72 @@ h1 {
 
 /* Resume-Button in der Fortschritts-Karte */
 #resumeBtn { margin-top: 12px; }
+
+/* ---------- Premium / Abo ---------- */
+.premium { margin-top: 8px; }
+
+.premium-lead {
+  font-size: clamp(15px, 1.8vw, 18px);
+  color: var(--parchment-2);
+  margin: 0 0 18px;
+}
+
+.premium-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.premium-card {
+  background: linear-gradient(180deg, rgba(248, 245, 238, .10), rgba(248, 245, 238, .04));
+  border: 2px solid rgba(243, 186, 37, .45);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.premium-card.is-featured {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(243, 186, 37, .18);
+}
+
+.premium-card.is-active { max-width: 520px; }
+
+.premium-kicker {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: var(--gold);
+  margin: 0 0 10px;
+  text-transform: uppercase;
+}
+
+.premium-title {
+  font-family: var(--font-pirate);
+  font-size: clamp(24px, 3vw, 30px);
+  color: var(--parchment);
+  margin: 0 0 8px;
+}
+
+.premium-price, .premium-hint, .premium-note {
+  font-size: 14px;
+  color: var(--sand);
+  margin: 0 0 14px;
+}
+
+.premium-note { font-size: 12.5px; color: var(--grey); }
+
+.premium-box > .premium-note { margin-top: 14px; }
+
+.premium-msg {
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 18px;
+  border: 1px solid var(--gold);
+  background: rgba(243, 186, 37, .12);
+  color: var(--gold);
+}
+
+.premium-msg--error { border-color: var(--red); background: rgba(232, 88, 84, .12); color: #ffb3b0; }
+.premium-msg--ok { border-color: var(--green); background: rgba(49, 170, 64, .14); color: #9be8a5; }
+.premium-msg--warn { color: var(--gold); margin: 0 0 12px; }

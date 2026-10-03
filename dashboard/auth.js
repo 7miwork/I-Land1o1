@@ -75,6 +75,7 @@
       window.ilandDashboardInited = true;
       window.initDashboard(user.id, client);
     }
+    if (typeof window.initBilling === 'function') window.initBilling(client);
   }
 
   async function boot() {

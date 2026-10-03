@@ -7,6 +7,17 @@ Videos/
 # FTP-Helper-Skript (enthaelt Zugangsdaten) - bleibt lokal
 upload-videos.ps1
 
+# ============================================================
+# GEHEIME: Umgebungsvariablen & Schluessel
+# .env.example (VORLAGE ohne Werte) darf committet werden
+# ============================================================
+.env
+.env.*
+!.env.example
+supabase/.temp/
+supabase/functions/.env
+node_modules/
+
 # OS / Editor-Reste
 Thumbs.db
 ehthumbs.db

@@ -30,8 +30,26 @@ Eigene, statische App (kein Build-Schritt) im Piraten-Design der Hauptseite.
 
 - **Inhalte ändern:** einfach `dashboard/lessons.js` bearbeiten
   (`title`, `desc`, `task`, `video`). Neue Lektion = neues Objekt oder `length: 11` anpassen.
-- **Fortschritt:** pro Supabase-User-ID in `localStorage` (`iland-progress-de-level1:<id>`).
+- **Fortschritt:** pro Supabase-User-ID in `localStorage` (`iland-progress-de-level1:<id>`),
+  spiegeln in die Tabelle `lesson_progress` (Supabase) → geräteübergreifend.
 - **Ohne ausgefüllte `config.js`-Werte** bleibt das Dashboard offen erreichbar (praktisch zum Testen).
+- **Abo & Zahlung:** `dashboard/billing.js` spricht die Edge Functions an
+  (Preise + Stripe-Key liegen ausschließlich serverseitig).
+
+## Datenbank & Zahlungen (Supabase)
+
+| Datei | Inhalt |
+|-------|--------|
+| `supabase/schema.sql` | `profiles` (Rollen Schüler/Eltern/Lehrer/Admin), `parent_links`, `lesson_progress`, RLS |
+| `supabase/subscriptions.sql` | `subscriptions` + `payments` (nur lesbar für User, geschrieben vom Webhook) |
+| `supabase/functions/README.md` | **Anleitung:** Edge Functions & Stripe in 7 Schritten |
+| `.env.example` | Vorlage aller Variablen (echte `.env` ist in `.gitignore`) |
+
+Reihenfolge: erst `schema.sql`, dann `subscriptions.sql` ausführen.
+
+**Goldene Regel:** Alles mit `sk_…`, `service_role` oder SMTP-Passwörtern
+gehört ausschließlich in **Supabase Edge Function Secrets** – niemals in
+`dashboard/config.js`, niemals ins Git.
 
 ## Deployment
 
