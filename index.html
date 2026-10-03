@@ -18,7 +18,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&family=Press+Start+2P&family=Pirata+One&display=swap" rel="stylesheet" />
     <script type="module" crossorigin src="/assets/index-Btd8bRLy.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-SEVzprOP.css">
-  </head>
+    <!-- Eigene Supabase-Login-Seite (ersetzt die alte React-Demo-Anmeldung) -->
+  <script>
+    try { sessionStorage.setItem('iland:useOwnLogin', '1'); } catch (e) { /* Private Mode */ }
+  </script>
+</head>
 
   <body>
     <div id="root"></div>

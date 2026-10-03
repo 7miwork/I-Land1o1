@@ -1,6 +1,11 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
+
+  # Eigene Login-Seite (supabase) statt der alten React-Demo-Seite.
+  # Ordner-Ausnahme muss VOR der SPA-Regel stehen.
+  RewriteRule ^login/?$ /login/index.html [L]
+
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d

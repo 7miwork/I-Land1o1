@@ -1,0 +1,243 @@
+/* ============================================================
+   I-Land1o1 – Login / Registrierung (Hauptseite /login)
+   Farben & Schriften exakt wie die Hauptseite (assets/index-*.css),
+   damit die Seite nicht als fremd wirkt.
+   ============================================================ */
+
+:root {
+  --gold: #f3ba25;
+  --gold-dark: #cf9c00;
+  --ink: #1a1a19;
+  --ocean: #000c1c;
+  --ocean-2: #003c6b;
+  --parchment: #f8f5ee;
+  --sand: #ddcca9;
+  --red: #e85854;
+  --grey: #858481;
+
+  --font-pirate: 'Pirata One', cursive;
+  --font-pixel: 'Press Start 2P', monospace;
+  --font-body: 'Nunito', sans-serif;
+  --font-display: 'Fredoka One', sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  color: var(--parchment);
+  background: var(--parchment);
+}
+
+/* ---------- Kopfbereich wie die Hauptseite ---------- */
+.hero {
+  background: linear-gradient(180deg, #0a2a4d 0%, #06203c 60%, #051a31 100%);
+  padding: clamp(40px, 7vw, 84px) clamp(20px, 5vw, 72px) clamp(56px, 9vw, 120px);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(243, 186, 37, .22) 2px, transparent 2px);
+  background-size: 46px 46px;
+  opacity: .35;
+  pointer-events: none;
+}
+
+.hero-inner { position: relative; max-width: 720px; }
+
+.kicker {
+  font-family: var(--font-pixel);
+  font-size: clamp(10px, 1.4vw, 13px);
+  color: var(--gold);
+  margin: 0 0 14px;
+  line-height: 1.8;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: clamp(44px, 8vw, 76px);
+  line-height: 1;
+  margin: 0 0 14px;
+  color: #fff;
+}
+
+.sub {
+  font-size: clamp(15px, 1.8vw, 18px);
+  color: #cfe0f0;
+  margin: 0;
+  max-width: 560px;
+  line-height: 1.6;
+}
+
+/* ---------- Formularkarte ---------- */
+.card-wrap {
+  background: var(--parchment);
+  padding: clamp(40px, 7vw, 90px) clamp(16px, 5vw, 32px) 80px;
+  display: flex;
+  justify-content: center;
+}
+
+.card {
+  width: min(460px, 100%);
+  background: #fff;
+  border-radius: 18px;
+  padding: clamp(26px, 5vw, 40px);
+  box-shadow: 0 18px 50px rgba(6, 32, 60, .16);
+  margin-top: clamp(-60px, -6vw, -40px);
+}
+
+.icon-badge {
+  width: 62px;
+  height: 62px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: var(--parchment);
+  border: 2px solid #e6ddca;
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+}
+
+.card h2 {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 4vw, 30px);
+  color: var(--ink);
+  margin: 0 0 18px;
+  text-align: center;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  background: var(--parchment);
+  border-radius: 999px;
+  padding: 5px;
+  margin-bottom: 22px;
+}
+
+.tab {
+  flex: 1;
+  padding: 11px 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 14px;
+  color: #6b6455;
+  cursor: pointer;
+}
+
+.tab.active {
+  background: var(--gold);
+  color: var(--ink);
+}
+
+label.field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  color: #8a8171;
+  margin: 14px 0 6px;
+}
+
+input[type='email'],
+input[type='password'],
+input[type='text'] {
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: 10px;
+  border: 2px solid #e2dccd;
+  background: var(--parchment);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+input:focus { outline: none; border-color: var(--gold); background: #fff; }
+
+.role-row { display: flex; gap: 10px; margin-top: 4px; }
+
+.role {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 2px solid #e2dccd;
+  border-radius: 10px;
+  background: var(--parchment);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.role:has(input:checked) {
+  border-color: var(--gold);
+  background: #fff8e3;
+}
+
+.role input { accent-color: var(--gold-dark); }
+
+.hint {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--grey);
+  line-height: 1.5;
+}
+
+.submit {
+  width: 100%;
+  margin-top: 22px;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  background: var(--gold);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background .15s ease;
+}
+
+.submit:hover { background: var(--gold-dark); }
+.submit:disabled { opacity: .6; cursor: wait; }
+
+.error {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  background: rgba(232, 88, 84, .1);
+  border: 1px solid var(--red);
+  color: #c23c38;
+}
+
+.error.ok {
+  background: rgba(49, 170, 64, .1);
+  border-color: #31aa40;
+  color: #227a2e;
+}
+
+.back-link {
+  display: block;
+  text-align: center;
+  margin-top: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #8a8171;
+  text-decoration: none;
+}
+
+.back-link:hover { color: var(--gold-dark); }

@@ -30,6 +30,8 @@ Eigene, statische App (kein Build-Schritt) im Piraten-Design der Hauptseite.
 
 - **Inhalte ändern:** einfach `dashboard/lessons.js` bearbeiten
   (`title`, `desc`, `task`, `video`). Neue Lektion = neues Objekt oder `length: 11` anpassen.
+- **Login:** `i-land1o1.com/login` → `login/index.html` (Supabase, Look der Hauptseite).
+  Nach dem Login geht es weiter nach `/dashboard/`.
 - **Fortschritt:** pro Supabase-User-ID in `localStorage` (`iland-progress-de-level1:<id>`),
   spiegeln in die Tabelle `lesson_progress` (Supabase) → geräteübergreifend.
 - **Ohne ausgefüllte `config.js`-Werte** bleibt das Dashboard offen erreichbar (praktisch zum Testen).
