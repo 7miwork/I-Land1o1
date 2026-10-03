@@ -532,3 +532,84 @@ h1 {
 .premium-msg--error { border-color: var(--red); background: rgba(232, 88, 84, .12); color: #ffb3b0; }
 .premium-msg--ok { border-color: var(--green); background: rgba(49, 170, 64, .14); color: #9be8a5; }
 .premium-msg--warn { color: var(--gold); margin: 0 0 12px; }
+
+/* ---------- Rollenwahl + Eltern-Code (Registrierung) ---------- */
+.auth-role-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.auth-role {
+  flex: 1 1 160px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 12px;
+  border: 2px solid rgba(228, 221, 207, .3);
+  border-radius: 10px;
+  background: rgba(0, 12, 28, .65);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--parchment);
+  cursor: pointer;
+}
+
+.auth-role:has(input:checked) {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(243, 186, 37, .12);
+}
+
+.auth-role input { accent-color: var(--gold); width: 16px; height: 16px; }
+
+.auth-hint {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--grey);
+}
+
+/* ---------- Familie ---------- */
+.family-box {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.family-list { list-style: none; margin: 0 0 12px; padding: 0; }
+
+.family-list li {
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(243, 186, 37, .3);
+  font-weight: 700;
+  color: var(--parchment);
+}
+
+.family-list li:last-child { border-bottom: none; }
+
+.family-codes { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+
+.family-code {
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  color: var(--gold);
+  background: rgba(0, 12, 28, .6);
+  border: 2px dashed var(--gold-dark);
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.family-code:hover { background: rgba(243, 186, 37, .15); }
+.family-code span { font-family: var(--font-body); font-size: 11px; color: var(--sand); }
+
+.family-input {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  border: 2px solid rgba(228, 221, 207, .3);
+  background: rgba(0, 12, 28, .65);
+  color: var(--parchment);
+  font-family: var(--font-pixel);
+  font-size: 14px;
+}
+
+.family-input:focus { outline: none; border-color: var(--gold); }

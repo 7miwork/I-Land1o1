@@ -42,6 +42,7 @@ Eigene, statische App (kein Build-Schritt) im Piraten-Design der Hauptseite.
 |-------|--------|
 | `supabase/schema.sql` | `profiles` (Rollen Schüler/Eltern/Lehrer/Admin), `parent_links`, `lesson_progress`, RLS |
 | `supabase/subscriptions.sql` | `subscriptions` + `payments` (nur lesbar für User, geschrieben vom Webhook) |
+| `supabase/parents.sql` | Eltern-Einladungen (`parent_invites`), Registrierungs-Regeln, `has_course_access()` |
 | `supabase/functions/README.md` | **Anleitung:** Edge Functions & Stripe in 7 Schritten |
 | `.env.example` | Vorlage aller Variablen (echte `.env` ist in `.gitignore`) |
 

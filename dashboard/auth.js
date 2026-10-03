@@ -20,6 +20,18 @@
   const pwInput = document.getElementById('authPassword');
   const nameInput = document.getElementById('authName');
   const nameWrap = document.getElementById('authNameWrap');
+  const roleWrap = document.getElementById('authRoleWrap');
+  const inviteWrap = document.getElementById('authInviteWrap');
+  const inviteInput = document.getElementById('authInvite');
+
+  function selectedRole() {
+    const checked = form.querySelector('input[name="authRole"]:checked');
+    return checked ? checked.value : 'student';
+  }
+
+  function syncRoleFields() {
+    if (inviteWrap) inviteWrap.hidden = selectedRole() !== 'student';
+  }
   const errBox = document.getElementById('authError');
   const btnLogin = document.getElementById('tabLogin');
   const btnSignup = document.getElementById('tabSignup');
@@ -42,6 +54,8 @@
     btnSignup.classList.toggle('active', m === 'signup');
     btnSubmit.textContent = m === 'login' ? 'Anmelden ⚓' : 'Registrieren 🏴‍☠️';
     if (nameWrap) nameWrap.hidden = m !== 'signup';
+    if (roleWrap) roleWrap.hidden = m !== 'signup';
+    syncRoleFields();
     showError('');
   }
 
@@ -76,6 +90,7 @@
       window.initDashboard(user.id, client);
     }
     if (typeof window.initBilling === 'function') window.initBilling(client);
+    if (typeof window.initFamily === 'function') window.initFamily(client, user);
   }
 
   async function boot() {
@@ -109,10 +124,21 @@
         const { data, error } = await client.auth.signUp({
           email,
           password,
-          options: { data: pirateName ? { display_name: pirateName } : {} },
+          options: {
+            data: {
+              ...(pirateName ? { display_name: pirateName } : {}),
+              role: selectedRole(),
+            },
+          },
         });
         if (error) throw error;
         if (data.session) {
+          // Eltern-Code sofort einloesen (falls angegeben)
+          const code = inviteInput ? inviteInput.value.trim() : '';
+          if (code && selectedRole() === 'student') {
+            const { error: linkError } = await client.rpc('accept_invite', { p_code: code });
+            if (linkError) console.warn('Eltern-Code nicht eingelöst:', linkError.message);
+          }
           showApp(data.session.user); // E-Mail-Bestätigung deaktiviert
         } else {
           showError('Fast geschafft! Bitte bestätige die E-Mail, die wir dir geschickt haben, und melde dich dann an. 📬');

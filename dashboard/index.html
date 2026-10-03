@@ -35,6 +35,21 @@
         <button type="button" class="auth-tab" id="tabSignup">Registrieren</button>
       </div>
       <form id="authForm" novalidate>
+        <div id="authRoleWrap" hidden>
+          <span class="auth-label">Ich bin …</span>
+          <div class="auth-role-row">
+            <label class="auth-role"><input type="radio" name="authRole" value="student" checked />
+              <span>⛏️ Kind / Schüler:in</span></label>
+            <label class="auth-role"><input type="radio" name="authRole" value="parent" />
+              <span>👨‍👩‍👧 Elternteil</span></label>
+          </div>
+        </div>
+        <div id="authInviteWrap" hidden>
+          <label class="auth-label" for="authInvite">Eltern-Code (falls du einen bekommen hast)</label>
+          <input id="authInvite" type="text" autocomplete="off" placeholder="ILAND-XXXXXX" />
+          <p class="auth-hint">Noch kein Code? Registriere dich einfach – dein Elternteil
+            kann ihn dir später im Dashboard geben.</p>
+        </div>
         <div id="authNameWrap" hidden>
           <label class="auth-label" for="authName">Dein Piratenname</label>
           <input id="authName" type="text" maxlength="24" autocomplete="nickname" placeholder="z. B. kleine Piratin" />
@@ -83,6 +98,11 @@
       <p id="premiumMsg" class="premium-msg" hidden></p>
       <div id="premiumBox" class="premium-box"></div>
     </section>
+  <section class="family" id="familySection" hidden>
+      <h2 class="section-title">👨‍👩‍👧 Familie</h2>
+      <p id="familyMsg" class="premium-msg" hidden></p>
+      <div id="familyBox" class="family-box"></div>
+    </section>
   </main>
 
   <!-- Video-Modal -->
@@ -109,6 +129,7 @@
   <script src="lessons.js"></script>
   <script src="dashboard.js"></script>
   <script src="billing.js"></script>
+  <script src="family.js"></script>
   <script src="auth.js"></script>
 </body>
 
