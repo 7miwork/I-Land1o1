@@ -60,11 +60,12 @@ Deno.serve(async (req) => {
       .eq('student_id', userId);
 
     const payerIds = [userId, ...(links || []).map((l) => l.parent_id)];
+    // 'paid' = einmaliger Kauf (dauerhaft), 'active'/'trialing' = Abo
     const { data: subs } = await db
       .from('subscriptions')
       .select('user_id, status')
       .in('user_id', payerIds)
-      .in('status', ['active', 'trialing']);
+      .in('status', ['active', 'trialing', 'paid']);
 
     if (!subs || subs.length === 0) {
       return fail('Fuer diese Lektion brauchst du ein aktives Abo.', 403, { locked: true });

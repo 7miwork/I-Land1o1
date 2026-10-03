@@ -9,10 +9,18 @@ export const PLANS = {
   'level1-monthly': {
     priceEnv: 'STRIPE_PRICE_LEVEL1_MONTHLY',
     label: 'Level 1 – monatlich',
+    mode: 'subscription',
   },
   'level1-yearly': {
     priceEnv: 'STRIPE_PRICE_LEVEL1_YEARLY',
     label: 'Level 1 – jährlich',
+    mode: 'subscription',
+  },
+  // Einmalzahlung: dauerhafter Zugang, kein Abo, keine Verlaengerung
+  'level1-once': {
+    priceEnv: 'STRIPE_PRICE_LEVEL1_ONCE',
+    label: 'Level 1 – einmalig (11 Lektionen)',
+    mode: 'payment',
   },
 };
 
@@ -29,6 +37,11 @@ export function priceFor(plan) {
 
 export function labelFor(plan) {
   return PLANS[plan]?.label ?? plan;
+}
+
+// 'subscription' = Abo mit Verlaengerung, 'payment' = einmaliger Kauf
+export function modeFor(plan) {
+  return PLANS[plan]?.mode === 'payment' ? 'payment' : 'subscription';
 }
 
 export function siteUrl() {

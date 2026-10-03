@@ -6,7 +6,7 @@
 import Stripe from 'npm:stripe@16.12.0';
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
 import { preflight, json, fail } from '../_shared/cors.ts';
-import { priceFor, labelFor, siteUrl, requireUser } from '../_shared/plans.ts';
+import { priceFor, labelFor, modeFor, siteUrl, requireUser } from '../_shared/plans.ts';
 
 Deno.serve(async (req) => {
   const pre = preflight(req);
@@ -39,15 +39,23 @@ Deno.serve(async (req) => {
     const priceId = priceFor(plan);
     if (!priceId) return fail('Unbekannter Tarif.', 400);
 
-    // 2) Schon ein aktives Abo? Dann nicht doppelt kaufen lassen.
+    // 2) Schon bezahlt? Dann nicht doppelt kaufen lassen.
+    const mode = modeFor(plan);
     const admin = createClient(supabaseUrl, serviceKey);
     const { data: existing } = await admin
       .from('subscriptions')
-      .select('status')
+      .select('status, plan')
       .eq('user_id', user.id)
-      .in('status', ['active', 'trialing'])
+      .in('status', ['active', 'trialing', 'paid'])
       .maybeSingle();
     if (existing) {
+      // Einmalzahlung gilt dauerhaft -> kein weiterer Kauf derselben Sache
+      if (existing.status === 'paid' && existing.plan === plan) {
+        return fail('Diesen Zugang hast du bereits.', 409, { alreadySubscribed: true });
+      }
+      if (existing.status === 'paid') {
+        return fail('Du hast bereits den einmaligen Kauf.', 409, { alreadySubscribed: true });
+      }
       return fail('Du hast schon ein aktives Abo – bitte im Kundenportal verwalten.', 409, {
         alreadySubscribed: true,
       });
@@ -58,7 +66,8 @@ Deno.serve(async (req) => {
     const site = siteUrl();
 
     const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
+      // Einmalzahlung -> kein Abo, keine Verlaengerung
+      mode: mode,
       customer_email: user.email || undefined,
       client_reference_id: user.id,
       line_items: [{ price: priceId, quantity: 1 }],
@@ -69,8 +78,14 @@ Deno.serve(async (req) => {
       // metadata landet in beiden Objekten -> damit kann der Webhook
       // das Abo spaeter eindeutig einem User zuordnen.
       metadata: { user_id: user.id, plan },
-      subscription_data: { metadata: { user_id: user.id, plan } },
-      payment_intent_data: { setup_future_usage: 'off_session' },
+      // Bei Einmalzahlung darf kein Abo-Metadatenblock mitgegeben werden
+      ...(mode === 'subscription'
+        ? { subscription_data: { metadata: { user_id: user.id, plan } } }
+        : {}),
+      // Nur beim Abo braucht Stripe die Grundlage fuer spaetere Abbuchungen
+      ...(mode === 'subscription'
+        ? { payment_intent_data: { setup_future_usage: 'off_session' } }
+        : {}),
     });
 
     if (!session.url) return fail('Kasse konnte nicht gestartet werden.', 500);

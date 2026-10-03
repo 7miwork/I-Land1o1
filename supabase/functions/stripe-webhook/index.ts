@@ -74,21 +74,41 @@ Deno.serve(async (req) => {
         }
 
         if (userId) {
-          await db.from('subscriptions').upsert(
-            {
-              user_id: userId,
-              stripe_customer_id:
-                typeof session.customer === 'string' ? session.customer : session.customer?.id,
-              stripe_subscription_id: subscriptionId,
-              plan,
-              status: subStatus,
-              current_period_end: periodEnd,
-              cancel_at_period_end: cancelAtEnd,
-              updated_at: new Date().toISOString(),
-            },
-            { onConflict: 'user_id' },
-          );
-          console.log('[webhook] Abo aktiviert', { userId, plan, subStatus });
+          if (session.mode === 'payment') {
+            // Einmalzahlung: dauerhafter Zugang, KEIN Abo.
+            // 'paid' heisst: bezahlt und nicht ablaeufig.
+            await db.from('subscriptions').upsert(
+              {
+                user_id: userId,
+                stripe_customer_id:
+                  typeof session.customer === 'string' ? session.customer : session.customer?.id,
+                stripe_subscription_id: null,
+                plan,
+                status: 'paid',
+                current_period_end: null,
+                cancel_at_period_end: false,
+                updated_at: new Date().toISOString(),
+              },
+              { onConflict: 'user_id' },
+            );
+            console.log('[webhook] Einmalzahlung freigeschaltet', { userId, plan });
+          } else {
+            await db.from('subscriptions').upsert(
+              {
+                user_id: userId,
+                stripe_customer_id:
+                  typeof session.customer === 'string' ? session.customer : session.customer?.id,
+                stripe_subscription_id: subscriptionId,
+                plan,
+                status: subStatus,
+                current_period_end: periodEnd,
+                cancel_at_period_end: cancelAtEnd,
+                updated_at: new Date().toISOString(),
+              },
+              { onConflict: 'user_id' },
+            );
+            console.log('[webhook] Abo aktiviert', { userId, plan, subStatus });
+          }
         }
         break;
       }

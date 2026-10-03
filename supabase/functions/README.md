@@ -45,10 +45,11 @@ Dashboard → **Project Settings → Edge Functions → Secrets** → **Add new 
 | `STRIPE_WEBHOOK_SECRET` | kommt in Schritt 5 |
 | `STRIPE_PRICE_LEVEL1_MONTHLY` | `price_…` aus Schritt 2 |
 | `STRIPE_PRICE_LEVEL1_YEARLY` | `price_…` aus Schritt 2 |
+| `STRIPE_PRICE_LEVEL1_ONCE` | `price_…` Einmalzahlung (z. B. Level 1 dauerhaft) |
 | `SITE_URL` | `https://i-land1o1.com` |
 > `SUPABASE_URL`, `SUPABASE_ANON_KEY` und `SUPABASE_SERVICE_ROLE_KEY` setzt
 > Supabase **automatisch** – die muss man nicht (und sollte nicht) von Hand anlegen.
-> Es sind also genau **5 Einträge** oben.
+> Es sind also genau **6 Einträge** oben.
 
 ### 4. Functions deployen
 Dashboard → **Edge Functions → Create Function**

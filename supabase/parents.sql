@@ -133,7 +133,7 @@ returns boolean language sql stable security definer set search_path = public as
   select exists (
     select 1
       from public.subscriptions s
-     where s.status in ('active', 'trialing')
+     where s.status in ('active', 'trialing', 'paid')
        and (
          s.user_id = p_user
          or exists (

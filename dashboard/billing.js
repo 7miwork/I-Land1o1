@@ -15,10 +15,12 @@
 
   // Muss mit supabase/functions/_shared/plans.ts uebereinstimmen
   const PLANS = {
-    'level1-monthly': { label: 'Level 1 · monatlich', hint: 'jederzeit kündbar' },
+    'level1-monthly': { label: 'Level 1 · monatlich', hint: 'jederzeit kündbar', featured: true },
     'level1-yearly': { label: 'Level 1 · jährlich', hint: '2 Monate geschenkt' },
+    'level1-once': { label: 'Level 1 · einmalig', hint: '11 Lektionen, kein Abo', badge: 'Einmalig' },
   };
-  const ACTIVE = ['active', 'trialing', 'past_due'];
+  // 'paid' = Einmalzahlung (dauerhaft), 'active'/'trialing' = Abo
+  const ACTIVE = ['active', 'trialing', 'past_due', 'paid'];
 
   function showMsg(text, kind = 'info') {
     if (!msg) return;
@@ -80,16 +82,24 @@
   function renderActive(sub) {
     const label = PLANS[sub.plan]?.label || sub.plan;
     const end = sub.current_period_end ? fmtDate(sub.current_period_end) : '–';
+    const isOneTime = sub.status === 'paid';
+    const statusLine = isOneTime
+      ? '✨ dauerhaft freigeschaltet – kein Abo, keine Verlängerung'
+      : sub.status === 'past_due'
+        ? 'Zahlung offen – bitte prüfen'
+        : 'läuft bis ' + end;
     const note = sub.cancel_at_period_end
       ? `<p class="premium-hint premium-msg--warn">Gekündigt – läuft bis ${end} weiter.</p>`
       : '';
     box.innerHTML = `
       <div class="premium-card is-active">
-        <p class="premium-kicker">Dein Abo</p>
+        <p class="premium-kicker">Dein Zugang</p>
         <h3 class="premium-title">✅ ${label}</h3>
-        <p class="premium-price">${sub.status === 'past_due' ? 'Zahlung offen – bitte prüfen' : 'läuft bis ' + end}</p>
+        <p class="premium-price">${statusLine}</p>
         ${note}
-        <button class="btn btn-play" id="btnPortal">🧾 Abo verwalten (Zahlung, Rechnungen)</button>
+        <button class="btn btn-play" id="btnPortal">🧾 ${
+          isOneTime ? 'Rechnung herunterladen' : 'Abo verwalten (Zahlung, Rechnungen)'
+        }</button>
       </div>`;
     const btn = document.getElementById('btnPortal');
     btn.addEventListener('click', () => openPortal(btn));
@@ -101,11 +111,11 @@
         ${Object.entries(PLANS)
           .map(
             ([key, p], i) => `
-          <div class="premium-card${i === 1 ? ' is-featured' : ''}">
-            <p class="premium-kicker">${p.label}</p>
+          <div class="premium-card${p.featured ? ' is-featured' : ''}">
+            <p class="premium-kicker">${p.badge ? p.badge + ' · ' : ''}${p.label}</p>
             <p class="premium-hint">${p.hint}</p>
             <p class="premium-note">Den Preis siehst du sicher in der Kasse.</p>
-            <button class="btn btn-play" data-plan="${key}">⚓ Abo starten</button>
+            <button class="btn btn-play" data-plan="${key}">⚓ ${p.badge ? 'Einmal kaufen' : 'Abo starten'}</button>
           </div>`
           )
           .join('')}

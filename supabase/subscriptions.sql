@@ -13,6 +13,7 @@ create table if not exists public.subscriptions (
   plan                  text not null default 'level1-monthly',
   status                text not null default 'incomplete',
   -- Stripe-Status: incomplete | trialing | active | past_due | canceled | unpaid
+  --                  paid = Einmalzahlung (dauerhafter Zugang, kein Abo)
   current_period_end    timestamptz,
   cancel_at_period_end  boolean not null default false,
   created_at            timestamptz not null default now(),
