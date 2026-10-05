@@ -9,7 +9,7 @@
 // ============================================================
 
 import fs from 'node:fs';
-import { requireKey, getProjectUrl, getAnonKey } from './keys.mjs';
+import { getKey, getProjectUrl, getAnonKey } from './keys.mjs';
 
 const SB_URL = getProjectUrl();
 const KEY = getAnonKey();
@@ -22,11 +22,13 @@ const USERS = [
 ];
 
 async function api(path, opts = {}) {
+  // Admin-Aufrufe brauchen den service_role-Key, normale den anon-Key.
+  const key = opts.admin ? getKey('SUPABASE_SERVICE_ROLE_KEY') : KEY;
   const res = await fetch(SB_URL + path, {
     method: opts.method || 'GET',
     headers: {
-      apikey: KEY,
-      Authorization: 'Bearer ' + KEY,
+      apikey: key,
+      Authorization: 'Bearer ' + key,
       'Content-Type': 'application/json',
     },
     body: opts.body ? JSON.stringify(opts.body) : undefined,
@@ -35,9 +37,20 @@ async function api(path, opts = {}) {
 }
 
 async function signUp(u) {
-  return api('/auth/v1/signup', {
+  // WICHTIG: Über den normalen /auth/v1/signup werden die
+  // user_metadata in manchen Supabase-Setups verworfen. Über die
+  // Admin-API mit email_confirm:true kommen sie zuverlässig an –
+  // und das Konto ist sofort bestätigt (kein E-Mail-Trial).
+  const adminKey = getKey('SUPABASE_SERVICE_ROLE_KEY');
+  return api('/auth/v1/admin/users', {
     method: 'POST',
-    body: { email: u.email, password: PASSWORD, data: { display_name: u.name, role: u.role } },
+    body: {
+      email: u.email,
+      password: PASSWORD,
+      email_confirm: true,
+      user_metadata: { display_name: u.name, role: u.role },
+    },
+    admin: true,
   });
 }
 
@@ -51,6 +64,19 @@ async function signIn(email) {
 (async () => {
   console.log('Konten werden angelegt bzw. geprueft...\n');
   let first = null;
+
+  // Alte Testkonten erst entfernen, damit sie sauber neu angelegt
+  // werden und der Trigger das Profil mit der richtigen Rolle erzeugt.
+  const adminKey = getKey('SUPABASE_SERVICE_ROLE_KEY');
+  const list = await api('/auth/v1/admin/users?page=1&per_page=100', { admin: true });
+  if (list.status === 200) {
+    const { users = [] } = JSON.parse(list.text);
+    for (const u of users) {
+      if (!['eltern@i-land1o1.com', 'kind@i-land1o1.com', 'admin@i-land1o1.com'].includes(u.email)) continue;
+      const del = await api('/auth/v1/admin/users/' + u.id, { method: 'DELETE', admin: true });
+      console.log(`🗑️  ${u.email} entfernt (HTTP ${del.status})`);
+    }
+  }
 
   for (const u of USERS) {
     let r = await signUp(u);
@@ -105,4 +131,20 @@ async function signIn(email) {
     body: {},
   });
   console.log('\nmy_role() via RPC (ohne Token):', rpc.status, rpc.text.slice(0, 150));
+
+  // Rohdaten: welche Metadaten hat der Eltern-User wirklich?
+  const admin = await fetch(SB_URL + '/auth/v1/admin/users?page=1&per_page=50', {
+    headers: { apikey: getKey('SUPABASE_SERVICE_ROLE_KEY'), Authorization: 'Bearer ' + getKey('SUPABASE_SERVICE_ROLE_KEY') },
+  });
+  if (admin.ok) {
+    const data = await admin.json();
+    console.log('\nRohdaten aus auth.users (user_metadata):');
+    for (const u of data.users || []) {
+      console.log(
+        `  ${u.email.padEnd(38)} role=${JSON.stringify(u.user_metadata?.role)} name=${JSON.stringify(u.user_metadata?.display_name)}`
+      );
+    }
+  } else {
+    console.log('\nadmin/users nicht lesbar:', admin.status, (await admin.text()).slice(0, 120));
+  }
 })();
