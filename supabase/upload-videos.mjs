@@ -234,6 +234,8 @@ const files = walk(srcDir).filter((f) => f.endsWith('.mp4'));
 console.log(`${files.length} Videos gefunden. Bucket: ${BUCKET}\n`);
 
 let done = 0;
+const skipped = [];
+
 for (const file of files) {
   const name = path.basename(file);
   const id = lessonIdFor(name);
@@ -259,6 +261,14 @@ for (const file of files) {
     }
   }
 
+  // Groesser als 50 MB: der API-Upload schafft das nicht.
+  // Diese Dateien bitte ueber das Dashboard hochladen.
+  if (size > 50 * 1024 * 1024) {
+    console.log(`⚠️  ${id.padEnd(7)} ${objectPath}  ${Math.round(size / 1048576)} MB – zu gross fuer den API-Upload (>50 MB)`);
+    skipped.push({ id, objectPath, mb: Math.round(size / 1048576) });
+    continue;
+  }
+
   console.log(`⬆️  ${id.padEnd(7)} ${objectPath}  ${Math.round(size / 1048576)} MB`);
   try {
     await uploadFile(file, objectPath, size);
@@ -272,16 +282,27 @@ for (const file of files) {
 
 console.log(`\n${done}/${files.length} Videos im Bucket.`);
 
+if (skipped.length) {
+  console.log(`\n${skipped.length} Video(s) ueber 50 MB – bitte ueber das Dashboard hochladen:`);
+  console.log('  Supabase -> Storage -> course-videos -> Upload');
+  for (const s of skipped) {
+    console.log(`    ${s.objectPath}   (${s.mb} MB, lokal: Videos/DE/...)`);
+  }
+}
+
 const missing = [];
 for (const file of files) {
   const id = lessonIdFor(path.basename(file));
   if (!id) continue;
-  if (!(await existsInBucket(storagePathFor(id)))) missing.push(storagePathFor(id));
+  const obj = storagePathFor(id);
+  const localSize = fs.statSync(file).size;
+  const rSize = await remoteSize(obj);
+  if (rSize < 0 || Math.abs(rSize - localSize) > 1024) missing.push(obj);
 }
 if (missing.length) {
-  console.log('\nNoch fehlend:');
+  console.log('\nNoch offen:');
   missing.forEach((m) => console.log('  - ' + m));
 } else {
-  console.log('\nAlle Videos vorhanden. Jetzt noch:');
+  console.log('\nAlle Videos vollstaendig. Jetzt noch:');
   console.log('  node supabase/register-lesson-videos.mjs');
 }
