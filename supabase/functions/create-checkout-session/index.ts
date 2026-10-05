@@ -94,6 +94,22 @@ Deno.serve(async (req) => {
     return json({ url: session.url });
   } catch (err) {
     console.error('[edge] create-checkout-session', err);
-    return fail('Kasse konnte nicht gestartet werden.', 500);
+    // Warum wird der Fehler weitergereicht? Ohne das bleibt ein
+    // falscher API-Key, ein abgelaufener Preis oder ein fehlendes
+    // Secret woertlich unsichtbar – man sieht nur "HTTP 500".
+    // err.type / err.code nennen die Ursache konkret (z. B.
+    // "StripeAuthenticationError" bei falschem Key). Der API-Key
+    // selbst steht NIE in diesem Feld.
+    const e = err ?? {};
+    const reason =
+      e.type || e.code || e.raw?.code || e.raw?.type || e.name || 'unbekannt';
+    const info =
+      (typeof e.raw?.message === 'string' && e.raw.message.slice(0, 200)) ||
+      (typeof e.message === 'string' && e.message.slice(0, 200)) ||
+      '';
+    return json(
+      { error: 'Kasse konnte nicht gestartet werden.', reason: String(reason), info },
+      500
+    );
   }
 });
