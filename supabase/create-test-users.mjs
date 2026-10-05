@@ -78,6 +78,9 @@ async function signIn(email) {
       { email: 'kind@i-land1o1.com', name: 'Kind', role: 'student' },
       { email: 'admin@i-land1o1.com', name: 'Admin-Demo', role: 'admin' },
     ]) {
+      // Bewusst NUR diese drei Testkonten. Die frueheren demo-* und
+      // demo-student-* Konten wurden entfernt, damit das Projekt
+      // uebersichtlich bleibt und nicht von Testkonten zugewuchert.
       const found = byEmail.get(u.email);
       if (!found) continue;
 
