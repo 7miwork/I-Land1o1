@@ -54,12 +54,8 @@
       label: 'Level 1 – monatlich',
       mode: 'subscription',
     },
-    'level1-yearly': {
-      priceEnv: 'STRIPE_PRICE_LEVEL1_YEARLY',
-      label: 'Level 1 – jährlich',
-      mode: 'subscription',
-    },
     // Einmalzahlung: dauerhafter Zugang, kein Abo, keine Verlaengerung
+    // (Ein Jahresabo gibt es bewusst nicht – nur monatlich und einmalig.)
     'level1-once': {
       priceEnv: 'STRIPE_PRICE_LEVEL1_ONCE',
       label: 'Level 1 – einmalig (11 Lektionen)',

@@ -16,7 +16,6 @@
   // Muss mit supabase/functions/_shared/plans.ts uebereinstimmen
   const PLANS = {
     'level1-monthly': { label: 'Level 1 · monatlich', hint: 'jederzeit kündbar', featured: true },
-    'level1-yearly': { label: 'Level 1 · jährlich', hint: '2 Monate geschenkt' },
     'level1-once': { label: 'Level 1 · einmalig', hint: '11 Lektionen, kein Abo', badge: 'Einmalig' },
   };
   // 'paid' = Einmalzahlung (dauerhaft), 'active'/'trialing' = Abo

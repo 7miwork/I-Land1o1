@@ -54,11 +54,6 @@ const PLANS = {
     label: 'Level 1 – monatlich',
     mode: 'subscription',
   },
-  'level1-yearly': {
-    priceEnv: 'STRIPE_PRICE_LEVEL1_YEARLY',
-    label: 'Level 1 – jährlich',
-    mode: 'subscription',
-  },
   // Einmalzahlung: dauerhafter Zugang, kein Abo, keine Verlaengerung
   'level1-once': {
     priceEnv: 'STRIPE_PRICE_LEVEL1_ONCE',
