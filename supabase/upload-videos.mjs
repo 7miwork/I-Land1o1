@@ -99,7 +99,16 @@ async function getUploadOffset(location) {
 // Die grossen Videos ueber 50 MB brauchen Weg 1 oder den Weg unten.
 
 async function uploadFile(filePath, objectPath, size) {
-  const meta = `${b64('filename')},${b64(path.basename(filePath))} ${b64('filetype')},${b64('video/mp4')}`;
+  // Supabase liest Bucket und Ziel-Objekt AUSSCHLIESSLICH aus
+  // Upload-Metadata. Ohne diese beiden Felder kommt zurueck:
+  //   "Bucket name invalid"
+  // Format laut TUS-Spec: "key base64wert,key2 base64wert2"
+  // (Leerzeichen zwischen Key und Wert, Komma zwischen Paaren)
+  const meta =
+    `bucketName ${b64(BUCKET)},` +
+    `objectName ${b64(objectPath)},` +
+    `filename ${b64(path.basename(filePath))},` +
+    `filetype ${b64('video/mp4')}`;
 
   // 1) TUS versuchen (resumabel)
   try {
@@ -261,22 +270,24 @@ for (const file of files) {
     }
   }
 
-  // Groesser als 50 MB: der API-Upload schafft das nicht.
-  // Diese Dateien bitte ueber das Dashboard hochladen.
-  if (size > 50 * 1024 * 1024) {
-    console.log(`⚠️  ${id.padEnd(7)} ${objectPath}  ${Math.round(size / 1048576)} MB – zu gross fuer den API-Upload (>50 MB)`);
-    skipped.push({ id, objectPath, mb: Math.round(size / 1048576) });
-    continue;
-  }
+  // Ueber 50 MB: nur ueber TUS moeglich. Der Standard-Upload
+  // scheitert dann. Wir versuchen es mit TUS und melden es,
+  // falls auch das nicht klappt.
+  const viaTusOnly = size > 50 * 1024 * 1024;
 
-  console.log(`⬆️  ${id.padEnd(7)} ${objectPath}  ${Math.round(size / 1048576)} MB`);
+  console.log(`⬆️  ${id.padEnd(7)} ${objectPath}  ${Math.round(size / 1048576)} MB${viaTusOnly ? '  (nur TUS möglich)' : ''}`);
   try {
     await uploadFile(file, objectPath, size);
     console.log('   fertig.');
     done++;
   } catch (err) {
     console.log(`\n   FEHLER: ${err.message}`);
-    console.log('   -> Script einfach erneut starten, es setzt fort.');
+    if (viaTusOnly) {
+      console.log('   -> Datei ist >50 MB und braucht zwingend TUS.');
+      skipped.push({ id, objectPath, mb: Math.round(size / 1048576) });
+    } else {
+      console.log('   -> Script einfach erneut starten, es setzt fort.');
+    }
   }
 }
 

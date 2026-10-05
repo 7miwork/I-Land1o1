@@ -67,8 +67,10 @@ function walk(dir) {
 }
 
 async function existsInBucket(objectPath) {
+  // HEAD statt GET: ein GET wuerde das komplette Video (bis 85 MB)
+  // herunterladen, nur um zu pruefen, ob es existiert.
   const res = await fetch(`${URL}/storage/v1/object/${BUCKET}/${encodeURI(objectPath)}`, {
-    method: 'GET',
+    method: 'HEAD',
     headers: { apikey: KEY, Authorization: 'Bearer ' + KEY },
   });
   return res.status === 200;
@@ -77,6 +79,9 @@ async function existsInBucket(objectPath) {
 const rows = [];
 let missing = 0;
 
+// Wichtig: Nur was wirklich im Bucket liegt, wird veroeffentlicht.
+// Sonst zeigt das Dashboard eine Lektion an, deren Video fehlt –
+// der Schueler sieht dann eine kaputte Seite statt einer Lektion.
 for (const file of walk(srcDir).filter((f) => f.endsWith('.mp4'))) {
   const name = path.basename(file);
   const id = lessonIdFor(name);
@@ -93,10 +98,10 @@ for (const file of walk(srcDir).filter((f) => f.endsWith('.mp4'))) {
     title: path.parse(name).name,
     storage_path: storagePath,
     sort_order: sortOrderFor(id),
-    published: true,
+    published: ok, // <- nur veröffentlichen, was wirklich existiert
   });
 
-  console.log(`${ok ? '✅' : '❌'} ${id.padEnd(7)} ${storagePath}`);
+  console.log(`${ok ? '✅' : '❌'}${ok ? '' : ' (bleibt unveröffentlicht)'} ${id.padEnd(7)} ${storagePath}`);
 }
 
 // Zuordnung in die Datenbank schreiben (service role umgeht RLS)
