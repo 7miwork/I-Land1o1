@@ -57,9 +57,26 @@ function walk(dir) {
 
 async function existsInBucket(objectPath) {
   const res = await fetch(`${SB_URL}/storage/v1/object/${BUCKET}/${encodeURI(objectPath)}`, {
+    method: 'HEAD',
     headers: { apikey: KEY, Authorization: 'Bearer ' + KEY },
   });
   return res.status === 200;
+}
+
+async function remoteSize(objectPath) {
+  const res = await fetch(`${SB_URL}/storage/v1/object/${BUCKET}/${encodeURI(objectPath)}`, {
+    method: 'HEAD',
+    headers: { apikey: KEY, Authorization: 'Bearer ' + KEY },
+  });
+  if (res.status !== 200) return -1;
+  return Number(res.headers.get('content-length') || 0);
+}
+
+async function removeObject(objectPath) {
+  await fetch(`${SB_URL}/storage/v1/object/${BUCKET}/${encodeURI(objectPath)}`, {
+    method: 'DELETE',
+    headers: { apikey: KEY, Authorization: 'Bearer ' + KEY },
+  });
 }
 
 // TUS: Metadaten (Name + Content-Type) base64-kodiert
@@ -75,11 +92,30 @@ async function getUploadOffset(location) {
   return off ? Number(off) : 0;
 }
 
+// TUS ist auf manchen Supabase-Projekten nicht aktiviert (dann antwortet
+// das Endpunkt mit "Bucket name invalid"). Darum gibt es zwei Wege:
+// 1) Versuch per TUS (resumabel, ideal fuer grosse Dateien)
+// 2) Rueckfall auf den Standard-Upload (klappt bis 50 MB)
+// Die grossen Videos ueber 50 MB brauchen Weg 1 oder den Weg unten.
+
 async function uploadFile(filePath, objectPath, size) {
   const meta = `${b64('filename')},${b64(path.basename(filePath))} ${b64('filetype')},${b64('video/mp4')}`;
 
-  // 1) Upload anlegen
-  const create = await fetch(`${SB_URL}/storage/v1/upload/resumable`, {
+  // 1) TUS versuchen (resumabel)
+  try {
+    return await uploadViaTus(filePath, objectPath, size, meta);
+  } catch (err) {
+    if (!/bucket name invalid|not enabled|404/i.test(err.message)) throw err;
+    console.log('   (TUS nicht verfügbar, nutze Standard-Upload)');
+    return await uploadViaStandard(filePath, objectPath, size);
+  }
+}
+
+async function uploadViaTus(filePath, objectPath, size, meta) {
+  // Bucket muss eigener Pfadteil sein
+  const endpoint = `${SB_URL}/storage/v1/upload/resumable/${BUCKET}`;
+
+  const create = await fetch(endpoint, {
     method: 'POST',
     headers: {
       apikey: KEY,
@@ -97,11 +133,8 @@ async function uploadFile(filePath, objectPath, size) {
   }
 
   const location = create.headers.get('location');
-
-  // 2) Offset holen – setzt nach einem Abbruch fort
   let offset = await getUploadOffset(location);
 
-  // 3) In Bloecken senden
   const fd = fs.openSync(filePath, 'r');
   const buffer = Buffer.alloc(CHUNK);
   try {
@@ -137,6 +170,60 @@ async function uploadFile(filePath, objectPath, size) {
   }
   process.stdout.write('\n');
 }
+
+async function uploadViaStandard(filePath, objectPath, size) {
+  // Supabase nimmt im Standard-Upload maximal 50 MB pro Anfrage.
+  // Groessere Dateien zerlegen wir in Bloecke und schieben sie
+  // nacheinander an dieselbe URL. Laeuft ein Block durch, machen
+  // wir mit dem naechsten weiter (der Server haengt an).
+  const MAX = 50 * 1024 * 1024;
+  const url = `${SB_URL}/storage/v1/object/${BUCKET}/${encodeURI(objectPath)}`;
+  const fd = fs.openSync(filePath, 'r');
+  const buffer = Buffer.alloc(MAX);
+
+  try {
+    let offset = 0;
+    let isFirst = true;
+    const contentRange = [];
+
+    while (offset < size) {
+      const toRead = Math.min(MAX, size - offset);
+      const bytesRead = fs.readSync(fd, buffer, 0, toRead, offset);
+
+      const end = offset + bytesRead;
+      contentRange.push(`${offset}-${end - 1}/${size}`);
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          apikey: KEY,
+          Authorization: 'Bearer ' + KEY,
+          'Content-Type': 'video/mp4',
+          // Range-Header: signalisiert, dass dies ein Teil ist
+          'Content-Range': `bytes ${offset}-${end - 1}/${size}`,
+          ...(isFirst ? { 'x-upsert': 'true' } : {}),
+        },
+        body: buffer.subarray(0, bytesRead),
+      });
+
+      if (!res.ok) {
+        const t = await res.text();
+        throw new Error(
+          `Fehler bei ${Math.round(offset / 1048576)} MB (${res.status}): ${t.slice(0, 160)}`
+        );
+      }
+
+      offset = end;
+      process.stdout.write(
+        `\r   ${Math.round((offset / size) * 100)}%  (${Math.round(offset / 1048576)} / ${Math.round(size / 1048576)} MB)   `
+      );
+      isFirst = false;
+    }
+  } finally {
+    fs.closeSync(fd);
+  }
+  process.stdout.write('\n');
+}
 const srcDir = path.resolve('Videos/DE');
 if (!fs.existsSync(srcDir)) {
   console.error('Videos/DE nicht gefunden – bitte im Repo-Root starten.');
@@ -157,10 +244,19 @@ for (const file of files) {
   const objectPath = storagePathFor(id);
   const size = fs.statSync(file).size;
 
-  if (!FORCE && (await existsInBucket(objectPath))) {
-    console.log(`⏭  ${id.padEnd(7)} ${objectPath} (existiert schon)`);
-    done++;
-    continue;
+  // Bereits vollstaendig im Bucket? Dann ueberspringen.
+  if (!FORCE) {
+    const rSize = await remoteSize(objectPath);
+    if (rSize > 0 && Math.abs(rSize - size) <= 1024) {
+      console.log(`⏭  ${id.padEnd(7)} ${objectPath} (existiert schon, ${Math.round(rSize / 1048576)} MB)`);
+      done++;
+      continue;
+    }
+    // Abgeschnittenes Teilstueck? Erst loeschen, dann neu hochladen.
+    if (rSize > 0) {
+      console.log(`🧹 ${id.padEnd(7)} ${objectPath}: Teilstueck (${Math.round(rSize / 1048576)} statt ${Math.round(size / 1048576)} MB) wird ersetzt`);
+      await removeObject(objectPath);
+    }
   }
 
   console.log(`⬆️  ${id.padEnd(7)} ${objectPath}  ${Math.round(size / 1048576)} MB`);
