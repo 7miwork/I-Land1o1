@@ -23,13 +23,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const BUCKET = 'course-videos';
-const URL = process.env.SUPABASE_URL;
-const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+import { requireKey, getProjectUrl } from './keys.mjs';
 
-if (!URL || !KEY) {
-  console.error('Fehlt: SUPABASE_URL und/oder SUPABASE_SERVICE_ROLE_KEY als Umgebungsvariable.');
-  process.exit(1);
-}
+const URL = getProjectUrl();
+const KEY = requireKey(
+  'SUPABASE_SERVICE_ROLE_KEY',
+  'Der Key umgeht alle Sicherheitsregeln – nur fuer lokale Scripts benutzen.'
+);
 
 // Dateiname -> Lektions-ID (muss zu dashboard/lessons.js passen!)
 function lessonIdFor(fileName) {

@@ -45,6 +45,8 @@ Eigene, statische App (kein Build-Schritt) im Piraten-Design der Hauptseite.
 | `supabase/schema.sql` | `profiles` (Rollen Schüler/Eltern/Lehrer/Admin), `parent_links`, `lesson_progress`, RLS |
 | `supabase/subscriptions.sql` | `subscriptions` + `payments` (nur lesbar für User, geschrieben vom Webhook) |
 | `supabase/parents.sql` | Eltern-Einladungen (`parent_invites`), Registrierungs-Regeln, `has_course_access()` |
+| `supabase/keys.mjs` | Liest lokale Schlüssel aus `supabase/.env.local` (git-ignoriert) |
+| `supabase/setup-keys.mjs` | Legt `.env.local` an – einmalig, danach nie wieder nötig |
 | `supabase/videos.sql` | Privater Storage-Bucket `course-videos` + Tabelle `lesson_videos` (Bezahlschranke) |
 | `supabase/functions/README.md` | **Anleitung:** Edge Functions & Stripe in 7 Schritten |
 | `.env.example` | Vorlage aller Variablen (echte `.env` ist in `.gitignore`) |

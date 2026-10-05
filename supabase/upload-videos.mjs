@@ -21,16 +21,13 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { requireKey, getProjectUrl } from './keys.mjs';
 
-const CFG = fs.readFileSync('Z:/I-Land1o1/Webseite/dashboard/config.js', 'utf8');
-const SB_URL = process.env.SUPABASE_URL || CFG.match(/SUPABASE_URL:\s*'([^']+)'/)[1];
-const KEY =
-  process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  (() => {
-    console.error('\nFehlt: SUPABASE_SERVICE_ROLE_KEY als Umgebungsvariable.');
-    console.error('Findest du in Supabase unter Project Settings -> API -> service_role.');
-    process.exit(1);
-  })();
+const SB_URL = getProjectUrl();
+const KEY = requireKey(
+  'SUPABASE_SERVICE_ROLE_KEY',
+  'Der Key umgeht alle Sicherheitsregeln – nur fuer lokale Scripts benutzen.'
+);
 
 const BUCKET = 'course-videos';
 const CHUNK = 6 * 1024 * 1024; // 6 MB – Supabase-Limit pro PATCH

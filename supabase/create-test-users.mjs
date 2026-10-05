@@ -9,10 +9,10 @@
 // ============================================================
 
 import fs from 'node:fs';
+import { requireKey, getProjectUrl, getAnonKey } from './keys.mjs';
 
-const CFG = fs.readFileSync('Z:/I-Land1o1/Webseite/dashboard/config.js', 'utf8');
-const SB_URL = CFG.match(/SUPABASE_URL:\s*'([^']+)'/)[1];
-const KEY = CFG.match(/SUPABASE_ANON_KEY:\s*'([^']+)'/)[1];
+const SB_URL = getProjectUrl();
+const KEY = getAnonKey();
 
 const PASSWORD = 'Pirat1234!';
 const USERS = [

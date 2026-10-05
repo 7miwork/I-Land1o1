@@ -16,6 +16,10 @@ upload-videos.ps1
 !.env.example
 supabase/.temp/
 supabase/functions/.env
+
+# Lokale Schluessel (service_role etc.) - NIE ins Git!
+supabase/.env.local
+*.local
 node_modules/
 
 # OS / Editor-Reste
