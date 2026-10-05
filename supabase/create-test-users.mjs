@@ -65,16 +65,46 @@ async function signIn(email) {
   console.log('Konten werden angelegt bzw. geprueft...\n');
   let first = null;
 
-  // Alte Testkonten erst entfernen, damit sie sauber neu angelegt
-  // werden und der Trigger das Profil mit der richtigen Rolle erzeugt.
-  const adminKey = getKey('SUPABASE_SERVICE_ROLE_KEY');
-  const list = await api('/auth/v1/admin/users?page=1&per_page=100', { admin: true });
+  // Bestehende Testkonten NICHT loeschen: der FK profiles->auth.users
+  // hat kein ON DELETE CASCADE, das Loeschen scheitert also mit 23503.
+  // Stattdessen: Metadaten + Profil direkt aktualisieren.
+  const list = await api('/auth/v1/admin/users?page=1&per_page=200', { admin: true });
   if (list.status === 200) {
     const { users = [] } = JSON.parse(list.text);
-    for (const u of users) {
-      if (!['eltern@i-land1o1.com', 'kind@i-land1o1.com', 'admin@i-land1o1.com'].includes(u.email)) continue;
-      const del = await api('/auth/v1/admin/users/' + u.id, { method: 'DELETE', admin: true });
-      console.log(`🗑️  ${u.email} entfernt (HTTP ${del.status})`);
+    const byEmail = new Map(users.map((u) => [u.email, u]));
+
+    for (const u of [
+      { email: 'eltern@i-land1o1.com', name: 'Eltern', role: 'parent' },
+      { email: 'kind@i-land1o1.com', name: 'Kind', role: 'student' },
+      { email: 'admin@i-land1o1.com', name: 'Admin-Demo', role: 'admin' },
+    ]) {
+      const found = byEmail.get(u.email);
+      if (!found) continue;
+
+      // Passwort + Bestaetigung + Metadaten in einem Rutsch setzen
+      const up = await api('/auth/v1/admin/users/' + found.id, {
+        method: 'PUT',
+        admin: true,
+        body: {
+          email: u.email,
+          password: PASSWORD,
+          email_confirm: true,
+          user_metadata: { ...(found.user_metadata || {}), display_name: u.name, role: u.role },
+        },
+      });
+      console.log(`🔧  ${u.email} aktualisiert (HTTP ${up.status})`);
+
+      // Profil-Rolle nachziehen (PATCH, nicht POST!)
+      const patch = await fetch(SB_URL + '/rest/v1/profiles?id=eq.' + found.id, {
+        method: 'PATCH',
+        headers: {
+          apikey: KEY,
+          Authorization: 'Bearer ' + KEY,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ role: u.role, display_name: u.name }),
+      });
+      console.log(`    Profil -> ${u.role} (HTTP ${patch.status})`);
     }
   }
 
