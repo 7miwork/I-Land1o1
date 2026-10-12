@@ -168,8 +168,9 @@ veröffentlicht, die **wirklich** im Bucket liegen.
   **bewusst ignoriert** (Entscheidung des Inhabers). Das React-Projekt hat
   eine eigene `.clinerules`; AGENTS.md wird weder repariert noch als
   Regelwerk benutzt.
-- Push nach `i-land1o1-8b3659f4` scheitert (Repository 404) – Remote muss
-  neu gesetzt werden
+- Push fürs React-Projekt funktioniert wieder: neues Repo
+  `7miwork/I-Land1o1-React` (privat) ersetzt das gelöschte
+  `i-land1o1-8b3659f4`. Remote dort ist jetzt korrekt gesetzt.
 - `.htaccess` liegt in **diesem** Projekt und wird vom React-Build
   überschrieben → Login-Rewrite prüfen
 - Echter Stripe-Testkauf (`4242 4242 4242 4242`) über die Live-Site steht
