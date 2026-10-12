@@ -162,27 +162,41 @@ veröffentlicht, die **wirklich** im Bucket liegen.
 
 ---
 
-## 8. Bekannte offene Punkte
+## 8. Bekannte offene Punkte (Stand 12.10.2026 nach System-Check)
 
-- `Z:\Codes\Codes\I-Land1o1\AGENTS.md` enthält Merge-Konfliktmarker –
-  **bewusst ignoriert** (Entscheidung des Inhabers). Das React-Projekt hat
-  eine eigene `.clinerules`; AGENTS.md wird weder repariert noch als
-  Regelwerk benutzt.
-- Push fürs React-Projekt funktioniert wieder: neues Repo
-  `7miwork/I-Land1o1-React` (privat) ersetzt das gelöschte
-  `i-land1o1-8b3659f4`. Remote dort ist jetzt korrekt gesetzt.
-- `.htaccess` liegt in **diesem** Projekt und wird vom React-Build
-  überschrieben → Login-Rewrite prüfen
-- Echter Stripe-Testkauf (`4242 4242 4242 4242`) über die Live-Site steht
-  noch aus. Die **Kette ist aber bewiesen**: signiertes Webhook-Event →
-  HTTP 200 → Zeile in `subscriptions` → `has_course_access()` = true →
-  signierte Video-URL (HTTP 200, 44 MB).
-- `fix-signup-role.sql` wurde noch nie ausgeführt – alle Konten weiter
-  `role = student` (Eltern-/Admin-Konto also falsch)
-- Videos `l01`–`l04` fehlen; die Original-Videos auf Hostinger sind noch
-  öffentlich erreichbar
-Alle weiteren `demo-*`-Konten wurden **gelöscht**. `create-test-users.mjs`
-und `fix-roles.mjs` erzeugen bewusst keine neuen Testkonten an. Nicht wieder
-einführen.
+- **Drei Stripe-Functions müssen neu deployt werden** – apiVersion
+  `2024-06-20` → `2025-03-31.basil`; das Konto lehnte die alte Version ab
+  (`Managed Payments is not supported`) → die Kasse startete nie.
+  Quelldateien: `supabase/functions-deploy/*.ts` (neu gebaut).
+  Ablauf: `WAS-DU-MACHEN-MUSST.md` (Schritt 1).
+- `.htaccess` mit `/Videos`-403-Block liegt in **beiden** Projekten
+  (dieses als Referenz, `React/public/.htaccess` wird mit dem Deploy
+  ausgeliefert) – bis zum Deploy sind die Originale noch abrufbar.
+  Login-Rewrite ist in der React-Fassung jetzt auch enthalten (wurde
+  sonst vom SPA-Rewrite verschluckt).
+- Echter Stripe-Testkauf (`4242 4242 4242 4242`) steht aus. Das Test-Abo
+  wurde **gelöscht** (`subscriptions` = 0), Paywall greift wieder (403).
+  Bewiesen: signiertes Webhook-Event → Zeile in `subscriptions` →
+  `has_course_access()` = true → signierte Video-URL (HTTP 206).
+- **Secrets-Rotation steht aus**: `sk_live_`, service_role und `whsec_`
+  lagen als echte Werte in der `.env.example` im Git-Verlauf (Datei ist
+  bereinigt; Werte rotieren, dann Supabase-Secrets + lokale
+  `supabase/.env.local` nachziehen).
+- GitHub-Repo `7miwork/I-Land1o1-React` braucht die drei
+  `HOSTINGER_FTP_*`-Secrets, sonst scheitert das Deploy (der Build selbst
+  ist grün). Danach: `gh workflow run "Deploy to Hostinger"`.
+- `fix-signup-role.sql` / Rollen: erledigt (`fix-roles.mjs` lief durch).
+- Videos `l01`–`l04`: erledigt – alle 13 Lektionen liegen komprimiert im
+  Bucket (`compress-videos.ps1`, SSIM ≥ 0.989).
+- SMTP für Auth-Mails + E-Mail-Bestätigung, Rechtsseiten
+  (Impressum/Datenschutz/AGB) noch offen.
 
-- Der Browser schickt nur **Plan-Namen**, niemals Preise
+**Notizen (bewusst so entschieden):**
+- `AGENTS.md` im React-Projekt enthält Merge-Konfliktmarker – **bewusst
+  ignoriert** (Entscheidung des Inhabers), weder reparieren noch als
+  Regelwerk nutzen.
+- Alle `demo-*`-Konten wurden **gelöscht**. `create-test-users.mjs`
+  und `fix-roles.mjs` erzeugen bewusst keine neuen Testkonten an.
+  Nicht wieder einführen.
+- Der Browser schickt nur **Plan-Namen**, niemals Preise (Preis-IDs
+  werden serverseitig in `_shared/plans.ts` aufgelöst).
