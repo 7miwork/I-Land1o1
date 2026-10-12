@@ -117,7 +117,15 @@ Deno.serve(async (req) => {
                 stripe_subscription_id: null,
                 plan,
                 status: 'paid',
-                current_period_end: null,
+                // HINWEIS: current_period_end darf NICHT null sein. Die
+                // Spalte in der Datenbank hat ein NOT NULL – ein null
+                // liess den ganzen upsert mit 23502 scheitern (der
+                // Webhook brach dann mit 500 ab). Fuer die Einmalzahlung
+                // tragen wir ein fernes Datum ein: der Zugang soll
+                // dauerhaft gelten. has_course_access() prueft bei
+                // status 'paid' NICHT das Datum, nur active/trialing
+                // werden gegen current_period_end geprueft.
+                current_period_end: '2099-12-31T23:59:59Z',
                 cancel_at_period_end: false,
                 updated_at: new Date().toISOString(),
               },
@@ -133,7 +141,9 @@ Deno.serve(async (req) => {
                 stripe_subscription_id: subscriptionId,
                 plan,
                 status: subStatus,
-                current_period_end: periodEnd,
+                // NOT NULL: nie null eintragen (sonst 23502 -> 500).
+                // Fehlt das Datum, gilt dauerhafter Zugang als Notfall.
+                current_period_end: periodEnd ?? '2099-12-31T23:59:59Z',
                 cancel_at_period_end: cancelAtEnd,
                 updated_at: new Date().toISOString(),
               },
@@ -157,7 +167,8 @@ Deno.serve(async (req) => {
           stripe_subscription_id: sub.id,
           plan: sub.metadata?.plan || 'level1-monthly',
           status,
-          current_period_end: periodEndOf(sub),
+          // NOT NULL: periodEndOf kann null liefern -> nie null eintragen
+          current_period_end: periodEndOf(sub) ?? '2099-12-31T23:59:59Z',
           cancel_at_period_end: sub.cancel_at_period_end,
           updated_at: new Date().toISOString(),
         };

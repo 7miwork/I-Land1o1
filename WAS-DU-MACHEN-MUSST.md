@@ -1,58 +1,30 @@
 # Nur noch EIN Schritt
 
-Der Rest ist fertig. Deine Logs haben den Fehler gefunden.
+## Schritt 1: `stripe-webhook` NOCH EINMAL neu deployen
 
-## Was die Logs gezeigt haben
+Der letzte Deploy hat den echten Fehler zum Vorschein gebracht – er lag
+nicht im Webhook-Code, sondern an einem **NOT-NULL-Datenbankfeld**:
 
 ```
-[webhook] Abo aktiviert { userId: "02da27ad…", plan: "level1-monthly", subStatus: "active" }
+null value in column "current_period_end" ... violates not-null constraint (23502)
 ```
 
-Fünfmal. Der Code läuft also korrekt – und **trotzdem** blieb `subscriptions` leer.
+Der Webhook schrieb `current_period_end: null` (Einmalzahlung), die Spalte
+verweigert `null` → ganzer Upsert scheiterte → 500. Vorher hat der Client
+diesen Fehler stillschweigend verschluckt, deshalb „Abo aktiviert" im Log
+bei leerer Tabelle. **Ist jetzt überall gefixt** (auch bei den beiden anderen
+Null-Stellen, die dasselbe Problem gehabt hätten).
 
-**Ursache:** Alle Schreibvorgänge warfen ihr Ergebnis weg:
-
-```js
-await db.from('subscriptions').upsert({...});   // Fehler wird verworfen
-console.log('[webhook] Abo aktiviert');          // logt trotzdem Erfolg
-```
-
-Der Supabase-Client wirft bei einem fehlgeschlagenen Schreiben **keinen**
-Fehler, sondern gibt `{ data, error }` zurück. Das wurde ignoriert – deshalb
-der Erfolgs-Log bei leerer Tabelle. Behoben.
-
----
-
-## Schritt 1: `stripe-webhook` neu deployen
-
-https://supabase.com/dashboard/project/lmlbjtazgcylsrtzzisr/functions/stripe-webhook
-
-1. Function **`stripe-webhook`** → Tab **Code**
+1. https://supabase.com/dashboard/project/lmlbjtazgcylsrtzzisr/functions/stripe-webhook → Tab **Code**
 2. **Gesamten** Inhalt löschen
-3. Inhalt dieser Datei einfügen:
+3. Inhalt einfügen aus:
 
 ```
 Z:\I-Land1o1\Webseite\supabase\functions-deploy\stripe-webhook.ts
 ```
 
 4. **Deploy** klicken
-
-Das ist alles. Danach sag Bescheid, ich prüfe den Rest.
-
----
-
-## Was danach passiert
-
-Die Function gibt jetzt bei einem Schreibfehler **500** zurück (vorher: stilles
-Verschweigen). Zwei mögliche Ausgänge:
-
-**A) Es funktioniert** – Abo landet in `subscriptions`, ich prüfe mit
-`test-video-access.mjs`, ob das Video aufgeht.
-
-**B) `SCHREIBFEHLER` im Log** – dann steht dort die echte Ursache
-(`message`, `code`, `hint`). Ich sehe daran sofort, was fehlt.
-
-In beiden Fällen wissen wir mehr als jetzt.
+5. Danach hier melden – ich teste sofort die komplette Kette
 
 ---
 
