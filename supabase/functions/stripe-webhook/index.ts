@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
   }
 
   const rawBody = await req.text();
-  const stripe = new Stripe(stripeKey, { apiVersion: '2024-06-20' });
+  const stripe = new Stripe(stripeKey, { apiVersion: '2025-03-31.basil' });
 
   // 1) Signatur pruefen (bevor irgendetwas passiert)
   let event;

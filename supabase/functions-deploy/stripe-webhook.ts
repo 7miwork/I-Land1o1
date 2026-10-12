@@ -54,6 +54,8 @@ const PLANS = {
     label: 'Level 1 – monatlich',
     mode: 'subscription',
   },
+  // Einmalzahlung: dauerhafter Zugang, kein Abo, keine Verlaengerung
+  // (Ein Jahresabo gibt es bewusst nicht – nur monatlich und einmalig.)
   'level1-once': {
     priceEnv: 'STRIPE_PRICE_LEVEL1_ONCE',
     label: 'Level 1 – einmalig (11 Lektionen)',
@@ -139,7 +141,7 @@ Deno.serve(async (req) => {
   }
 
   const rawBody = await req.text();
-  const stripe = new Stripe(stripeKey, { apiVersion: '2024-06-20' });
+  const stripe = new Stripe(stripeKey, { apiVersion: '2025-03-31.basil' });
 
   // 1) Signatur pruefen (bevor irgendetwas passiert)
   let event;
@@ -162,7 +164,7 @@ Deno.serve(async (req) => {
   // WICHTIG: Der Supabase-Client wirft bei einem fehlgeschlagenen
   // Schreiben KEINEN Fehler, sondern gibt { data, error } zurueck.
   // Wer das ignoriert, loggt "Abo aktiviert", obwohl nichts in der
-  // Datenbank angekommen ist – genau dieser Fehler war hier drin.
+  // Datenbank angekommen ist - genau dieser Fehler war hier drin.
   // Diese Helfer-Funktion macht aus einem stillen Fehler einen lauten.
   async function write(what, result) {
     const { error } = await result;
@@ -206,56 +208,46 @@ Deno.serve(async (req) => {
           if (session.mode === 'payment') {
             // Einmalzahlung: dauerhafter Zugang, KEIN Abo.
             // 'paid' heisst: bezahlt und nicht ablaeufig.
-            await write(
-              'subscriptions:once',
-              db
-                .from('subscriptions')
-                .upsert(
-                  {
-                    user_id: userId,
-                    stripe_customer_id:
-                      typeof session.customer === 'string'
-                        ? session.customer
-                        : session.customer?.id,
-                    stripe_subscription_id: null,
-                    plan,
-                    status: 'paid',
-                    // NOT NULL: darf nie null sein, sonst scheitert der
-                    // gesamte upsert mit 23502 (Webhook antwortet 500).
-                    // Einmalzahlung = dauerhafter Zugang, daher fernes
-                    // Datum; has_course_access() prueft bei 'paid' das
-                    // Datum ohnehin nicht.
-                    current_period_end: '2099-12-31T23:59:59Z',
-                    cancel_at_period_end: false,
-                    updated_at: new Date().toISOString(),
-                  },
-                  { onConflict: 'user_id' },
-                ),
-            );
+            await write('subscriptions:once', db.from('subscriptions').upsert(
+              {
+                user_id: userId,
+                stripe_customer_id:
+                  typeof session.customer === 'string' ? session.customer : session.customer?.id,
+                stripe_subscription_id: null,
+                plan,
+                status: 'paid',
+                // HINWEIS: current_period_end darf NICHT null sein. Die
+                // Spalte in der Datenbank hat ein NOT NULL – ein null
+                // liess den ganzen upsert mit 23502 scheitern (der
+                // Webhook brach dann mit 500 ab). Fuer die Einmalzahlung
+                // tragen wir ein fernes Datum ein: der Zugang soll
+                // dauerhaft gelten. has_course_access() prueft bei
+                // status 'paid' NICHT das Datum, nur active/trialing
+                // werden gegen current_period_end geprueft.
+                current_period_end: '2099-12-31T23:59:59Z',
+                cancel_at_period_end: false,
+                updated_at: new Date().toISOString(),
+              },
+              { onConflict: 'user_id' },
+            ));
             console.log('[webhook] Einmalzahlung freigeschaltet', { userId, plan });
           } else {
-            await write(
-              'subscriptions:subscription',
-              db
-                .from('subscriptions')
-                .upsert(
-                  {
-                    user_id: userId,
-                    stripe_customer_id:
-                      typeof session.customer === 'string'
-                        ? session.customer
-                        : session.customer?.id,
-                    stripe_subscription_id: subscriptionId,
-                    plan,
-                    status: subStatus,
-                    // NOT NULL: nie null eintragen (sonst 23502 -> 500).
-                    current_period_end: periodEnd ?? '2099-12-31T23:59:59Z',
-                    cancel_at_period_end: cancelAtEnd,
-                    updated_at: new Date().toISOString(),
-                  },
-                  { onConflict: 'user_id' },
-                ),
-            );
+            await write('subscriptions:subscription', db.from('subscriptions').upsert(
+              {
+                user_id: userId,
+                stripe_customer_id:
+                  typeof session.customer === 'string' ? session.customer : session.customer?.id,
+                stripe_subscription_id: subscriptionId,
+                plan,
+                status: subStatus,
+                // NOT NULL: nie null eintragen (sonst 23502 -> 500).
+                // Fehlt das Datum, gilt dauerhafter Zugang als Notfall.
+                current_period_end: periodEnd ?? '2099-12-31T23:59:59Z',
+                cancel_at_period_end: cancelAtEnd,
+                updated_at: new Date().toISOString(),
+              },
+              { onConflict: 'user_id' },
+            ));
             console.log('[webhook] Abo aktiviert', { userId, plan, subStatus });
           }
         }
@@ -284,7 +276,7 @@ Deno.serve(async (req) => {
           await write('subscriptions:abo-update', db.from('subscriptions').upsert(row, { onConflict: 'user_id' }));
         } else {
           // Fallback: ueber die Stripe-Subscription-ID den User finden
-          await write('subscriptions:abo-update-fallback', db.from('subscriptions').update(row).eq('stripe_subscription_id', sub.id));
+          await write('subscriptions:abo-fallback', db.from('subscriptions').update(row).eq('stripe_subscription_id', sub.id));
         }
         console.log('[webhook] Abo-Update', { type: event.type, status });
         break;
@@ -308,20 +300,17 @@ Deno.serve(async (req) => {
         }
 
         if (userId) {
-          await write(
-            'payments:invoice',
-            db.from('payments').upsert(
-              {
-                user_id: userId,
-                stripe_invoice_id: invoice.id,
+          await write('payments:invoice', db.from('payments').upsert(
+            {
+              user_id: userId,
+              stripe_invoice_id: invoice.id,
               amount_cents: invoice.amount_paid || 0,
               currency: invoice.currency || 'eur',
               status: 'paid',
               paid_at: new Date().toISOString(),
             },
-              { onConflict: 'stripe_invoice_id' },
-            ),
-          );
+            { onConflict: 'stripe_invoice_id' },
+          ));
           console.log('[webhook] Zahlung erfasst', { userId, amount: invoice.amount_paid });
         }
         break;

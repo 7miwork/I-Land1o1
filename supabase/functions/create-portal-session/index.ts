@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
 
     if (!sub?.stripe_customer_id) return fail('Du hast noch kein Abo.', 404);
 
-    const stripe = new Stripe(stripeKey, { apiVersion: '2024-06-20' });
+    const stripe = new Stripe(stripeKey, { apiVersion: '2025-03-31.basil' });
     const portal = await stripe.billingPortal.sessions.create({
       customer: sub.stripe_customer_id,
       return_url: `${siteUrl()}/dashboard/?portal=zurueck`,

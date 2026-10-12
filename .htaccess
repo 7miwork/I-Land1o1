@@ -2,6 +2,11 @@
   RewriteEngine On
   RewriteBase /
 
+  # Lektions-Videos sind NICHT mehr oeffentlich – Zugriff nur noch ueber
+  # Supabase signed URLs (get-video-url, 5 Minuten gueltig).
+  # Muss VOR den Existenz-Regeln stehen.
+  RewriteRule ^Videos(/|$) - [F,L]
+
   # Eigene Login-Seite (supabase) statt der alten React-Demo-Seite.
   # Ordner-Ausnahme muss VOR der SPA-Regel stehen.
   RewriteRule ^login/?$ /login/index.html [L]
