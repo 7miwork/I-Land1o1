@@ -62,6 +62,26 @@ Deno.serve(async (req) => {
   // 2) Serverseitiger Client mit service role: umgeht RLS (darf alles)
   const db = createClient(supabaseUrl, serviceKey);
 
+  // WICHTIG: Der Supabase-Client wirft bei einem fehlgeschlagenen
+  // Schreiben KEINEN Fehler, sondern gibt { data, error } zurueck.
+  // Wer das ignoriert, loggt "Abo aktiviert", obwohl nichts in der
+  // Datenbank angekommen ist - genau dieser Fehler war hier drin.
+  // Diese Helfer-Funktion macht aus einem stillen Fehler einen lauten.
+  async function write(what, result) {
+    const { error } = await result;
+    if (error) {
+      console.error(`[webhook] SCHREIBFEHLER (${what}):`, {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+      });
+      // 500 => Stripe wiederholt den Aufruf. Ein bezahlter Vorgang
+      // darf nicht stillschweigend verloren gehen.
+      throw error;
+    }
+  }
+
   try {
     switch (event.type) {
       // Bezahlung abgeschlossen -> Abo aktivieren
@@ -89,7 +109,7 @@ Deno.serve(async (req) => {
           if (session.mode === 'payment') {
             // Einmalzahlung: dauerhafter Zugang, KEIN Abo.
             // 'paid' heisst: bezahlt und nicht ablaeufig.
-            await db.from('subscriptions').upsert(
+            await write('subscriptions:once', db.from('subscriptions').upsert(
               {
                 user_id: userId,
                 stripe_customer_id:
@@ -102,10 +122,10 @@ Deno.serve(async (req) => {
                 updated_at: new Date().toISOString(),
               },
               { onConflict: 'user_id' },
-            );
+            ));
             console.log('[webhook] Einmalzahlung freigeschaltet', { userId, plan });
           } else {
-            await db.from('subscriptions').upsert(
+            await write('subscriptions:subscription', db.from('subscriptions').upsert(
               {
                 user_id: userId,
                 stripe_customer_id:
@@ -118,7 +138,7 @@ Deno.serve(async (req) => {
                 updated_at: new Date().toISOString(),
               },
               { onConflict: 'user_id' },
-            );
+            ));
             console.log('[webhook] Abo aktiviert', { userId, plan, subStatus });
           }
         }
@@ -143,10 +163,10 @@ Deno.serve(async (req) => {
         };
 
         if (userId) {
-          await db.from('subscriptions').upsert(row, { onConflict: 'user_id' });
+          await write('subscriptions:abo-update', db.from('subscriptions').upsert(row, { onConflict: 'user_id' }));
         } else {
           // Fallback: ueber die Stripe-Subscription-ID den User finden
-          await db.from('subscriptions').update(row).eq('stripe_subscription_id', sub.id);
+          await write('subscriptions:abo-fallback', db.from('subscriptions').update(row).eq('stripe_subscription_id', sub.id));
         }
         console.log('[webhook] Abo-Update', { type: event.type, status });
         break;
@@ -170,7 +190,7 @@ Deno.serve(async (req) => {
         }
 
         if (userId) {
-          await db.from('payments').upsert(
+          await write('payments:invoice', db.from('payments').upsert(
             {
               user_id: userId,
               stripe_invoice_id: invoice.id,
@@ -180,7 +200,7 @@ Deno.serve(async (req) => {
               paid_at: new Date().toISOString(),
             },
             { onConflict: 'stripe_invoice_id' },
-          );
+          ));
           console.log('[webhook] Zahlung erfasst', { userId, amount: invoice.amount_paid });
         }
         break;
