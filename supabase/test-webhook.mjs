@@ -70,9 +70,13 @@ const session = {
   payment_status: 'paid',
 };
 
-// Abo bekommt eine subscription; Einmalzahlung nicht
+// Abo bekommt eine subscription. WICHTIG: Die Function ruft fuer
+// diesen Zweig stripe.subscriptions.retrieve() auf. Eine erfundene ID
+// (sub_...) existiert bei Stripe nicht -> die Function bricht mit 500
+// ab. Fuer den Durchlauf ohne echten Kauf darf deshalb KEINE
+// subscription mitgeschickt werden; die Function setzt dann
+// status='active' als Vorgabe. Genau dieser Zweig wird hier getestet.
 if (MODE === 'subscription') {
-  session.subscription = 'sub_' + crypto.randomBytes(8).toString('hex');
   session.subscription_data = { metadata: { user_id: user.id, plan: PLAN } };
 }
 
