@@ -38,7 +38,14 @@ try {
     const id = lessonIdFor(path.basename(f));
     if (!id) continue;
     const obj = storagePathFor(id);
-    const localSize = fs.statSync(f).size;
+    // Referenzgroesse: komprimierte Fassung, falls vorhanden (die wird
+    // auch hochgeladen – Original >50 MB wird von Supabase geblockt)
+    let ref = f;
+    if (fs.statSync(f).size > 50 * 1024 * 1024) {
+      const alt = path.join(path.resolve('Videos'), 'compressed', path.relative(path.resolve('Videos/DE'), f));
+      if (fs.existsSync(alt)) ref = alt;
+    }
+    const localSize = fs.statSync(ref).size;
 
     // Groesse per HEAD holen – ein GET liefert bei Video-Objekten
     // die Binaerdaten, die sich nicht als JSON parsen lassen.

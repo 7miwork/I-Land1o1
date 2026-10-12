@@ -114,7 +114,10 @@ async function uploadFile(filePath, objectPath, size) {
   try {
     return await uploadViaTus(filePath, objectPath, size, meta);
   } catch (err) {
-    if (!/bucket name invalid|not enabled|404/i.test(err.message)) throw err;
+    // 413 "Maximum size exceeded" kommt auf dem Free-Tarif AUCH beim
+    // TUS-Start (nicht nur beim Standard-Upload) – fuer Dateien <= 50 MB
+    // ist der Standard-Upload trotzdem der richtige Weg.
+    if (!/bucket name invalid|not enabled|404|maximum size|413/i.test(err.message)) throw err;
     console.log('   (TUS nicht verfügbar, nutze Standard-Upload)');
     return await uploadViaStandard(filePath, objectPath, size);
   }
@@ -253,7 +256,19 @@ for (const file of files) {
     continue;
   }
   const objectPath = storagePathFor(id);
-  const size = fs.statSync(file).size;
+  // Quelldatei waehlen: ist das Original > 50 MB und existiert eine
+  // komprimierte Fassung (Videos/compressed/...), nehmen wir die.
+  // Supabase Free blockt grosse Dateien naemlich AUCH per TUS (413).
+  let source = file;
+  const origSize = fs.statSync(file).size;
+  if (origSize > 50 * 1024 * 1024) {
+    const alt = path.join(srcDir, '..', 'compressed', path.relative(srcDir, file));
+    if (fs.existsSync(alt)) {
+      source = alt;
+      console.log(`   (komprimierte Fassung: ${path.relative(process.cwd(), alt)})`);
+    }
+  }
+  const size = fs.statSync(source).size;
 
   // Bereits vollstaendig im Bucket? Dann ueberspringen.
   if (!FORCE) {
@@ -277,7 +292,7 @@ for (const file of files) {
 
   console.log(`⬆️  ${id.padEnd(7)} ${objectPath}  ${Math.round(size / 1048576)} MB${viaTusOnly ? '  (nur TUS möglich)' : ''}`);
   try {
-    await uploadFile(file, objectPath, size);
+    await uploadFile(source, objectPath, size);
     console.log('   fertig.');
     done++;
   } catch (err) {
@@ -306,7 +321,14 @@ for (const file of files) {
   const id = lessonIdFor(path.basename(file));
   if (!id) continue;
   const obj = storagePathFor(id);
-  const localSize = fs.statSync(file).size;
+  // Gleiche Logik wie oben: komprimierte Fassung zaehlt als Referenz
+  let ref = file;
+  const origSize2 = fs.statSync(file).size;
+  if (origSize2 > 50 * 1024 * 1024) {
+    const alt = path.join(srcDir, '..', 'compressed', path.relative(srcDir, file));
+    if (fs.existsSync(alt)) ref = alt;
+  }
+  const localSize = fs.statSync(ref).size;
   const rSize = await remoteSize(obj);
   if (rSize < 0 || Math.abs(rSize - localSize) > 1024) missing.push(obj);
 }
