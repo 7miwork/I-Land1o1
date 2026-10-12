@@ -1,25 +1,25 @@
-# Was DU machen musst – 3 Deploy-Schritte
+# Nur noch EIN Schritt
 
-Signaturprüfung läuft inzwischen (200 statt 401/400), aber die Function
-schreibt nichts. Der Grund ist eindeutig geklärt.
+Der Rest ist fertig. Deine Logs haben den Fehler gefunden.
 
-## Der Beweis
+## Was die Logs gezeigt haben
 
-Drei Events mit **gültiger Signatur** geschickt:
+```
+[webhook] Abo aktiviert { userId: "02da27ad…", plan: "level1-monthly", subStatus: "active" }
+```
 
-| Event | Antwort |
-|---|---|
-| `checkout.session.completed` | 200 `{"received":true}` |
-| `customer.subscription.deleted` | 200 `{"received":true}` |
-| **leeres `{}`** (ohne `type`) | **200 `{"received":true}`** ← identisch! |
+Fünfmal. Der Code läuft also korrekt – und **trotzdem** blieb `subscriptions` leer.
 
-Ein leeres Objekt ohne Event-Typ kann nicht dasselbe sein wie ein
-Bezahlt-Event – außer die Function kennt unsere Verarbeitung gar nicht
-und antwortet bei allem gleich. `subscriptions` bleibt bei allen drei
-Aufrufen **leer**.
+**Ursache:** Alle Schreibvorgänge warfen ihr Ergebnis weg:
 
-**Fazit: Die deployete Function ist eine alte Version** ohne unser
-`switch (event.type)`. Der Code liegt im Repo, wurde aber nie hochgeladen.
+```js
+await db.from('subscriptions').upsert({...});   // Fehler wird verworfen
+console.log('[webhook] Abo aktiviert');          // logt trotzdem Erfolg
+```
+
+Der Supabase-Client wirft bei einem fehlgeschlagenen Schreiben **keinen**
+Fehler, sondern gibt `{ data, error }` zurück. Das wurde ignoriert – deshalb
+der Erfolgs-Log bei leerer Tabelle. Behoben.
 
 ---
 
@@ -28,71 +28,35 @@ Aufrufen **leer**.
 https://supabase.com/dashboard/project/lmlbjtazgcylsrtzzisr/functions/stripe-webhook
 
 1. Function **`stripe-webhook`** → Tab **Code**
-2. Gesamten Inhalt löschen
+2. **Gesamten** Inhalt löschen
 3. Inhalt dieser Datei einfügen:
 
 ```
 Z:\I-Land1o1\Webseite\supabase\functions-deploy\stripe-webhook.ts
 ```
 
-4. **Deploy**
+4. **Deploy** klicken
 
-**Probe:** Danach sollte das leere `{}` nicht mehr `200 received:true`
-geben, sondern scheitern – es hat ja kein `type`-Feld.
-
----
-
-## Schritt 2: Secrets bei `stripe-webhook`
-
-| Name | Wert |
-|---|---|
-| `STRIPE_SECRET_KEY` | `sk_test_…` (aus `.env.local`) |
-| `STRIPE_WEBHOOK_SECRET` | `whsec_…` aus dem **Testmodus** |
-| `SUPABASE_URL` | `https://lmlbjtazgcylsrtzzisr.supabase.co` |
-| `SUPABASE_SERVICE_ROLE_KEY` | service_role-Key |
-
-`SUPABASE_URL` und `SUPABASE_SERVICE_ROLE_KEY` sind oft automatisch da –
-prüfe aber den Service-Key. Ohne ihn bricht die Function bei
-„Server nicht konfiguriert" ab.
+Das ist alles. Danach sag Bescheid, ich prüfe den Rest.
 
 ---
 
-## Schritt 3: `create-checkout-session` neu deployen
+## Was danach passiert
 
-Gleiches Problem, gleiche Lösung. Bei **`create-checkout-session`** →
-**Code** → Inhalt ersetzen mit:
+Die Function gibt jetzt bei einem Schreibfehler **500** zurück (vorher: stilles
+Verschweigen). Zwei mögliche Ausgänge:
 
-```
-Z:\I-Land1o1\Webseite\supabase\functions-deploy\create-checkout-session.ts
-```
+**A) Es funktioniert** – Abo landet in `subscriptions`, ich prüfe mit
+`test-video-access.mjs`, ob das Video aufgeht.
 
-Secrets dort:
+**B) `SCHREIBFEHLER` im Log** – dann steht dort die echte Ursache
+(`message`, `code`, `hint`). Ich sehe daran sofort, was fehlt.
 
-| Name | Wert |
-|---|---|
-| `STRIPE_SECRET_KEY` | `sk_test_…` |
-| `STRIPE_PRICE_LEVEL1_MONTHLY` | `price_1UMSNrGrOz3Fo9oHXqEvSOAb` |
-| `STRIPE_PRICE_LEVEL1_ONCE` | `price_1UMSNrGrOz3Fo9oHKlsuSCNK` |
+In beiden Fällen wissen wir mehr als jetzt.
 
 ---
 
-## Was schon funktioniert
-
-| Prüfung | Stand |
-|---|---|
-| Verify JWT beim Webhook | ✅ **AUS** – Stripe kommt durch |
-| Signatur | ✅ gültig, wird akzeptiert |
-| Webhook-Endpoint | ✅ 5 Events, richtige URL |
-| `subscriptions`-Schema | ✅ Stripe-Spalten da |
-| `has_course_access()` | ✅ läuft |
-| **Paywall ohne Abo** | ✅ **403 – hält** |
-| Checkout lokal nachgebaut | ✅ HTTP 200 |
-
-Alles außer dem Deploy ist bereit.
-
----
-
-## Selbsttest danach
+## Selbsttest nach dem Deploy
 
 ```powershell
 cd Z:\I-Land1o1\Webseite
@@ -100,5 +64,39 @@ node supabase\test-webhook.mjs          # Bezahlung simulieren
 node supabase\test-video-access.mjs     # Video freigegeben?
 ```
 
-`test-webhook.mjs` signiert echt – die Function kann nicht erkennen, ob
-Stripe oder das Script es geschickt hat.
+---
+
+## Was bereits funktioniert (geprüft, nicht vermutet)
+
+| Prüfung | Stand |
+|---|---|
+| Verify JWT beim Webhook | ✅ **AUS** – Stripe kommt durch |
+| Signatur | ✅ wird akzeptiert |
+| Webhook-Endpoint | ✅ 5 Events, richtige URL, `enabled` |
+| Event-Verarbeitung | ✅ Zweig wird erreicht (aus deinen Logs) |
+| `subscriptions`-Schema | ✅ alle Stripe-Spalten |
+| Upsert über `user_id` | ✅ getestet – aktualisiert statt dupliziert |
+| `has_course_access()` | ✅ läuft, gibt `true` bei Abo |
+| **Paywall ohne Abo** | ✅ **403 – hält** |
+| Preise + `tax_code` | ✅ beide aktiv |
+| Checkout lokal nachgebaut | ✅ HTTP 200, Session erstellt |
+
+---
+
+## Zwei Dinge, die ich aus deinen Logs noch mitnehme
+
+**Ein echter Kauf ist bereits durchgelaufen.** Die Payload mit
+`t=1791787600` war kein Test von mir:
+
+```json
+"customer": "cus_c35ef669462eb0b4",
+"subscription": "sub_583593e4bf9230f3",
+"payment_status": "paid"
+```
+
+Der wurde wegen falscher Signatur abgelehnt. Seit deiner `whsec_`-Korrektur
+passt sie – der läuft jetzt durch.
+
+**Stripe mahnt die API-Version an:** `2024-06-20` ist veraltet, aktuell wäre
+`2026-09-30.endive`. Nicht dringend, aber irgendwann fällig. Soll ich das
+mitnehmen, wenn wir sowieso dabei sind?
