@@ -1,0 +1,177 @@
+# Cline-Regeln – I-Land1o1 (Projekt Z:\I-Land1o1\Webseite)
+
+Diese Datei liegt im Projekt-Root und beschreibt zwei **getrennte
+Projekte**, die beide auf `https://i-land1o1.com` landen – Verwechslung
+war in der Vergangenheit die häufigste Fehlerquelle.
+
+**Dieses Projekt** (`Z:\I-Land1o1\Webseite`) liefert `/login` und `/dashboard/`
+und enthält alle Supabase-Scripts. Die Hauptseite kommt aus einem zweiten
+Projekt (siehe Abschnitt 1).
+
+---
+
+## 1. Die zwei Projekte – nicht verwechseln
+
+| | **Webseite (dieses)** | **I-Land1o1 (React)** |
+|---|---|---|
+| Pfad | `Z:\I-Land1o1\Webseite` | `Z:\Codes\Codes\I-Land1o1` |
+| Art | Statisches HTML/CSS/JS | Vite + TanStack Start (SPA) |
+| Build | keiner | `npm run build:hostinger` |
+| Git | dieses Repo | `i-land1o1-8b3659f4` (**existiert nicht, Push scheitert**) |
+| Liefert | `/login`, `/dashboard/` | `/` (Hauptseite, `/assets/index-*.js`) |
+
+**Merksatz:** Das Live-HTML lädt `/assets/index-HASH.js` → Vite →
+nur `Codes\I-Land1o1` kann es bauen. Das Next.js-Projekt `Codes\I-Land`
+ist **nicht** die Quelle der Live-Seite und wird nicht deployed.
+
+Beide liegen im gleichen `/public_html/` auf Hostinger. Änderungen in einem
+Projekt können das andere betreffen – besonders über `.htaccess`.
+
+---
+
+## 2. Bevor du eine Datei suchst: prüfe den Fingerabdruck
+
+Vor jeder Reparatur erst feststellen, **welches Projekt live läuft**:
+
+```powershell
+(Invoke-WebRequest -Uri 'https://i-land1o1.com/' -UseBasicParsing).Content
+```
+
+- `/assets/index-*.js` → Vite-Projekt (`Codes\I-Land1o1`)
+- `/_next/static/` → Next.js (nicht deployed)
+
+Niemals raten, welcher Ordner „das" Projekt ist.
+
+---
+
+## 3. Supabase & Secrets
+
+- Projekt-URL: `https://lmlbjtazgcylsrtzzisr.supabase.co`
+- Schlüssel liegen **nur** in `supabase/.env.local`
+  (gitignoriert, **nie** ausgeben, nie committen)
+- Immer über `supabase/keys.mjs` lesen: `getKey()`, `getProjectUrl()`,
+  `getAnonKey()`
+- **`getKey('SUPABASE_ANON_KEY')` ist leer** – der Anon-Key kommt aus
+  `getAnonKey()` (liest `dashboard/config.js`)
+- Service-Role-Key nur für lokale Scripte. Er umgeht RLS komplett.
+
+### Edge Functions
+
+Vier Funktionen, jede existiert **doppelt** – Quelle und Einzeldatei:
+
+```
+supabase/functions/<name>/index.ts       <- Quelle (mit _shared-Imports)
+supabase/functions-deploy/<name>.ts      <- fürs Dashboard (alles eingebettet)
+```
+
+**Bei jeder Änderung beide Dateien synchron halten.** Die deployete Version
+ist die im Dashboard – dort driftet der Code sonst auseinander. Prüfen, welche
+Version läuft: verbesserte Fehlermeldung im Response = neu.
+
+- Nur `stripe-webhook` hat **Verify JWT deaktiviert** (Stripe sendet kein
+  Token; Sicherheit kommt aus `STRIPE_WEBHOOK_SECRET`)
+- Alle anderen **müssen** JWT verlangen (401 bei fehlendem Login)
+
+### Testkonten – absichtlich nur drei
+
+`eltern@` (parent) · `kind@` (student) · `admin@` (admin) — Passwort `Pirat1234!`
+
+
+---
+
+## 4. Stripe
+
+- **Testmodus.** `sk_test_…` in den Supabase-Secrets, nicht in `.env.local`
+  (die Function liest nur Server-Secrets!)
+- Nur zwei Pläne: `level1-monthly` (99 €) und `level1-once` (499 €).
+  **`level1-yearly` wurde entfernt** – an 7 Stellen (plans.ts, alle
+  functions-deploy, billing.js). Nicht wieder einführen.
+- Preise: `price_1UMSNrGrOz3Fo9oHXqEvSOAb` (monatlich),
+  `price_1UMSNrGrOz3Fo9oHKlsuSCNK` (einmalig)
+- Produkt braucht `tax_code` (`txcd_10000000`) – Managed Payments verlangt es,
+  sonst **500** beim Checkout
+- Der Browser schickt nur **Plan-Namen**, niemals Preise
+
+
+
+## 5. Stil im React-Projekt (`Z:\Codes\Codes\I-Land1o1`)
+
+### Verfügbare Tailwind-Farben
+
+`gold` · `gold-dark` · `gold-deep` · `gold-ink` · `sea` · `sea-deep` ·
+`sea-light` · `coral` · `sand` · `sand-dark` · `wood` · `wood-dark` ·
+`parchment` · `ink` · `sky` · `grass`
+
+**`treasure` existiert NICHT.** Klassen wie `bg-treasure-500` rendern
+unsichtbar. Vor dem Benutzen einer Farbklasse in `src/styles.css` prüfen.
+
+### Übersetzungen
+
+Alle Texte über `useT()` aus `@/i18n` (`src/i18n/index.tsx`), Schlüssel in
+**drei** Dictionaries pflegen: `en`, `de`, `zh`. Ein neuer Schlüssel ohne alle
+drei Sprachen ist unvollständig.
+
+### Routing – wichtig
+
+`/login` und `/dashboard/` sind **statische Seiten außerhalb der SPA**.
+Immer einen echten `<a href="...">` benutzen, **nie** Tanstacks `<Link>`:
+`<Link>` fängt den Klick ab und sucht die Route in der SPA → „not found".
+
+### Build
+
+```powershell
+npm run build:hostinger
+```
+
+Das Script endet mit `mv` (Linux) und **scheitert unter Windows**. Der Build
+selbst läuft durch; danach manuell:
+`Copy-Item dist/client/_shell.html dist/client/index.html -Force`
+
+Im GitHub-Deploy (ubuntu) funktioniert `mv` – dort kein Problem nötig.
+
+---
+
+## 6. Videos & Storage
+
+Bucket `course-videos`, privat, 500 MB Limit. **Supabase Free blockt Uploads
+über 50 MB mit `413`** – das ist eine Plan-Grenze, **nicht** lösbar im Code.
+
+TUS braucht zwingend `bucketName` und `objectName` in `Upload-Metadata`
+(Space zwischen Key und Wert, Komma zwischen Paaren). Ohne das:
+„Bucket name invalid".
+
+Vier Dateien liegen nur lokal: `l01`–`l04` (51–85 MB). Sie bleiben
+`published: false` – `register-lesson-videos.mjs` markiert nur Videos als
+veröffentlicht, die **wirklich** im Bucket liegen.
+
+---
+
+## 7. Arbeitsweise
+
+- **Vor dem Beantworten prüfen, nicht annehmen.** Behauptungen über den
+  Server-/DB-Zustand immer per API verifizieren. (Die Telefon-Warnung wurde
+  zweimal fälschlich als „erledigt" gemeldet.)
+- **SQL geht nicht per API.** Schema-Änderungen (Spalten, FK, Funktionen)
+  müssen als `.sql`-Datei entstehen, die der Nutzer im Supabase-Dashboard
+  ausführt. Keine Lösungen „einbauen", die dort nicht ankommen.
+- **Deploy nicht als getan melden**, wenn `git push` scheiterte.
+- Am Ende einer Aufgabe: Dateien prüfen, bauen/testen wenn möglich, Ergebnis
+  belegen statt behaupten.
+- Reparatur-SQL ist idempotent (`if not exists`, `if exists`) und kommentiert
+  mit dem **Befund**, nicht nur mit dem Fix.
+
+---
+
+## 8. Bekannte offene Punkte
+
+- `Z:\Codes\Codes\I-Land1o1\AGENTS.md` enthält **Merge-Konfliktmarker** (Z. 1, 7, 18)
+- Push nach `i-land1o1-8b3659f4` scheitert (Repository 404) – Remote muss
+  neu gesetzt werden
+- `.htaccess` liegt in **diesem** Projekt und wird vom React-Build
+  überschrieben → Login-Rewrite prüfen
+- Stripe-Testkauf wurde nie komplett durchlaufen (Webhook → Abo → Video-URL)
+Alle weiteren `demo-*`-Konten wurden **gelöscht**. `create-test-users.mjs`
+und `fix-roles.mjs` erzeugen bewusst keine neuen Testkonten an. Nicht wieder
+einführen.
+
+- Der Browser schickt nur **Plan-Namen**, niemals Preise
