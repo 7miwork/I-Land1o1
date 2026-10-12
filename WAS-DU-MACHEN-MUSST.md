@@ -1,125 +1,104 @@
-# Was DU machen musst – 3 Schritte im Browser
+# Was DU machen musst – 3 Deploy-Schritte
 
-Nachdem ich die Code-Seite fertig habe, bleiben drei Dinge, die nur im
-Browser gehen. Alle drei sind Kleinigkeiten, aber zusammen sind sie der
-Grund, warum der Zahlungsfluss bisher nie durchlief.
+Signaturprüfung läuft inzwischen (200 statt 401/400), aber die Function
+schreibt nichts. Der Grund ist eindeutig geklärt.
 
-**Wichtig:** Teste erst nach Schritt 1 + 2. Vorher scheitert jeder Kauf.
+## Der Beweis
+
+Drei Events mit **gültiger Signatur** geschickt:
+
+| Event | Antwort |
+|---|---|
+| `checkout.session.completed` | 200 `{"received":true}` |
+| `customer.subscription.deleted` | 200 `{"received":true}` |
+| **leeres `{}`** (ohne `type`) | **200 `{"received":true}`** ← identisch! |
+
+Ein leeres Objekt ohne Event-Typ kann nicht dasselbe sein wie ein
+Bezahlt-Event – außer die Function kennt unsere Verarbeitung gar nicht
+und antwortet bei allem gleich. `subscriptions` bleibt bei allen drei
+Aufrufen **leer**.
+
+**Fazit: Die deployete Function ist eine alte Version** ohne unser
+`switch (event.type)`. Der Code liegt im Repo, wurde aber nie hochgeladen.
 
 ---
 
-## Schritt 1: Webhook-Freigabe (Verify JWT AUS) ⚠️ WICHTIGSTER PUNKT
+## Schritt 1: `stripe-webhook` neu deployen
 
-**Warum das nötig ist – der Beweis:**
+https://supabase.com/dashboard/project/lmlbjtazgcylsrtzzisr/functions/stripe-webhook
 
-Ich habe gemessen, was passiert, wenn Stripe den Webhook aufruft:
+1. Function **`stripe-webhook`** → Tab **Code**
+2. Gesamten Inhalt löschen
+3. Inhalt dieser Datei einfügen:
 
-| Anfrage | Antwort |
-|---|---|
-| Wie Stripe es schickt (nur `stripe-signature`, **kein** `Authorization`) | ❌ **401** `Missing authorization header` |
-| Mit `Authorization`-Header (so können nur wir testen) | 400 `invalid signature` |
+```
+Z:\I-Land1o1\Webseite\supabase\functions-deploy\stripe-webhook.ts
+```
 
-**Stripe sendet nie einen Supabase-Token.** Solange „Verify JWT" an ist,
-wird jeder echte Zahlungs-Webhook mit 401 abgelehnt – er kommt also
-**nie bis zur Signaturprüfung**. Das ist kein Verdacht, das ist gemessen.
+4. **Deploy**
 
-Genau daran ist der Testkauf bisher gescheitert. Stripe hat bezahlt
-richtig gemeldet, aber die Function hat die Nachricht nie angenommen.
-Deshalb blieb `subscriptions` leer.
-
-**So schaltest du es ab:**
-
-1. Öffne: https://supabase.com/dashboard/project/lmlbjtazgcylsrtzzisr/functions
-2. Klicke auf **`stripe-webhook`**
-3. Tab **Details** (rechts) → Abschnitt **„Verify JWT"**
-4. Schalter auf **AUS**
-5. Speichern
-
-**Bleibt die Sicherheit?** Ja. Die Function prüft jede Anfrage mit
-`STRIPE_WEBHOOK_SECRET` – nur wer das geheime Signatur-Secret hat, kommt
-durch. Ohne den Secret gibt es 400 `invalid signature`. Genau das habe
-ich oben gemessen: **400**, nicht 200. Die Absicherung ist also aktiv,
-nur eben über Stripe statt über Supabase-JWT.
-
-> **Nur diese eine Function.** Die anderen drei (`create-checkout-session`,
-> `create-portal-session`, `get-video-url`) müssen JWT **anbehalten** –
-> die prüfen, ob ein Nutzer angemeldet ist.
+**Probe:** Danach sollte das leere `{}` nicht mehr `200 received:true`
+geben, sondern scheitern – es hat ja kein `type`-Feld.
 
 ---
 
-## Schritt 2: Secrets eintragen
-
-https://supabase.com/dashboard/project/lmlbjtazgcylsrtzzisr/functions
-
-### Bei `create-checkout-session`
+## Schritt 2: Secrets bei `stripe-webhook`
 
 | Name | Wert |
 |---|---|
-| `STRIPE_SECRET_KEY` | `sk_test_…` (aus `supabase/.env.local`) |
-| `STRIPE_PRICE_LEVEL1_MONTHLY` | `price_1UMSNrGrOz3Fo9oHXqEvSOAb` |
-| `STRIPE_PRICE_LEVEL1_ONCE` | `price_1UMSNrGrOz3Fo9oHKlsuSCNK` |
-
-### Bei `stripe-webhook`
-
-| Name | Wert |
-|---|---|
-| `STRIPE_SECRET_KEY` | derselbe `sk_test_…` |
+| `STRIPE_SECRET_KEY` | `sk_test_…` (aus `.env.local`) |
 | `STRIPE_WEBHOOK_SECRET` | `whsec_…` aus dem **Testmodus** |
+| `SUPABASE_URL` | `https://lmlbjtazgcylsrtzzisr.supabase.co` |
+| `SUPABASE_SERVICE_ROLE_KEY` | service_role-Key |
 
-**Warum es hier klemmt:** `.env.local` ist nur für meine lokalen Scripte.
-Die Functions lesen ausschließlich diese Secrets – deshalb funktioniert
-derselbe Aufruf lokal, über die Function aber nicht.
-
-Das `STRIPE_WEBHOOK_SECRET` gibt es hier:
-Stripe Dashboard → **Test mode AN** → Developers → Webhooks →
-dein Endpoint → *Signing secret* → Reveal
-
-⚠️ Dein aktuelles `whsec_naHb…` in `.env.local` gehört zum **Live**-Key.
-Nimm das aus dem Testmodus, sonst schlägt die Signaturprüfung fehl.
+`SUPABASE_URL` und `SUPABASE_SERVICE_ROLE_KEY` sind oft automatisch da –
+prüfe aber den Service-Key. Ohne ihn bricht die Function bei
+„Server nicht konfiguriert" ab.
 
 ---
 
-## Schritt 3: Function-Code aktualisieren
+## Schritt 3: `create-checkout-session` neu deployen
 
-Bei `create-checkout-session` → Tab **Code** → Inhalt ersetzen mit:
+Gleiches Problem, gleiche Lösung. Bei **`create-checkout-session`** →
+**Code** → Inhalt ersetzen mit:
 
 ```
 Z:\I-Land1o1\Webseite\supabase\functions-deploy\create-checkout-session.ts
 ```
 
-Danach zeigt ein Fehler die echte Stripe-Ursache (`reason` + `info`)
-statt eines rätselhaften 500.
+Secrets dort:
 
----
-
-## Was ich schon für dich erledigt habe
-
-| | Stand |
+| Name | Wert |
 |---|---|
-| `subscriptions`-Schema (Stripe-Spalten) | ✅ läuft |
-| `has_course_access()` | ✅ läuft, gibt `true` bei Abo |
-| Upsert über `user_id` | ✅ getestet – aktualisiert statt dupliziert |
-| Preise + `tax_code` bei Stripe | ✅ gesetzt, beide aktiv |
-| Checkout lokal nachgebaut | ✅ HTTP 200, Session wird erstellt |
-| **Paywall ohne Abo** | ✅ **403 – hält** |
-| Test-Scripts geschrieben | ✅ siehe unten |
+| `STRIPE_SECRET_KEY` | `sk_test_…` |
+| `STRIPE_PRICE_LEVEL1_MONTHLY` | `price_1UMSNrGrOz3Fo9oHXqEvSOAb` |
+| `STRIPE_PRICE_LEVEL1_ONCE` | `price_1UMSNrGrOz3Fo9oHKlsuSCNK` |
 
 ---
 
-## Nach Schritt 1–3: Selbst testen
+## Was schon funktioniert
+
+| Prüfung | Stand |
+|---|---|
+| Verify JWT beim Webhook | ✅ **AUS** – Stripe kommt durch |
+| Signatur | ✅ gültig, wird akzeptiert |
+| Webhook-Endpoint | ✅ 5 Events, richtige URL |
+| `subscriptions`-Schema | ✅ Stripe-Spalten da |
+| `has_course_access()` | ✅ läuft |
+| **Paywall ohne Abo** | ✅ **403 – hält** |
+| Checkout lokal nachgebaut | ✅ HTTP 200 |
+
+Alles außer dem Deploy ist bereit.
+
+---
+
+## Selbsttest danach
 
 ```powershell
 cd Z:\I-Land1o1\Webseite
-
-# 1) Bezahlung simulieren (ohne Karte, ohne Kauf)
-node supabase\test-webhook.mjs
-
-# 2) Pruefen, ob das Video jetzt aufgeht
-node supabase\test-video-access.mjs
+node supabase\test-webhook.mjs          # Bezahlung simulieren
+node supabase\test-video-access.mjs     # Video freigegeben?
 ```
 
-`test-webhook.mjs` schickt ein **echt signiertes** Event – die Function
-kann nicht unterscheiden, ob Stripe oder das Script es geschickt hat.
-Läuft das durch, ist die komplette Kette intakt.
-
-Danach gern der echte Kauf mit `4242 4242 4242 4242` zur Kontrolle.
+`test-webhook.mjs` signiert echt – die Function kann nicht erkennen, ob
+Stripe oder das Script es geschickt hat.
