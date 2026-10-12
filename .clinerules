@@ -164,12 +164,22 @@ veröffentlicht, die **wirklich** im Bucket liegen.
 
 ## 8. Bekannte offene Punkte
 
-- `Z:\Codes\Codes\I-Land1o1\AGENTS.md` enthält **Merge-Konfliktmarker** (Z. 1, 7, 18)
+- `Z:\Codes\Codes\I-Land1o1\AGENTS.md` enthält Merge-Konfliktmarker –
+  **bewusst ignoriert** (Entscheidung des Inhabers). Das React-Projekt hat
+  eine eigene `.clinerules`; AGENTS.md wird weder repariert noch als
+  Regelwerk benutzt.
 - Push nach `i-land1o1-8b3659f4` scheitert (Repository 404) – Remote muss
   neu gesetzt werden
 - `.htaccess` liegt in **diesem** Projekt und wird vom React-Build
   überschrieben → Login-Rewrite prüfen
-- Stripe-Testkauf wurde nie komplett durchlaufen (Webhook → Abo → Video-URL)
+- Echter Stripe-Testkauf (`4242 4242 4242 4242`) über die Live-Site steht
+  noch aus. Die **Kette ist aber bewiesen**: signiertes Webhook-Event →
+  HTTP 200 → Zeile in `subscriptions` → `has_course_access()` = true →
+  signierte Video-URL (HTTP 200, 44 MB).
+- `fix-signup-role.sql` wurde noch nie ausgeführt – alle Konten weiter
+  `role = student` (Eltern-/Admin-Konto also falsch)
+- Videos `l01`–`l04` fehlen; die Original-Videos auf Hostinger sind noch
+  öffentlich erreichbar
 Alle weiteren `demo-*`-Konten wurden **gelöscht**. `create-test-users.mjs`
 und `fix-roles.mjs` erzeugen bewusst keine neuen Testkonten an. Nicht wieder
 einführen.
