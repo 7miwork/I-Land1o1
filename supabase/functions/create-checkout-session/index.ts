@@ -82,10 +82,6 @@ Deno.serve(async (req) => {
       ...(mode === 'subscription'
         ? { subscription_data: { metadata: { user_id: user.id, plan } } }
         : {}),
-      // Nur beim Abo braucht Stripe die Grundlage fuer spaetere Abbuchungen
-      ...(mode === 'subscription'
-        ? { payment_intent_data: { setup_future_usage: 'off_session' } }
-        : {}),
     });
 
     if (!session.url) return fail('Kasse konnte nicht gestartet werden.', 500);
