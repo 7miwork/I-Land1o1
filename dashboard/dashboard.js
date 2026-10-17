@@ -136,12 +136,15 @@ async function openModal(lesson) {
       body: { lessonId: lesson.id },
     });
     if (error || !data || !data.url) {
+      const msg = error?.message || 'Unbekannter Fehler';
       if (data && data.locked) {
         hasAccess = false;
         render();
-        showLock('🔒 Für diese Lektion brauchst du ein aktives Abo.');
+        showLock('🔒 Für diese Lektion brauchst du ein aktives Abo.\n' +
+          'Deine Eltern können es unter „⚓ Abo & Zahlung“ buchen.');
       } else {
-        showLock('😢 Das Video konnte nicht geladen werden. Bitte kurz später nochmal versuchen.');
+        showLock('😢 Video-Fehler: ' + msg + '\n' +
+          '(Console F12 öffnen für Details)');
       }
       return;
     }
