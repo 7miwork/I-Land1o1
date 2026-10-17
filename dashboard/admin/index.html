@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin | I-Land1o1 Learning Platform</title>
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&family=Press+Start+2P&family=Pirata+One&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../dashboard.css?v=53ff97cd05" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="logo" href="/">🏴‍☠️ I-Land<span>1o1</span></a>
+    <nav class="topnav">
+      <span class="who" id="authWho" hidden></span>
+      <button class="btn btn-ghost" id="btnLogout" hidden>Abmelden</button>
+      <a href="/">← Zurück zur Webseite</a>
+      <a href="/dashboard/" class="btn btn-ghost">← Dashboard</a>
+    </nav>
+  </header>
+  <main class="wrap" id="appContent" hidden>
+    <style>
+    .admin-table {
+      width: 100%; border-collapse: collapse; margin-top: 16px;
+      font-family: var(--font-body); font-size: 14px;
+    }
+    .admin-table th {
+      text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--gold-dark);
+      color: var(--gold); font-family: var(--font-pixel); font-size: 12px; text-transform: uppercase;
+    }
+    .admin-table td {
+      padding: 10px 12px; border-bottom: 1px solid rgba(243,186,37,.2);
+      color: var(--parchment); background: rgba(255,255,255,.02);
+    }
+    .admin-table tr:last-child td { border-bottom: none; }
+    .admin-table tr:hover td { background: rgba(243,186,37,.08); }
+    .role-badge {
+      display: inline-block; padding: 4px 10px; border-radius: 999px;
+      font-size: 11px; font-weight: 800; font-family: var(--font-body); text-transform: uppercase;
+    }
+    .role-student { background: rgba(0,12,28,.6); border: 1px solid var(--grey); color: var(--grey); }
+    .role-parent { background: rgba(243,186,37,.12); border: 1px solid var(--gold); color: var(--gold); }
+    .role-admin { background: rgba(232,88,84,.12); border: 1px solid var(--red); color: #ffb3b0; }
+    .role-teacher { background: rgba(140,180,240,.12); border: 1px solid #6fb3ff; color: #9cc4ff; }
+    .status-paid { color: var(--green); font-weight: 700; }
+    .status-active { color: var(--gold); font-weight: 700; }
+    .status-incomplete { color: var(--grey); }
+    .status-canceled { color: var(--red); }
+    .admin-section { margin-top: 48px; animation: fadeIn .4s ease; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .admin-hint { color: var(--sand); font-size: 12px; margin-bottom: 12px; }
+    .admin-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-top: 16px;
+    }
+    .admin-card {
+      background: linear-gradient(180deg, rgba(248,245,238,.10), rgba(248,245,238,.04));
+      border: 2px solid rgba(243,186,37,.45); border-radius: var(--radius); padding: 20px;
+    }
+    .admin-card h3 { margin: 0 0 12px; color: var(--gold); font-family: var(--font-pirate); font-size: 20px; }
+    .admin-count { font-size: 32px; font-weight: 800; color: var(--parchment); font-family: var(--font-pixel); }
+    .admin-label { color: var(--sand); font-size: 13px; margin-top: 4px; }
+    .role-select {
+      padding: 6px 10px; border-radius: 8px; border: 1px solid var(--gold-dark);
+      background: rgba(0,12,28,.65); color: var(--parchment); font-family: var(--font-body); font-size: 13px;
+    }
+    .role-select:focus { outline: none; border-color: var(--gold); }
+    .btn-save {
+      margin-top: 8px; padding: 8px 16px; background: var(--gold); color: var(--ink);
+      border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-family: var(--font-body);
+    }
+    .btn-save:hover { background: #e6b01a; }
+    .msg { margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; hidden: true; }
+    .msg--ok { background: rgba(49,170,64,.14); border: 1px solid var(--green); color: #9be8a5; }
+    .msg--error { background: rgba(232,88,84,.12); border: 1px solid var(--red); color: #ffb3b0; }
+    </style>
+    <section class="hero">
+      <p class="kicker">⚙️ Admin-Bereich</p>
+      <h1>Übersicht</h1>
+      <p class="sub">Alle Konten, Abos und Eltern-Kind-Verknüpfungen auf einen Blick.</p>
+    </section>
+
+    <div class="admin-section">
+      <div class="admin-grid">
+        <div class="admin-card">
+          <h3>👥 Nutzer</h3>
+          <div class="admin-count" id="countUsers">–</div>
+          <div class="admin-label">registrierte Accounts</div>
+        </div>
+        <div class="admin-card">
+          <h3>💳 Abos</h3>
+          <div class="admin-count" id="countSubs">–</div>
+          <div class="admin-label">aktive / bezahlte Zugänge</div>
+        </div>
+        <div class="admin-card">
+          <h3>🔗 Eltern-Kind</h3>
+          <div class="admin-count" id="countLinks">–</div>
+          <div class="admin-label">verknüpfte Kinder</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <h2 class="section-title">📋 Nutzer & Rollen</h2>
+      <p class="admin-hint">Nur Admins können Rollen ändern.</p>
+      <table class="admin-table" id="usersTable">
+        <thead><tr><th>E-Mail / Name</th><th>Rolle</th><th>Änderung</th><th>Erstellt</th></tr></thead>
+        <tbody id="usersBody"></tbody>
+      </table>
+      <p id="usersMsg" class="msg" hidden></p>
+    </div>
+
+    <div class="admin-section">
+      <h2 class="section-title">💳 Abos & Zahlungen</h2>
+      <p class="admin-hint">Wird vom Stripe-Webhook gepflegt.</p>
+      <table class="admin-table" id="subsTable">
+        <thead><tr><th>Nutzer</th><th>Plan</th><th>Status</th><th>Läuft bis</th></tr></thead>
+        <tbody id="subsBody"></tbody>
+      </table>
+      <p id="subsMsg" class="msg" hidden></p>
+    </div>
+
+    <div class="admin-section">
+      <h2 class="section-title">🔗 Eltern-Kind-Verknüpfungen</h2>
+      <p class="admin-hint">Zeigt, welches Kind bei welchem Elternteil hängt.</p>
+      <table class="admin-table" id="linksTable">
+        <thead><tr><th>Elternteil</th><th>Kind</th><th>Seit</th></tr></thead>
+        <tbody id="linksBody"></tbody>
+      </table>
+      <p id="linksMsg" class="msg" hidden></p>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config.js?v=e3aa5ff4ba"></script>
+  <script src="admin.js?v=1"></script>
+</body>
+</html>
