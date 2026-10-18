@@ -200,3 +200,29 @@ veröffentlicht, die **wirklich** im Bucket liegen.
   Nicht wieder einführen.
 - Der Browser schickt nur **Plan-Namen**, niemals Preise (Preis-IDs
   werden serverseitig in `_shared/plans.ts` aufgelöst).
+
+---
+
+## 9. Design & Rollen-Regeln (Dashboard / Login)
+
+### 9.1 Kauf/Zahlung NUR für Eltern – Kinder-Dashboard frei davon
+- `billing.js` darf **nicht** als statisches `<script>` in `dashboard/index.html` stehen (wird sonst für alle geladen, auch Kinder).
+- `auth.js` lädt `billing.js` **dynamisch** nur wenn `profile.role === 'parent'` und ruft dann `window.initBilling(client)` auf.
+- `<section class="premium" id="premiumSection">` bleibt `hidden` für Kinder und wird erst für Eltern durch `initBilling()` sichtbar.
+- Kinder sehen **keine** Stripe-Checkout-Schaltflächen, keine Preise, kein Abo-Management.
+
+### 9.2 Rollen-basierter Redirect nach dem Login
+Nach erfolgreichem Login wird anhand der `role` aus der `profiles`-Tabelle weitergeleitet:
+- `admin` → `/dashboard/admin/`
+- `parent` und `student` → `/dashboard/` (das eine Dashboard passt sich an die Rolle an – Eltern sehen Abo+Familie, Kinder nur Lektionen)
+- Umgesetzt in `login/login.js`: `goDashboard(user)` liest `profiles.role` und wählt das Ziel.
+
+### 9.3 Pirate-Design-Ausrichtung (Dashboard + Login ≈ Root index.html)
+Dashboard und Login müssen das Piraten-Design der Hauptseite (`/`) spiegeln:
+- **Schriften:** `Pirata One` (Logo/Überschriften), `Press Start 2P` (Pixel-Elemente, Kicker), `Fredoka One` (Display), `Nunito` (Body).
+- **Farben (oklch-Tokens):** `--gold`, `--gold-dark`, `--gold-deep`, `--gold-ink`, `--ink`, `--ocean`, `--ocean-deep`, `--parchment`, `--parchment-2`, `--parchment-3`, `--sand`, `--skytext`, `--wood-dark`, `--green`, `--green-deep`, `--red`, `--grey`.
+- **Stil:** ECKIGE Kanten (`--radius: 4px`), **keine Pillen**; Gold-Akzente, Marineblau-Gradient, Pergament-Hintergrund, Schatten `4px 4px 0 oklch(82% .16 85 / .15)`.
+- `dashboard/dashboard.css` und `login/login.css` müssen konsistent mit `assets/index-*.css` der Hauptseite bleiben.
+
+### 9.4 Diese Regeln dokumentieren
+- Jede der obigen Regeln wird in `.clinerules` festgehalten, damit zukünftige Änderungen nicht gegen die Architektur verstoßen (z. B. `billing.js` nicht wieder statisch ins Dashboard-HTML einbauen).
