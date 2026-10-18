@@ -102,6 +102,17 @@ Stripe hat den Dialog als 3-Schritte-Assistenten umgebaut
 4. Nach dem Anlegen: **Signing secret** (`whsec_…`) als
    `STRIPE_WEBHOOK_SECRET` in Supabase eintragen
 
+> **Stand 2026-10-18:** Es existiert inzwischen EIN Endpoint
+> `we_1URmO6KF18tdUqMNFn83AHN3` (Testmodus, angelegt ueber die
+> Stripe-API, siehe `supabase/.env.local`). Falls du im Dashboard
+> weitere Endpoints fuer dieselbe URL findest: NUR diesen behalten,
+> alte loeschen – jedes stale Endpoint wirft
+> „No signatures found"-Fehler in den Logs.
+>
+> **Merke:** Jeder neue Endpoint erzeugt ein NEUES `whsec_…`.
+> Das muss dann zwingend auch als `STRIPE_WEBHOOK_SECRET` in
+> Supabase aktualisiert werden, sonst schlaegt jede Signatur fehl.
+
 ### 6. Billing-Portal aktivieren
 Stripe Dashboard → **Settings → Billing → Customer portal** → **Activate**
 (sonst liefert `create-portal-session` einen Fehler).
