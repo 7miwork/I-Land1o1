@@ -2,7 +2,7 @@ name: Deploy to Hostinger
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -24,4 +24,3 @@ jobs:
             **/.git*
             **/.github/**
             **/node_modules/**
-">
