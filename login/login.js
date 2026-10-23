@@ -76,7 +76,7 @@
   function goDashboard(user) {
     // Weiter zur naechsten Seite, falls per ?next= gewuenscht
     const next = new URLSearchParams(window.location.search).get('next');
-    const safe = next && next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard/';
+    const safe = next && next.startsWith('/dashboard/') && !next.startsWith('//') ? next : '/dashboard/';
     window.location.replace(safe + (user ? '?angemeldet=1' : ''));
   }
 

@@ -1,7 +1,8 @@
 /* ============================================================
    I-Land1o1 – Auth (Supabase)
-   Login / Registrierung / Session / Logout für das Dashboard.
-   Läuft VOR dashboard.js und startet es via initDashboard().
+   Session-Check für das Dashboard.
+   Bei nicht-angemeldetem Nutzer: Redirect zu /login.
+   Bei angemeldetem Nutzer: Dashboard-App starten.
    ============================================================ */
 
 (function () {
@@ -14,75 +15,44 @@
     && cfg.SUPABASE_ANON_KEY.indexOf('HIER_') !== 0
     && cfg.SUPABASE_ANON_KEY.length > 20;
 
-  const overlay = document.getElementById('authOverlay');
-  const form = document.getElementById('authForm');
-  const emailInput = document.getElementById('authEmail');
-  const pwInput = document.getElementById('authPassword');
-  const nameInput = document.getElementById('authName');
-  const nameWrap = document.getElementById('authNameWrap');
-  const roleWrap = document.getElementById('authRoleWrap');
-  const inviteWrap = document.getElementById('authInviteWrap');
-  const inviteInput = document.getElementById('authInvite');
-
-  function selectedRole() {
-    const checked = form.querySelector('input[name="authRole"]:checked');
-    return checked ? checked.value : 'student';
-  }
-
-  function syncRoleFields() {
-    if (inviteWrap) inviteWrap.hidden = selectedRole() !== 'student';
-  }
-  const errBox = document.getElementById('authError');
-  const btnLogin = document.getElementById('tabLogin');
-  const btnSignup = document.getElementById('tabSignup');
-  const btnSubmit = document.getElementById('authSubmit');
   const btnLogout = document.getElementById('btnLogout');
   const whoBox = document.getElementById('authWho');
 
-  let mode = 'login';
   let client = null;
 
   if (isConfigured && window.supabase) {
     client = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
   }
 
-  function showError(msg) { errBox.textContent = msg; errBox.hidden = !msg; }
-
-  function setMode(m) {
-    mode = m;
-    btnLogin.classList.toggle('active', m === 'login');
-    btnSignup.classList.toggle('active', m === 'signup');
-    btnSubmit.textContent = m === 'login' ? 'Anmelden ⚓' : 'Registrieren 🏴‍☠️';
-    if (nameWrap) nameWrap.hidden = m !== 'signup';
-    if (roleWrap) roleWrap.hidden = m !== 'signup';
-    syncRoleFields();
-    showError('');
-  }
-
-  function showAuth() {
-    overlay.hidden = false;
-    document.getElementById('appContent').hidden = true;
-    if (btnLogout) btnLogout.hidden = true;
-  }
-
   function showApp(user) {
-    overlay.hidden = true;
     document.getElementById('appContent').hidden = false;
     if (whoBox) whoBox.textContent = user.email;
     // Piratenname aus profiles laden (Trigger legt die Zeile bei Signup an)
     client
       .from('profiles')
-      .select('display_name')
+      .select('display_name, role')
       .eq('id', user.id)
       .maybeSingle()
       .then(({ data }) => {
-        if (data && data.display_name && whoBox) whoBox.textContent = '🏴‍☠️ ' + data.display_name;
+        if (whoBox && data) {
+          const label = data.display_name ? data.display_name : user.email;
+          whoBox.textContent = '🏴‍☠️ ' + label;
+          if (data.role === 'admin' && btnLogout) {
+            // Admin-Link in der Topbar anzeigen
+            const adminLink = document.createElement('a');
+            adminLink.href = '/dashboard/admin/';
+            adminLink.className = 'btn btn-ghost';
+            adminLink.textContent = '⚙️ Admin';
+            adminLink.style.marginLeft = '10px';
+            btnLogout.parentNode.insertBefore(adminLink, btnLogout.nextSibling);
+          }
+        }
       });
     if (btnLogout) {
       btnLogout.hidden = false;
       btnLogout.onclick = async () => {
         await client.auth.signOut();
-        showAuth();
+        window.location.replace('/');
       };
     }
     if (!window.ilandDashboardInited && typeof window.initDashboard === 'function') {
@@ -95,8 +65,7 @@
 
   async function boot() {
     if (!client) {
-      // Supabase noch nicht konfiguriert -> Dashboard offen zeigen (Fallback)
-      overlay.hidden = true;
+      // Supabase nicht konfiguriert -> Dashboard offen zeigen (Fallback)
       document.getElementById('appContent').hidden = false;
       if (!window.ilandDashboardInited && typeof window.initDashboard === 'function') {
         window.ilandDashboardInited = true;
@@ -105,65 +74,15 @@
       return;
     }
     const { data } = await client.auth.getSession();
-    if (data.session && data.session.user) showApp(data.session.user);
-    else showAuth();
-  }
-
-  btnLogin.addEventListener('click', () => setMode('login'));
-  btnSignup.addEventListener('click', () => setMode('signup'));
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    showError('');
-    const email = emailInput.value.trim();
-    const password = pwInput.value;
-    btnSubmit.disabled = true;
-    try {
-      if (mode === 'signup') {
-        const pirateName = nameInput ? nameInput.value.trim() : '';
-        const { data, error } = await client.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              ...(pirateName ? { display_name: pirateName } : {}),
-              role: selectedRole(),
-            },
-          },
-        });
-        if (error) throw error;
-        if (data.session) {
-          // Eltern-Code sofort einloesen (falls angegeben)
-          const code = inviteInput ? inviteInput.value.trim() : '';
-          if (code && selectedRole() === 'student') {
-            const { error: linkError } = await client.rpc('accept_invite', { p_code: code });
-            if (linkError) console.warn('Eltern-Code nicht eingelöst:', linkError.message);
-          }
-          showApp(data.session.user); // E-Mail-Bestätigung deaktiviert
-        } else {
-          showError('Fast geschafft! Bitte bestätige die E-Mail, die wir dir geschickt haben, und melde dich dann an. 📬');
-          setMode('login');
-        }
-      } else {
-        const { data, error } = await client.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        showApp(data.session.user);
+    if (data.session && data.session.user) {
+      showApp(data.session.user);
+    } else {
+      // Nicht eingeloggt -> zur Login-Seite (einmaliges Login auf /login)
+      const params = new URLSearchParams(window.location.search);
+      if (!params.get('fromLogin')) {
+        window.location.replace('/login/?next=/dashboard/');
       }
-    } catch (err) {
-      showError(readableError(err));
-    } finally {
-      btnSubmit.disabled = false;
     }
-  });
-
-  function readableError(err) {
-    const m = (err && err.message) || '';
-    if (/invalid login/i.test(m)) return 'E-Mail oder Passwort ist falsch.';
-    if (/already registered|already exists/i.test(m)) return 'Diese E-Mail ist schon an Bord – bitte anmelden.';
-    if (/confirm/i.test(m)) return 'Bitte zuerst die E-Mail bestätigen (Postfach prüfen).';
-    if (/rate limit/i.test(m)) return 'Zu viele Versuche – bitte kurz warten.';
-    if (/password/i.test(m) && /length|weak/i.test(m)) return 'Das Passwort ist zu schwach (mind. 6 Zeichen).';
-    return m || 'Etwas ist schiefgelaufen. Bitte erneut versuchen.';
   }
 
   boot();
