@@ -78,7 +78,7 @@
 
     if (btnLogout) {
       btnLogout.hidden = false;
-      btnLogout.onclick = async () => { await client.auth.signOut(); window.location.replace('/login/'); };
+      btnLogout.onclick = async () => { await client.auth.signOut(); window.location.replace('/'); };
     }
 
     appContent.hidden = false;
