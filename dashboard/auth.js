@@ -80,7 +80,9 @@
       } else {
         const params = new URLSearchParams(window.location.search);
         if (!params.get('fromLogin')) {
-          window.location.replace('/login/index.html?next=/dashboard/');
+          // Aktuellen Pfad als next merken, damit nach Login zurueckkehrt (z. B. /dashboard/admin/)
+          const next = window.location.pathname.startsWith('/dashboard/') ? window.location.pathname : '/dashboard/';
+          window.location.replace('/login/index.html?next=' + encodeURIComponent(next));
         }
       }
     } catch (err) {

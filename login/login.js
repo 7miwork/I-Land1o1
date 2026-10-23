@@ -77,7 +77,10 @@
     // Weiter zur naechsten Seite, falls per ?next= gewuenscht
     const next = new URLSearchParams(window.location.search).get('next');
     const safe = next && next.startsWith('/dashboard/') && !next.startsWith('//') ? next : '/dashboard/';
-    window.location.replace(safe + (user ? '?angemeldet=1' : '') + '&fromLogin=1');
+    const url = new URL(safe, window.location.origin);
+    url.searchParams.set('fromLogin', '1');
+    if (user) url.searchParams.set('angemeldet', '1');
+    window.location.replace(url.toString());
   }
 
   tabLogin.addEventListener('click', () => setMode('login'));
