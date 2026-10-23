@@ -56,7 +56,7 @@
     }
     const { data } = await client.auth.getSession();
     if (!data || !data.session || !data.session.user) {
-      window.location.replace('/login/?next=/dashboard/admin/');
+      window.location.replace('/login/index.html?next=/dashboard/admin/');
       return;
     }
 

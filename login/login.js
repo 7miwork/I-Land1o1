@@ -73,26 +73,11 @@
     return m || 'Etwas ist schiefgelaufen. Bitte erneut versuchen.';
   }
 
-  async function goDashboard(user) {
-    // Weiter zur naechsten Seite, falls per ?next= gewuenscht (Login-Seite)
+  function goDashboard(user) {
+    // Weiter zur naechsten Seite, falls per ?next= gewuenscht
     const next = new URLSearchParams(window.location.search).get('next');
-    const safe = next && next.startsWith('/') && !next.startsWith('//') ? next : null;
-    let target = safe || '/dashboard/';
-    // Ohne ?next=: passendes Dashboard waehlen. Admins gehoeren ins
-    // Admin-Dashboard, Eltern & Kinder in das Lektions-Dashboard.
-    if (!safe && user && client) {
-      try {
-        const { data } = await client
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .maybeSingle();
-        if (data && data.role === 'admin') target = '/dashboard/admin/';
-      } catch {
-        // Profil noch nicht da -> Standard-Dashboard
-      }
-    }
-    window.location.replace(target + (user ? '?angemeldet=1' : ''));
+    const safe = next && next.startsWith('/dashboard/') && !next.startsWith('//') ? next : '/dashboard/';
+    window.location.replace(safe + (user ? '?angemeldet=1' : '') + '&fromLogin=1');
   }
 
   tabLogin.addEventListener('click', () => setMode('login'));
