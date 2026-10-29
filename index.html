@@ -27,6 +27,20 @@
   <script>
     try { sessionStorage.setItem('iland:useOwnLogin', '1'); } catch (e) { /* Private Mode */ }
   </script>
+  <!-- Redirect: eingeloggte Nutzer von der Startseite (/) automatisch zum Dashboard -->
+  <script>
+    (function () {
+      if (window.location.pathname !== '/') return;
+      var cfg = window.ILAND_CONFIG || {};
+      if (!cfg.SUPABASE_URL || !window.supabase) return;
+      var client = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+      client.auth.getSession().then(function (result) {
+        if (result && result.session && result.session.user) {
+          window.location.replace('/dashboard/');
+        }
+      });
+    })();
+  </script>
   <!-- MutationObserver: alle /login Links im React-DOM auf /login/index.html umschreiben -->
   <script>
     (function () {
