@@ -65,16 +65,17 @@
       }
       fixLoginLinks();
 
-      // Klick-Handler: falls doch ein alter /login Link geklickt wird, direkt redirecten
+      // Klick-Handler in Capture-Phase: läuft VOR React, verhindert client-seitige Navigation zur alten Login-Seite
       document.addEventListener('click', function (e) {
         var link = e.target.closest('a');
         if (!link) return;
         var href = link.getAttribute('href') || '';
-        if (href === '/login' || href === '/login/') {
+        if (href === '/login' || href === '/login/' || (href.indexOf('/login') !== -1 && href.indexOf('/login/index.html') === -1 && href.indexOf('/login/') === -1)) {
           e.preventDefault();
+          e.stopPropagation();
           window.location.href = '/login/index.html';
         }
-      });
+      }, true);
 
       // Observer für nachträglich eingefügte React-Elemente
       var observer = new MutationObserver(function (mutations) {
