@@ -41,24 +41,38 @@
       });
     })();
   </script>
-  <!-- MutationObserver: alle /login Links im React-DOM auf /login/index.html umschreiben -->
+  <!-- Login-Link-Fix: alle /login Links sofort und dauerhaft auf /login/index.html umleiten -->
   <script>
     (function () {
       function fixLoginLinks() {
-        document.querySelectorAll('a[href="/login"]').forEach(function (a) {
-          a.href = '/login/index.html';
+        document.querySelectorAll('a[href*="/login"]').forEach(function (a) {
+          var href = a.getAttribute('href') || '';
+          if (href.indexOf('/login/index.html') === -1 && href.indexOf('/login/') === -1) {
+            a.href = '/login/index.html';
+          }
         });
       }
       fixLoginLinks();
+
+      // Klick-Handler: falls doch ein alter /login Link geklickt wird, direkt redirecten
+      document.addEventListener('click', function (e) {
+        var link = e.target.closest('a');
+        if (!link) return;
+        var href = link.getAttribute('href') || '';
+        if (href === '/login' || href === '/login/') {
+          e.preventDefault();
+          window.location.href = '/login/index.html';
+        }
+      });
+
+      // Observer für nachträglich eingefügte React-Elemente
       var observer = new MutationObserver(function (mutations) {
         var shouldFix = false;
         mutations.forEach(function (m) {
           m.addedNodes.forEach(function (node) {
-            if (node.nodeType === 1) { // Element
-              if (node.matches && node.matches('a[href="/login]')) shouldFix = true;
-              if (node.querySelectorAll) {
-                if (node.querySelectorAll('a[href="/login"]').length > 0) shouldFix = true;
-              }
+            if (node.nodeType === 1) {
+              if (node.matches && node.matches('a[href*="/login]')) shouldFix = true;
+              if (node.querySelectorAll && node.querySelectorAll('a[href*="/login"]').length > 0) shouldFix = true;
             }
           });
         });
