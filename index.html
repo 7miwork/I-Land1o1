@@ -27,6 +27,15 @@
   <script>
     try { sessionStorage.setItem('iland:useOwnLogin', '1'); } catch (e) { /* Private Mode */ }
   </script>
+  <!-- Direkt-Redirect: Falls /login geladen wird (SPA liefert immer index.html), sofort zum neuen Login weiterleiten -->
+  <script>
+    (function () {
+      var path = window.location.pathname;
+      if (path === '/login' || path === '/login/') {
+        window.location.replace('/login/index.html');
+      }
+    })();
+  </script>
   <!-- Redirect: eingeloggte Nutzer von der Startseite (/) automatisch zum Dashboard -->
   <script>
     (function () {
