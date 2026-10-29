@@ -12,68 +12,100 @@
     href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&family=Press+Start+2P&family=Pirata+One&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="/dashboard/dashboard.css" />
-  <link rel="stylesheet" href="login.css?v=f62c8c6c2c" />
+  <link rel="stylesheet" href="login.css?v=3" />
 </head>
 
 <body>
-  <!-- Kopfbereich im Stil der Hauptseite -->
-  <section class="hero">
-    <div class="hero-inner">
-      <p class="kicker">⚓ WELCOME BACK</p>
-      <h1>Login</h1>
-      <p class="sub">Melde dich an, um deine Coding-Abenteuer fortzusetzen.</p>
-    </div>
-  </section>
+  <!-- Header wie auf der Hauptseite -->
+  <header class="topbar">
+    <div class="container flex items-center justify-between gap-4">
+      <a href="/" class="logo">I-Land<span>1o1</span></a>
 
-  <!-- Login / Registrierung -->
-  <section class="card-wrap">
-    <div class="card">
-      <div class="icon-badge">⚓</div>
-      <h2 id="formTitle">Willkommen zurück!</h2>
+      <nav class="topnav hidden md:flex">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/courses/" class="nav-link">Courses</a>
+        <a href="/testimonials/" class="nav-link">Testimonials</a>
+        <a href="/faq/" class="nav-link">FAQ</a>
+        <a href="/contact/" class="nav-link">Contact</a>
+      </nav>
 
-      <div class="tabs">
-        <button type="button" class="tab active" id="tabLogin">Anmelden</button>
-        <button type="button" class="tab" id="tabSignup">Registrieren</button>
+      <div class="auth-actions flex items-center gap-3">
+        <a href="/login/index.html" class="btn-outline">Login</a>
+        <a href="/login/index.html#signup" class="btn-outline">Registrieren</a>
+        <a href="/enroll/" class="btn-gold">Enroll</a>
       </div>
 
-      <form id="loginForm" novalidate>
-        <div id="signupFields" hidden>
-          <div class="role-row">
-            <label class="role"><input type="radio" name="role" value="student" checked />
-              <span>⛏️ Kind</span></label>
-            <label class="role"><input type="radio" name="role" value="parent" />
-              <span>👨‍👩‍👧 Elternteil</span></label>
-          </div>
+      <button class="menu-toggle hidden md:hidden" aria-label="Menü öffnen">☰</button>
+    </div>
+  </header>
 
-          <label class="field-label" for="name">Dein Name</label>
-          <input id="name" type="text" autocomplete="name" placeholder="z. B. kleine Piratin" />
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb container py-3 px-4">
+    <a href="/" class="breadcrumb-link">← Home</a>
+    <span class="breadcrumb-separator">/</span>
+    <span class="breadcrumb-current">Login</span>
+  </nav>
 
-          <div id="inviteBlock" hidden>
-            <label class="field-label" for="invite">Eltern-Code (falls vorhanden)</label>
-            <input id="invite" type="text" placeholder="ILAND-XXXXXX" />
-            <p class="hint">Noch kein Code? Registriere dich einfach – dein Elternteil kann ihn
-              dir später im Dashboard geben.</p>
-          </div>
+  <!-- Login / Registrierung -->
+  <main class="container flex flex-col items-center justify-center py-12 md:py-20 gap-8">
+    <section class="hero flex flex-col items-center justify-center text-center w-full max-w-4xl">
+      <div class="hero-inner">
+        <p class="kicker">⚓ WELCOME BACK</p>
+        <h1 class="font-display text-4xl md:text-5xl font-bold text-parchment mb-4 tracking-tighter">Login</h1>
+        <p class="sub text-parchment/90 text-lg max-w-2xl mx-auto">Melde dich an, um deine Coding-Abenteuer fortzusetzen.</p>
+      </div>
+    </section>
+
+    <section class="card-wrap w-full max-w-md">
+      <div class="card">
+        <div class="icon-badge">⚓</div>
+        <h2 id="formTitle">Willkommen zurück!</h2>
+
+        <div class="tabs">
+          <button type="button" class="tab active" id="tabLogin">Anmelden</button>
+          <button type="button" class="tab" id="tabSignup">Registrieren</button>
         </div>
 
-        <label class="field-label" for="email">Email</label>
-        <input id="email" type="email" autocomplete="email" required placeholder="du@beispiel.de" />
+        <form id="loginForm" novalidate>
+          <div id="signupFields" hidden>
+            <div class="role-row">
+              <label class="role"><input type="radio" name="role" value="student" checked />
+                <span>⛏️ Kind</span></label>
+              <label class="role"><input type="radio" name="role" value="parent" />
+                <span>👨‍👩‍👧 Elternteil</span></label>
+            </div>
 
-        <label class="field-label" for="password">Passwort</label>
-        <input id="password" type="password" autocomplete="current-password" required minlength="6"
-          placeholder="••••••••" />
+            <label class="field-label" for="name">Dein Name</label>
+            <input id="name" type="text" autocomplete="name" placeholder="z. B. kleine Piratin" />
 
-        <button type="submit" class="submit" id="submit">Anmelden ⚓</button>
-      </form>
+            <div id="inviteBlock" hidden>
+              <label class="field-label" for="invite">Eltern-Code (falls vorhanden)</label>
+              <input id="invite" type="text" placeholder="ILAND-XXXXXX" />
+              <p class="hint">Noch kein Code? Registriere dich einfach – dein Elternteil kann ihn
+                dir später im Dashboard geben.</p>
+            </div>
+          </div>
 
-      <p class="error" id="error" hidden></p>
-      <a class="back-link" href="/">← Zurück zur Webseite</a>
-    </div>
-  </section>
+          <label class="field-label" for="email">Email</label>
+          <input id="email" type="email" autocomplete="email" required placeholder="du@beispiel.de" />
+
+          <label class="field-label" for="password">Passwort</label>
+          <input id="password" type="password" autocomplete="current-password" required minlength="6"
+            placeholder="••••••••" />
+
+          <button type="submit" class="submit" id="submit">Anmelden ⚓</button>
+        </form>
+
+        <p class="error" id="error" hidden role="alert" aria-live="assertive"></p>
+        <a class="back-link" href="/">← Zurück zur Webseite</a>
+        <p class="legal-links"><a href="/impressum/">Impressum</a> · <a href="/datenschutz/">Datenschutz</a> · <a href="/agb/">AGB</a></p>
+      </div>
+    </section>
+  </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/dashboard/config.js"></script>
-  <script src="login.js?v=e41eef7af4"></script>
+  <script src="login.js?v=e41eef7af5"></script>
 </body>
 
 </html>
