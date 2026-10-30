@@ -1,0 +1,33 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Lektions-Videos sind NICHT mehr oeffentlich – Zugriff nur noch ueber
+  # Supabase signed URLs (get-video-url, 5 Minuten gueltig).
+  # Muss VOR den Existenz-Regeln stehen.
+  RewriteRule ^Videos(/|$) - [F,L]
+
+  # Eigene Login-Seite (supabase) statt der alten React-Demo-Seite.
+  # Ordner-Ausnahme muss VOR der SPA-Regel stehen.
+  # Expliciter Redirect (301) statt internes Rewrite, damit der Browser
+  # die neue Login-URL cacht und nicht die alte gecachte Demo-Seite anzeigt.
+  RewriteRule ^login/?$ /login/index.html [R=301,L]
+
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+
+# Cache-Steuerung: HTML/JS/CSS werden haeufig in-place ersetzt (gleicher
+# Dateiname, z.B. bei Bugfixes am Bundle). Der Server-Default
+# (max-age=604800) liess den Browser bis zu 7 Tage alte Dateien zeigen.
+# no-cache erzwingt Revalidierung per ETag -> 304 (winzige Antwort),
+# neue Inhalte sind danach sofort sichtbar.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|htm|js|css)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+    Header unset Expires
+  </FilesMatch>
+</IfModule>
+
+</IfModule>

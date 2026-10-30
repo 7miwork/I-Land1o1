@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>I-Land1o1 Learning Platform | Minecraft Coding for Kids</title>
+    <meta name="description" content="Minecraft Coding for Kids aged 6-14. Pre-Recorded Programming Courses for Coding Classes in Germany, English, German, and Chinese. Pirate-themed adventure learning." />
+    <meta name="keywords" content="Minecraft Coding for Kids, Coding Classes Germany, Pre-Recorded Programming Courses, Minecraft Education, Kids Coding" />
+    <meta name="author" content="I-Land1o1 Learning Platform" />
+    <meta property="og:title" content="I-Land1o1 Learning Platform | Minecraft Coding for Kids" />
+    <meta property="og:description" content="Where young pirates aged 6-14 learn to code through Minecraft adventures and creative programming." />
+    <meta property="og:type" content="website" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&family=Press+Start+2P&family=Pirata+One&display=swap" rel="stylesheet" />
+    <script type="module" crossorigin src="/assets/index-Btd8bRLy.js?v=8b93471222"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-SEVzprOP.css?v=1ce33fe27a">
+    <!-- Eigene Supabase-Login-Seite (ersetzt die alte React-Demo-Anmeldung) -->
+  <script>
+    try { sessionStorage.setItem('iland:useOwnLogin', '1'); } catch (e) { /* Private Mode */ }
+  </script>
+</head>
+
+  <body>
+    <div id="root"></div>
+    <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
+  </body>
+
+</html>
