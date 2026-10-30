@@ -1,1 +1,113 @@
-<!doctype html><html lang="de"><head><meta charset="UTF-8"/><title>Admin Dashboard</title></head><body><h1>Admin Dashboard</h1><p>Platzhalter.</p></body></html>
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>I-Land1o1 – Admin-Dashboard</title>
+  <meta name="description" content="Admin-Dashboard: Nutzer, Abos und Eltern-Kind-Verknüpfungen verwalten." />
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&family=Press+Start+2P&family=Pirata+One&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../dashboard/dashboard.css?v=53ff97cd06" />
+</head>
+
+<body>
+  <header class="topbar">
+    <a class="logo" href="/">🏴‍☠️ I-Land<span>1o1</span></a>
+    <nav class="topnav">
+      <span class="who" id="authWho" hidden></span>
+      <button class="btn btn-ghost" id="btnLogout" hidden>Abmelden</button>
+      <a href="/dashboard/">Zum Dashboard</a>
+    </nav>
+  </header>
+
+  <main class="wrap" id="appContent">
+    <section class="hero">
+      <p class="kicker">⚙️ Admin-Bereich</p>
+      <h1>Admin-Dashboard</h1>
+      <p class="sub">Nutzer, Abos und Eltern-Kind-Verknüpfungen im Überblick – nur für Admins und Lehrer:innen.</p>
+    </section>
+
+    <section class="stats">
+      <div class="stat-card">
+        <p class="stat-label">Nutzer</p>
+        <p class="stat-value" id="countUsers">0</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Aktive Abos</p>
+        <p class="stat-value" id="countSubs">0</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Eltern-Kind-Links</p>
+        <p class="stat-value" id="countLinks">0</p>
+      </div>
+    </section>
+
+    <section class="admin-section">
+      <h2 class="section-title">👥 Nutzer</h2>
+      <p class="msg" id="usersMsg" hidden></p>
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Name / E-Mail</th>
+              <th>Rolle</th>
+              <th>Ändern</th>
+              <th>Erstellt</th>
+            </tr>
+          </thead>
+          <tbody id="usersBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="admin-section">
+      <h2 class="section-title">💳 Abos</h2>
+      <p class="msg" id="subsMsg" hidden></p>
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Plan</th>
+              <th>Status</th>
+              <th>Läuft bis</th>
+            </tr>
+          </thead>
+          <tbody id="subsBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="admin-section">
+      <h2 class="section-title">👨‍👩‍👧 Eltern-Kind-Links</h2>
+      <p class="msg" id="linksMsg" hidden></p>
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Elternteil</th>
+              <th>Kind</th>
+              <th>Verknüpft am</th>
+            </tr>
+          </thead>
+          <tbody id="linksBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>🏴‍☠️ I-Land1o1 Learning Platform – Admin-Bereich</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/dashboard/config.js"></script>
+  <script src="admin.js?v=2"></script>
+</body>
+
+</html>
+

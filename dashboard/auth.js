@@ -65,7 +65,6 @@
 
   async function boot() {
     if (!client) {
-      // Supabase nicht konfiguriert -> Dashboard offen zeigen (Fallback)
       document.getElementById('appContent').hidden = false;
       if (!window.ilandDashboardInited && typeof window.initDashboard === 'function') {
         window.ilandDashboardInited = true;
@@ -73,15 +72,21 @@
       }
       return;
     }
-    const { data } = await client.auth.getSession();
-    if (data.session && data.session.user) {
-      showApp(data.session.user);
-    } else {
-      // Nicht eingeloggt -> zur Login-Seite (einmaliges Login auf /login)
-      const params = new URLSearchParams(window.location.search);
-      if (!params.get('fromLogin')) {
-        window.location.replace('/login/?next=/dashboard/');
+    try {
+      const { data, error } = await client.auth.getSession();
+      if (error) console.error('getSession error:', error);
+      if (data && data.session && data.session.user) {
+        showApp(data.session.user);
+      } else {
+        const params = new URLSearchParams(window.location.search);
+        if (!params.get('fromLogin')) {
+          // Aktuellen Pfad als next merken, damit nach Login zurueckkehrt (z. B. /dashboard/admin/)
+          const next = window.location.pathname.startsWith('/dashboard/') ? window.location.pathname : '/dashboard/';
+          window.location.replace('/login/index.html?next=' + encodeURIComponent(next));
+        }
       }
+    } catch (err) {
+      console.error('Dashboard boot failed:', err);
     }
   }
 

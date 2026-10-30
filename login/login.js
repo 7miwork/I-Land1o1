@@ -77,7 +77,10 @@
     // Weiter zur naechsten Seite, falls per ?next= gewuenscht
     const next = new URLSearchParams(window.location.search).get('next');
     const safe = next && next.startsWith('/dashboard/') && !next.startsWith('//') ? next : '/dashboard/';
-    window.location.replace(safe + (user ? '?angemeldet=1' : ''));
+    const url = new URL(safe, window.location.origin);
+    url.searchParams.set('fromLogin', '1');
+    if (user) url.searchParams.set('angemeldet', '1');
+    window.location.replace(url.toString());
   }
 
   tabLogin.addEventListener('click', () => setMode('login'));
@@ -141,19 +144,6 @@
       submit.disabled = false;
     }
   });
-
-  // Schon angemeldet? Dann direkt weiter zum Dashboard
-  (async () => {
-    if (!client) return;
-    const { data } = await client.auth.getSession();
-    if (data.session && data.session.user) {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('abmelden') !== '1') {
-        // Nicht automatisch weiterleiten, damit man den Login sieht.
-        // Erst beim Absenden geht es weiter.
-      }
-    }
-  })();
 
   setMode('login');
 })();

@@ -8,8 +8,8 @@
   RewriteRule ^Videos(/|$) - [F,L]
 
   # Eigene Login-Seite (supabase) statt der alten React-Demo-Seite.
-  # Ordner-Ausnahme muss VOR der SPA-Regel stehen.
-  RewriteRule ^login/?$ /login/index.html [L]
+  # RedirectMatch ist zuverlässiger als RewriteRule auf LiteSpeed-Servern.
+  RedirectMatch 301 ^/login/?$ /login/index.html
 
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f

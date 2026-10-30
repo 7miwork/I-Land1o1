@@ -129,8 +129,9 @@ node supabase\storage-status.mjs        # 13/13 Videos im Bucket
 
 - **SMTP + E-Mail-Bestätigung** für Signup-Mails (Supabase → Auth → SMTP;
   Hostinger: smtp.hostinger.com, Port 465)
-- **Rechtsseiten**: Impressum, Datenschutz, AGB (rechtlich Pflicht vor
-  echtem Verkauf)
+- **Rechtsseiten**: Impressum, Datenschutz, AGB – als statische Seiten unter
+  `/impressum/`, `/datenschutz/`, `/agb/` angelegt (Platzhalter, vor
+  echtem Verkauf mit echten Angaben + Anwalt prüfen)
 - Optional: Stripe-Webhook-Events prüfen (5 Events, `whsec_` muss passen)
 
 ---

@@ -28,6 +28,12 @@
     msg.className = 'premium-msg premium-msg--' + kind;
   }
 
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>\"']/g, (c) => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+  }
+
   function fmtDate(iso) {
     try {
       return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -79,7 +85,7 @@
   }
 
   function renderActive(sub) {
-    const label = PLANS[sub.plan]?.label || sub.plan;
+    const label = esc(PLANS[sub.plan]?.label || sub.plan);
     const end = sub.current_period_end ? fmtDate(sub.current_period_end) : '–';
     const isOneTime = sub.status === 'paid';
     const statusLine = isOneTime

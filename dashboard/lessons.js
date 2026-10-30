@@ -3,8 +3,7 @@
    ------------------------------------------------------------
    Pflegt hier eure Kurs-Inhalte:
    - type : 'start' | 'kapitel' | 'lektion'
-   - title/desc : dürfen später die echten Titel/Aufgaben
-     der Videos bekommen (einfach pro Lektion ersetzen)
+   - title/desc : echte Titel/Aufgaben der Videos
    - task : kurzer Hinweis "Was du machen sollst" (optional)
    - video : Pfad auf dem Server (FTP-Bereich /Videos/...)
    ============================================================ */
@@ -15,6 +14,7 @@ window.ILAND_LESSONS = [
     num: 'Intro',
     title: 'Willkommen an Bord',
     desc: 'Lerne deine Crew, dein Schiff und Minecraft Education kennen – der perfekte Start in dein erstes Abenteuer!',
+    task: 'Schaue dir das Video an und finde alle Crewmitglieder im Spiel.',
     video: '/Videos/DE/DE Start.mp4',
   },
   {
@@ -23,17 +23,106 @@ window.ILAND_LESSONS = [
     num: 'Kapitel',
     title: 'Das Schiff',
     desc: 'Zusammen bauen wir euer Klassen-Schiff – die Basis für alle weiteren Level-1-Abenteuer.',
+    task: 'Baue deinen Platz am Schiffsbug und finde die Anleitung für das Navigationstool.',
     video: '/Videos/DE/DE Schiff.mp4',
   },
-  ...Array.from({ length: 11 }, (_, i) => {
-    const n = String(i + 1).padStart(2, '0');
-    return {
-      id: `l${n}`,
-      type: 'lektion',
-      num: `Lektion ${n}`,
-      title: `Lektion ${n}`,
-      desc: 'Video ansehen, Aufgabe in Minecraft Education lösen und danach als erledigt markieren.',
-      video: `/Videos/DE/Level 1/DE Level 1 Lesson ${n}.mp4`,
-    };
-  }),
+  {
+    id: 'l01',
+    type: 'lektion',
+    num: 'Lektion 01',
+    title: 'Der Kompass',
+    desc: 'Lerne, wie der Kompass auf dem Schiff funktioniert und wie du mit ihm navigierst.',
+    task: 'Nutze den Kompass, um den versteckten Schatz auf der Insel zu finden.',
+    video: '/Videos/DE/Level 1/DE Level 1 Lesson 01.mp4',
+  },
+  {
+    id: 'l02',
+    type: 'lektion',
+    num: 'Lektion 02',
+    title: 'Das Navigationstool',
+    desc: 'Erkunde, wie das Navigationstool deinen Weg auf der Karte anzeigt und dir hilft, die Route zu planen.',
+    task: 'Verfolge die Routen auf der Karte und markiere die wichtigsten Punkte.',
+    video: '/Videos/DE/Level 1/DE Level 1 Lesson 02.mp4',
+  },
+  {
+    id: 'l03',
+    type: 'lektion',
+    num: 'Lektion 03',
+    title: 'Die Insel entdecken',
+    desc: 'Entdecke die abielle Insel und lerne ihre geheimen Gänge und versteckten Orte kennen.',
+    task: 'Finde die drei versteckten Orte auf der Insel und beschreibe sie.',
+    video: '/Videos/DE/Level 1/DE Level 1 Lesson 03.mp4',
+  },
+  {
+    id: 'l04',
+    type: 'lektion',
+    num: 'Lektion 04',
+    title: 'Minecraft Education: Erster Aufbau',
+    desc: 'Nutze Minecraft Education, um deinen ersten Bau auf der Insel zu errichten.',
+    task: 'Baue ein kleines Geschütz oder eine Höhle unter Verwendung der Planungsnotizen.',
+    video: '/Videos/DE/Level 1/DE Level 1 Lesson 04.mp4',
+  },
+  {
+    id: 'l05',
+    type: 'lektion',
+    num: 'Lektion 05',
+    title: 'Materialien sammeln',
+    desc: 'Lerne, wie du verschiedene Materialien sammelst und sie in deinen Bau einfängst.',
+    task: 'Sammle mindestens 5 verschiedene Materialien und weise sie deinem Bau zu.',
+    video: '/Videos/DE/Level 1/DE Level 1 Lesson 05.mp4',
+  },
+  {
+    id: 'l06',
+    type: 'lektion',
+    num: 'Lektion 06',
+    title: 'Das erste Pflanzen',
+    desc: 'Entdecke, wie du in Minecraft Education Pflanzen pflanzen und verwildern kannst.',
+    task: 'Pflanze 3 verschiedene Pflanzen und beschreibe das Wachstumsszenario.',
+    video: '/Videos/DE/Level 1/DE Level 1 Lesson 06.mp4',
+  },
+  {
+    id: 'l07',
+    type: 'lektion',
+    num: 'Lektion 07',
+    title: 'Das erste Tier',
+    desc: 'Lerne, wie du in Minecraft Education Tiere züchten und pflegen kannst.',
+    task: 'Züchte 2 verschiedene Tiere und dokumentiere ihr Verhalten.',
+    video: '/Videos/DE/Level 1/DE Level 1 Lesson 07.mp4',
+  },
+  {
+    id: 'l08',
+    type: 'lektion',
+    num: 'Lektion 08',
+    title: 'Der Bau beginnt',
+    desc: 'Baue dein erstes Gelände mit den gesammelten Materialien und fertige es nach dem Entwurf.',
+    task: 'Verwende mindestens 10 Blöcke deiner Wahl und plane eine Tür und ein Fenster.',
+    video: '/Videos/DE/Level 1/DE Level 1 Lesson 08.mp4',
+  },
+  {
+    id: 'l09',
+    type: 'lektion',
+    num: 'Lektion 09',
+    title: 'Der Schatz ist gefunden',
+    desc: 'Erfinde einen Schatz und verborge ihn an einem sicheren Ort auf der Insel.',
+    task: 'Verstecke den Schatz unter Sand oder in einem Schatzkoffer und markiere den Standort.',
+    video: '/Videos/DE/Level 1/DE Level 1 Lesson 09.mp4',
+  },
+  {
+    id: 'l10',
+    type: 'lektion',
+    num: 'Lektion 10',
+    title: 'Das Schutzsystem',
+    desc: 'Baue ein einfaches Schutzsystem mit Tor, Korb oder schmaleren Wegen ab.',
+    task: 'Zeige, wie dein Schatz vor fremden Spielern geschützt wird und teste dein System.',
+    video: '/Videos/DE/Level 1/DE Level 1 Lesson 10.mp4',
+  },
+  {
+    id: 'l11',
+    type: 'lektion',
+    num: 'Lektion 11',
+    title: 'Die letzte Lektion',
+    desc: 'Kombiniere alles, was du bisher gelernt hast, um dein eigenes Abenteuer zu schaffen.',
+    task: 'Entwickle eine eigene kurze Geschichte und biete sie als Spielmodul an.',
+    video: '/Videos/DE/Level 1/DE Level 1 Lesson 11.mp4',
+  },
 ];

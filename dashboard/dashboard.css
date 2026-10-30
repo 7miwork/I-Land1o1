@@ -4,27 +4,34 @@
    ============================================================ */
 
 :root {
-  --gold: #f3ba25;
-  --gold-dark: #cf9c00;
-  --gold-deep: #a27900;
-  --gold-ink: #7e5e00;
-  --ink: #1a1a19;
-  --ocean: #000c1c;
-  --ocean-2: #003c6b;
-  --parchment: #f8f5ee;
-  --parchment-2: #f5eee0;
-  --parchment-3: #e4ddcf;
-  --sand: #ddcca9;
-  --green: #31aa40;
-  --red: #e85854;
-  --grey: #858481;
+  /* Exakt die oklch-Tokens der Live-Hauptseite (assets/index-*.css) */
+  --gold: oklch(82% .16 85);
+  --gold-dark: oklch(60% .16 85);
+  --gold-deep: oklch(50% .14 85);
+  --gold-ink: oklch(47% .137 46);
+  --ink: oklch(23.5% .015 65);
+  --ocean: oklch(35% .12 250);
+  --ocean-deep: oklch(25% .1 250);
+  --ocean-deeper: oklch(15% .08 250);
+  --ocean-2: oklch(48% .12 250);
+  --parchment: oklch(95% .02 85);
+  --parchment-2: oklch(92% .02 85);
+  --parchment-3: oklch(88% .03 85);
+  --sand: oklch(70% .06 85);
+  --skytext: oklch(80% .05 250);
+  --wood-dark: oklch(25% .05 65);
+  --green: oklch(62% .19 149);
+  --green-deep: oklch(45% .15 149);
+  --red: oklch(64% .18 25);
+  --grey: oklch(55% .02 265);
 
   --font-pirate: 'Pirata One', cursive;
   --font-pixel: 'Press Start 2P', monospace;
   --font-body: 'Nunito', sans-serif;
 
-  --radius: 14px;
-  --shadow: 0 10px 30px rgba(0, 12, 28, .35);
+  /* Die Hauptseite arbeitet mit ECKIGEN Kanten (0–8px), nicht mit Pillen */
+  --radius: 4px;
+  --shadow: 4px 4px 0 oklch(82% .16 85 / .15);
 }
 
 * { box-sizing: border-box; }
@@ -36,53 +43,81 @@ body {
   min-height: 100vh;
   font-family: var(--font-body);
   color: var(--parchment);
+  /* Marineblau-Gradient wie der Live-Hero (dunkel oben -> Grundton) */
   background:
-    radial-gradient(1200px 600px at 15% -10%, rgba(243, 186, 37, .18), transparent 60%),
-    radial-gradient(900px 500px at 110% 20%, rgba(0, 60, 107, .45), transparent 65%),
-    linear-gradient(180deg, var(--ocean) 0%, var(--ink) 60%, #0b0b0a 100%);
+    radial-gradient(1100px 520px at 12% -8%, oklch(82% .16 85 / .10), transparent 55%),
+    linear-gradient(
+      180deg,
+      oklch(15% .08 250 / .8) 0%,
+      oklch(25% .10 250 / .6) 30%,
+      oklch(35% .12 250) 70%,
+      oklch(35% .12 250) 100%
+    );
   background-attachment: fixed;
   display: flex;
   flex-direction: column;
 }
 
-/* ---------- Topbar ---------- */
+/* ---------- Topbar (wie Hauptseite: Kompass-Logo + eckige Nav) ---------- */
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 16px clamp(16px, 4vw, 48px);
-  border-bottom: 2px solid rgba(243, 186, 37, .35);
-  background: rgba(0, 12, 28, .55);
-  backdrop-filter: blur(6px);
+  padding: 14px clamp(16px, 4vw, 48px);
+  border-bottom: 2px solid oklch(82% .16 85 / .25);
+  background: oklch(20% .09 250 / .6);
+  backdrop-filter: blur(8px);
   position: sticky;
   top: 0;
   z-index: 20;
 }
 
 .logo {
-  font-family: var(--font-pirate);
-  font-size: clamp(26px, 3.4vw, 36px);
-  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   text-decoration: none;
   color: var(--parchment);
 }
 
-.logo span { color: var(--gold); }
+.logo img {
+  width: 42px;
+  height: 42px;
+  transition: transform .2s ease;
+}
+
+.logo:hover img { transform: rotate(12deg); }
+
+.logo-text { display: flex; flex-direction: column; line-height: 1; }
+
+.logo-name {
+  font-family: var(--font-pirate);
+  font-size: clamp(22px, 2.6vw, 28px);
+  letter-spacing: 1px;
+  color: var(--parchment);
+}
+
+.logo-sub {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  letter-spacing: 3px;
+  color: var(--gold);
+  margin-top: 2px;
+}
 
 .topnav a {
   font-family: var(--font-body);
-  font-weight: 800;
+  font-weight: 700;
   font-size: 14px;
   text-decoration: none;
-  color: var(--gold);
-  border: 2px solid var(--gold-dark);
-  border-radius: 999px;
-  padding: 8px 16px;
-  transition: background .15s ease, color .15s ease;
+  color: var(--parchment);
+  border-radius: var(--radius);
+  padding: 8px 14px;
+  transition: all .16s ease-out;
 }
 
-.topnav a:hover { background: var(--gold); color: var(--ink); }
+.topnav a:hover { color: var(--gold); background: oklch(100% 0 0 / .10); }
 
 /* ---------- Layout ---------- */
 .wrap {
@@ -94,43 +129,67 @@ body {
 
 .hero { max-width: 760px; }
 
+/* Pixel-Badge mit Goldrahmen – exakt wie "MINECRAFT × CODING" auf der Startseite */
 .kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-family: var(--font-pixel);
-  font-size: clamp(9px, 1.4vw, 12px);
+  font-size: clamp(8px, 1.2vw, 11px);
   color: var(--gold);
-  margin: 0 0 14px;
-  line-height: 1.8;
+  background: oklch(82% .16 85 / .15);
+  border: 2px solid oklch(82% .16 85 / .4);
+  padding: 8px 14px;
+  margin: 0 0 20px;
+  letter-spacing: 2px;
+  line-height: 1.6;
 }
 
+/* H1 cremeweiß wie "Chart Your Course ..." (Pirata One + harter Schatten) */
 h1 {
   font-family: var(--font-pirate);
-  font-size: clamp(44px, 8vw, 78px);
-  line-height: .95;
+  font-size: clamp(42px, 7vw, 72px);
+  line-height: 1.05;
   margin: 0 0 14px;
-  color: var(--gold);
-  text-shadow: 3px 4px 0 rgba(0, 12, 28, .75);
+  color: var(--parchment);
+  text-shadow: 0 4px 0 rgb(0 0 0 / .35);
 }
 
 .sub {
-  font-size: clamp(15px, 1.8vw, 18px);
-  line-height: 1.65;
-  color: var(--parchment-2);
+  font-size: clamp(15px, 1.8vw, 19px);
+  line-height: 1.6;
+  color: var(--skytext);
   margin: 0 0 28px;
 }
 
 .sub strong { color: var(--gold); }
 
+/* ---------- Creme-Inhalts-Panels (wie die Sektionen der Hauptseite) ---------- */
 .section-title {
   font-family: var(--font-pirate);
   font-size: clamp(28px, 4vw, 40px);
-  color: var(--parchment);
-  margin: 48px 0 20px;
+  color: var(--ocean);
+  margin: 0 0 20px;
 }
 
-/* ---------- Fortschritt ---------- */
+.lessons,
+.premium,
+.family {
+  background: var(--parchment);
+  border: 2px solid oklch(90% .02 85);
+  box-shadow: 6px 6px 0 oklch(82% .16 85 / .12);
+  border-radius: var(--radius);
+  padding: clamp(20px, 4vw, 40px);
+  margin-top: 32px;
+  color: var(--ink);
+}
+
+.premium-lead { color: oklch(35% .12 250); }
+
+/* ---------- Fortschritt (im marineblauen Hero) ---------- */
 .progress-card {
-  background: linear-gradient(180deg, rgba(248, 245, 238, .10), rgba(248, 245, 238, .04));
-  border: 2px solid rgba(243, 186, 37, .45);
+  background: oklch(20% .09 250 / .55);
+  border: 2px solid oklch(82% .16 85 / .45);
   border-radius: var(--radius);
   padding: 18px 20px;
   box-shadow: var(--shadow);
@@ -144,7 +203,7 @@ h1 {
   margin-bottom: 12px;
 }
 
-.progress-label { font-weight: 800; font-size: 16px; }
+.progress-label { font-weight: 800; font-size: 16px; color: var(--parchment); }
 
 .progress-count {
   font-family: var(--font-pixel);
@@ -155,23 +214,22 @@ h1 {
 
 .progress-track {
   height: 18px;
-  border-radius: 999px;
-  background: rgba(0, 12, 28, .6);
-  border: 2px solid rgba(228, 221, 207, .25);
+  border-radius: var(--radius);
+  background: oklch(15% .08 250 / .8);
+  border: 2px solid oklch(95% .02 85 / .25);
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
   width: 0;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--gold-deep), var(--gold), #ffe08a);
+  background: linear-gradient(90deg, var(--gold-dark), var(--gold), oklch(88% .14 92));
   transition: width .45s ease;
 }
 
 .progress-msg { margin: 12px 0 0; font-size: 14px; color: var(--sand); }
 
-/* ---------- Lektions-Raster ---------- */
+/* ---------- Lektions-Raster (weisse Karten auf Creme – wie "WHY I-LAND") ---------- */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
@@ -183,17 +241,18 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background: linear-gradient(180deg, rgba(248, 245, 238, .09), rgba(248, 245, 238, .03));
-  border: 2px solid rgba(228, 221, 207, .18);
+  background: oklch(100% 0 0);
+  border: 2px solid oklch(90% .02 85);
   border-radius: var(--radius);
   padding: 18px;
-  transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+  box-shadow: 4px 4px 0 oklch(82% .16 85 / .15);
+  transition: transform .16s ease-out, box-shadow .16s ease-out, border-color .16s ease-out;
 }
 
 .card:hover {
   transform: translateY(-3px);
   border-color: var(--gold);
-  box-shadow: var(--shadow);
+  box-shadow: 6px 8px 0 oklch(82% .16 85 / .25);
 }
 
 .card.is-done { border-color: var(--green); }
@@ -205,18 +264,18 @@ h1 {
   font-family: var(--font-pixel);
   font-size: 9px;
   padding: 6px 8px;
-  border-radius: 8px;
-  background: var(--ocean-2);
+  border-radius: var(--radius);
+  background: var(--ocean);
   color: var(--parchment);
-  border: 2px solid rgba(248, 245, 238, .25);
+  border: 2px solid oklch(95% .02 85 / .3);
 }
 
-.card.is-done .card-badge { background: var(--green); border-color: #1f7a2b; }
+.card.is-done .card-badge { background: var(--green); border-color: var(--green-deep); }
 
 .card-num {
   font-family: var(--font-pixel);
   font-size: 10px;
-  color: var(--gold);
+  color: var(--gold-ink);
   letter-spacing: .5px;
 }
 
@@ -225,42 +284,55 @@ h1 {
   font-size: 26px;
   line-height: 1.1;
   margin: 0;
-  color: var(--parchment);
+  color: var(--ocean);
 }
 
 .card-desc {
   font-size: 14px;
   line-height: 1.55;
-  color: var(--parchment-2);
+  color: oklch(45% .05 65);
   margin: 0;
   flex: 1;
 }
 
 .card-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
 
-/* ---------- Buttons ---------- */
+/* ---------- Buttons (eckig mit 3D-Schatten wie die Live-CTAs) ---------- */
 .btn {
   font-family: var(--font-body);
   font-weight: 800;
   font-size: 13px;
-  border-radius: 999px;
+  border-radius: var(--radius);
   border: 2px solid transparent;
   padding: 9px 15px;
   cursor: pointer;
-  transition: background .15s ease, color .15s ease, transform .1s ease;
+  transition: all .16s ease-out;
 }
 
-.btn:active { transform: scale(.97); }
+.btn:active { transform: translateY(3px); }
 
-.btn-play { background: var(--gold); color: var(--ink); border-color: var(--gold-dark); }
-.btn-play:hover { background: #ffd166; }
+/* Primär: Gold + Minecraft-3D-Schatten (wie hero.cta auf der Hauptseite) */
+.btn-play {
+  background: var(--gold);
+  color: var(--wood-dark);
+  border-color: var(--gold-dark);
+  box-shadow: 0 4px 0 var(--gold-dark), 0 6px 0 var(--gold-deep);
+}
 
-.btn-done { background: transparent; color: var(--green); border-color: var(--green); }
-.btn-done:hover { background: var(--green); color: #04150a; }
+.btn-play:hover { filter: brightness(1.06); }
+.btn-play:active { box-shadow: 0 1px 0 var(--gold-dark), 0 2px 0 var(--gold-deep); }
 
-.card.is-done .btn-done { background: var(--green); color: #04150a; }
+.btn-done {
+  background: transparent;
+  color: var(--green-deep);
+  border-color: var(--green);
+}
 
-/* ---------- Modal ---------- */
+.btn-done:hover { background: var(--green); color: oklch(100% 0 0); }
+
+.card.is-done .btn-done { background: var(--green); color: oklch(100% 0 0); }
+
+/* ---------- Modal (dunkel Marineblau wie der Grundton) ---------- */
 .modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px; }
 
 .modal[hidden] { display: none; }
@@ -268,17 +340,17 @@ h1 {
 .modal-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 12, 28, .82);
+  background: oklch(10% .06 250 / .85);
   backdrop-filter: blur(3px);
 }
 
 .modal-box {
   position: relative;
   width: min(960px, 100%);
-  background: var(--ink);
+  background: var(--ocean-deep);
   border: 2px solid var(--gold);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: 6px 6px 0 oklch(0% 0 0 / .45);
   overflow: hidden;
 }
 
@@ -288,21 +360,21 @@ h1 {
   justify-content: space-between;
   gap: 12px;
   padding: 14px 18px;
-  border-bottom: 2px solid rgba(243, 186, 37, .35);
+  border-bottom: 2px solid oklch(82% .16 85 / .35);
 }
 
 .modal-head h3 {
   font-family: var(--font-pirate);
   font-size: 26px;
   margin: 0;
-  color: var(--gold);
+  color: var(--parchment);
 }
 
 .btn-close {
   background: transparent;
-  border: 2px solid rgba(248, 245, 238, .35);
+  border: 2px solid oklch(95% .02 85 / .35);
   color: var(--parchment);
-  border-radius: 10px;
+  border-radius: var(--radius);
   font-size: 16px;
   line-height: 1;
   padding: 8px 11px;
@@ -323,14 +395,21 @@ h1 {
   justify-content: flex-end;
   gap: 10px;
   padding: 14px 18px;
-  border-top: 2px solid rgba(243, 186, 37, .35);
+  border-top: 2px solid oklch(82% .16 85 / .35);
 }
 
-/* ---------- Footer ---------- */
+.modal-lock {
+  margin: 0;
+  padding: 16px 18px;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+/* ---------- Footer (auf Marineblau) ---------- */
 .footer {
   padding: 24px clamp(16px, 4vw, 48px);
-  border-top: 2px solid rgba(243, 186, 37, .25);
-  color: var(--grey);
+  border-top: 2px solid oklch(82% .16 85 / .25);
+  color: var(--sand);
   font-size: 13px;
   text-align: center;
 }
@@ -354,13 +433,13 @@ h1 {
   place-items: center;
   padding: 16px;
   background:
-    radial-gradient(1200px 600px at 15% -10%, rgba(243, 186, 37, .16), transparent 60%),
-    linear-gradient(180deg, var(--ocean) 0%, var(--ink) 70%, #0b0b0a 100%);
+    radial-gradient(1100px 520px at 12% -8%, oklch(82% .16 85 / .10), transparent 55%),
+    linear-gradient(180deg, oklch(15% .08 250 / .8) 0%, oklch(35% .12 250) 100%);
 }
 
 .auth-card {
   width: min(430px, 100%);
-  background: rgba(26, 26, 25, .94);
+  background: var(--parchment);
   border: 2px solid var(--gold);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -465,7 +544,7 @@ h1 {
 #resumeBtn { margin-top: 12px; }
 
 /* ---------- Premium / Abo ---------- */
-.premium { margin-top: 8px; }
+.premium { margin-top: 32px; }
 
 .premium-lead {
   font-size: clamp(15px, 1.8vw, 18px);
@@ -634,4 +713,120 @@ h1 {
   color: var(--gold);
   background: rgba(0, 12, 28, .6);
   border-top: 2px solid rgba(243, 186, 37, .35);
+
+/* ---------- Admin: Statistik-Karten ---------- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin: 24px 0 8px;
+}
+
+.stat-card {
+  background: linear-gradient(180deg, rgba(248, 245, 238, .10), rgba(248, 245, 238, .04));
+  border: 2px solid rgba(243, 186, 37, .35);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+}
+
+.stat-label {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  color: var(--sand);
+}
+
+.stat-value {
+  margin: 0;
+  font-family: var(--font-pirate);
+  font-size: clamp(32px, 5vw, 46px);
+  color: var(--gold);
+  line-height: 1;
+}
+
+.admin-section { margin-top: 16px; }
+
+.table-wrap {
+  overflow-x: auto;
+  border: 2px solid rgba(243, 186, 37, .25);
+  border-radius: var(--radius);
+  background: rgba(0, 12, 28, .55);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  color: var(--parchment);
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid rgba(243, 186, 37, .15);
+  vertical-align: middle;
+}
+
+.admin-table th {
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: var(--gold);
+  background: rgba(0, 12, 28, .7);
+  letter-spacing: .3px;
+}
+
+.admin-table tr:last-child td { border-bottom: none; }
+
+.admin-table .role-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  background: rgba(243, 186, 37, .15);
+  color: var(--gold);
+}
+
+.role-select {
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 2px solid rgba(228, 221, 207, .3);
+  background: rgba(0, 12, 28, .65);
+  color: var(--parchment);
+  font-family: var(--font-body);
+  font-weight: 700;
+  margin-right: 8px;
+}
+
+.btn-save {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  background: var(--gold);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.btn-save:hover { background: var(--gold-dark); }
+
+.msg {
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 14px;
+  border: 1px solid var(--gold);
+  background: rgba(243, 186, 37, .12);
+  color: var(--gold);
+}
+
+.msg--error { border-color: var(--red); background: rgba(232, 88, 84, .12); color: #ffb3b0; }
+.msg--ok { border-color: var(--green); background: rgba(49, 170, 64, .14); color: #9be8a5; }
+.msg[hidden] { display: none; }
 }

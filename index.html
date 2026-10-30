@@ -3,6 +3,17 @@
 
   <head>
     <meta charset="UTF-8" />
+    <!-- Direkt-Redirect: Falls /login geladen wird (SPA liefert immer index.html),
+         SOFORT umleiten bevor die React-App rendert – verhindert Flackern der alten Login-Seite -->
+    <script>
+      (function () {
+        var path = window.location.pathname;
+        if (path === '/login' || path === '/login/') {
+          document.documentElement.style.visibility = 'hidden';
+          window.location.replace('/login/index.html');
+        }
+      })();
+    </script>
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1" />
@@ -13,6 +24,11 @@
     <meta property="og:title" content="I-Land1o1 Learning Platform | Minecraft Coding for Kids" />
     <meta property="og:description" content="Where young pirates aged 6-14 learn to code through Minecraft adventures and creative programming." />
     <meta property="og:type" content="website" />
+    <meta property="og:image" content="/manus-storage/hero-ocean_a5463342.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="I-Land1o1 Learning Platform | Minecraft Coding for Kids" />
+    <meta name="twitter:description" content="Where young pirates aged 6-14 learn to code through Minecraft adventures and creative programming." />
+    <link rel="canonical" href="https://i-land1o1.com/" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&family=Press+Start+2P&family=Pirata+One&display=swap" rel="stylesheet" />
@@ -21,6 +37,61 @@
     <!-- Eigene Supabase-Login-Seite (ersetzt die alte React-Demo-Anmeldung) -->
   <script>
     try { sessionStorage.setItem('iland:useOwnLogin', '1'); } catch (e) { /* Private Mode */ }
+  </script>
+  <!-- Redirect: eingeloggte Nutzer von der Startseite (/) automatisch zum Dashboard -->
+  <script>
+    (function () {
+      if (window.location.pathname !== '/') return;
+      var cfg = window.ILAND_CONFIG || {};
+      if (!cfg.SUPABASE_URL || !window.supabase) return;
+      var client = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+      client.auth.getSession().then(function (result) {
+        if (result && result.session && result.session.user) {
+          window.location.replace('/dashboard/');
+        }
+      });
+    })();
+  </script>
+  <!-- Login-Link-Fix: alle /login Links sofort und dauerhaft auf /login/index.html umleiten -->
+  <script>
+    (function () {
+      function fixLoginLinks() {
+        document.querySelectorAll('a[href*="/login"]').forEach(function (a) {
+          var href = a.getAttribute('href') || '';
+          if (href.indexOf('/login/index.html') === -1 && href.indexOf('/login/') === -1) {
+            a.href = '/login/index.html';
+          }
+        });
+      }
+      fixLoginLinks();
+
+      // Klick-Handler in Capture-Phase: läuft VOR React, verhindert client-seitige Navigation zur alten Login-Seite
+      document.addEventListener('click', function (e) {
+        var link = e.target.closest('a');
+        if (!link) return;
+        var href = link.getAttribute('href') || '';
+        if (href === '/login' || href === '/login/' || (href.indexOf('/login') !== -1 && href.indexOf('/login/index.html') === -1 && href.indexOf('/login/') === -1)) {
+          e.preventDefault();
+          e.stopPropagation();
+          window.location.href = '/login/index.html';
+        }
+      }, true);
+
+      // Observer für nachträglich eingefügte React-Elemente
+      var observer = new MutationObserver(function (mutations) {
+        var shouldFix = false;
+        mutations.forEach(function (m) {
+          m.addedNodes.forEach(function (node) {
+            if (node.nodeType === 1) {
+              if (node.matches && node.matches('a[href*="/login]')) shouldFix = true;
+              if (node.querySelectorAll && node.querySelectorAll('a[href*="/login"]').length > 0) shouldFix = true;
+            }
+          });
+        });
+        if (shouldFix) fixLoginLinks();
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    })();
   </script>
 </head>
 
