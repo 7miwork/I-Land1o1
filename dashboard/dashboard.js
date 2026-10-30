@@ -7,6 +7,13 @@
 // Die Inhalte selbst werden in lessons.js gepflegt (window.ILAND_LESSONS)
 const LESSONS = window.ILAND_LESSONS || [];
 
+// Kleine HTML-Escaping-Hilfe für in lessons.js gepflegte Texte
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ));
+}
+
 const TYPE_ICONS = { start: '🏴‍☠️', kapitel: '⛵', lektion: '⛏️' };
 
 // Fortschritt wird pro Account (Supabase-User-ID) getrennt gespeichert
@@ -94,15 +101,15 @@ function render() {
     card.className = 'card' + (isDone ? ' is-done' : '') + (locked ? ' is-locked' : '');
     card.innerHTML = `
       <span class="card-badge">${isDone ? 'ERLEDIGT ✓' : 'OFFEN'}</span>
-      <span class="card-num">${TYPE_ICONS[lesson.type] || '🧭'} ${lesson.num}</span>
-      <h3 class="card-title">${lesson.title}</h3>
-      <p class="card-desc">${lesson.desc}</p>
-      ${lesson.task ? `<p class="card-task">🎯 ${lesson.task}</p>` : ''}
+      <span class="card-num">${esc(TYPE_ICONS[lesson.type] || '🧭')} ${esc(lesson.num)}</span>
+      <h3 class="card-title">${esc(lesson.title)}</h3>
+      <p class="card-desc">${esc(lesson.desc)}</p>
+      ${lesson.task ? `<p class="card-task">🎯 ${esc(lesson.task)}</p>` : ''}
       <div class="card-actions">
-        <button class="btn btn-play" data-action="play" data-id="${lesson.id}">${
+        <button class="btn btn-play" data-action="play" data-id="${esc(lesson.id)}">${
       locked ? '🔒 Gesperrt' : '▶ Video starten'
     }</button>
-        <button class="btn btn-done" data-action="toggle" data-id="${lesson.id}">
+        <button class="btn btn-done" data-action="toggle" data-id="${esc(lesson.id)}">
           ${isDone ? '✓ Erledigt' : 'Als erledigt markieren'}
         </button>
       </div>`;
@@ -111,7 +118,10 @@ function render() {
   updateProgress();
 }
 
+let lastFocus = null;
+
 async function openModal(lesson) {
+  lastFocus = document.activeElement;
   currentLesson = lesson;
   modalTitle.textContent = `${lesson.num}: ${lesson.title}`;
   modal.hidden = false;
@@ -119,6 +129,7 @@ async function openModal(lesson) {
   modalLock.hidden = true;
   modalLock.textContent = '';
   if (modalDone) modalDone.hidden = false;
+  if (modalClose) modalClose.focus();
   modalVideo.removeAttribute('src');
   modalVideo.load();
 
@@ -136,12 +147,15 @@ async function openModal(lesson) {
       body: { lessonId: lesson.id },
     });
     if (error || !data || !data.url) {
+      const msg = error?.message || 'Unbekannter Fehler';
       if (data && data.locked) {
         hasAccess = false;
         render();
-        showLock('🔒 Für diese Lektion brauchst du ein aktives Abo.');
+        showLock('🔒 Für diese Lektion brauchst du ein aktives Abo.\n' +
+          'Deine Eltern können es unter „⚓ Abo & Zahlung“ buchen.');
       } else {
-        showLock('😢 Das Video konnte nicht geladen werden. Bitte kurz später nochmal versuchen.');
+        showLock('😢 Video-Fehler: ' + msg + '\n' +
+          '(Console F12 öffnen für Details)');
       }
       return;
     }
@@ -169,6 +183,10 @@ function closeModal() {
   modal.hidden = true;
   document.body.style.overflow = '';
   currentLesson = null;
+  if (lastFocus && typeof lastFocus.focus === 'function') {
+    try { lastFocus.focus(); } catch (e) { /* ignore */ }
+  }
+  lastFocus = null;
 }
 
 function toggleDone(id) {
