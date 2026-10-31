@@ -1,0 +1,50 @@
+{
+  "id": "l02",
+  "level": "level1",
+  "part": "part1",
+  "lang": "zh",
+  "num": "第02课",
+  "title": "导航工具",
+  "desc": "探索导航工具如何在地图上显示您的路径并帮助您规划路线。",
+  "task": "在地图上跟随路线并标记重要地点。",
+  "video": "/Videos/ZH/Level 1/ZH Level 1 Lesson 02.mp4",
+  "explanation": "导航工具在地图上记录您的路径并显示重要地点。这有助于您规划岛上的路线，不会忘记自己去过哪里。",
+  "quiz": [
+    {
+      "question": "导航工具有什么作用？",
+      "options": ["A) 在地图上显示您的路径", "B) 为您建造房屋", "C) 删除岛屿", "D) 购买材料"],
+      "correct": 0,
+      "feedback": "它记录您的路线和重要地点。"
+    },
+    {
+      "question": "为什么要标记重要地点？",
+      "options": ["A) 以免忘记路", "B) 删除岛屿", "C) 为了好玩", "D) 给其他玩家"],
+      "correct": 0,
+      "feedback": "标记的地点帮助您定位。"
+    },
+    {
+      "question": "在地图上能看到什么？",
+      "options": ["A) 您的路线和标记的地点", "B) 只有水", "C) 只有树", "D) 没有东西"],
+      "correct": 0,
+      "feedback": "地图显示您的路线和标记的地点。"
+    }
+  ],
+  "test": [
+    {
+      "question": "为什么地图上的路线很重要？",
+      "options": ["A) 以免迷路", "B) 为了好看", "C) 为了删除", "D) 为了吃"],
+      "correct": 0,
+      "feedback": "路线帮助您保持概览。"
+    },
+    {
+      "question": "您使用导航工具规划什么？",
+      "options": ["A) 岛上的路线", "B) 一艘船", "C) 一条龙", "D) 没有东西"],
+      "correct": 0,
+      "feedback": "您规划岛上的路线。"
+    }
+  ],
+  "password": {
+    "threshold": 80,
+    "encrypted": "bmF2LXRvb2wtcHdk"
+  }
+}

@@ -31,6 +31,7 @@
       <div class="progress-head" style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px;">
         <span id="lessonNum" class="card-num" style="font-family:var(--font-pixel);color:var(--gold);font-size:13px;"></span>
         <span id="lessonBadge" class="card-badge" style="position:static;font-size:11px;padding:6px 10px;"></span>
+        <span id="langLabel" style="font-family:var(--font-pixel);color:var(--sand);font-size:11px;padding:6px 10px;"></span>
       </div>
       <p class="sub" id="lessonDesc"></p>
     </section>
@@ -67,6 +68,8 @@
         <div id="testBox"></div>
         <button class="btn btn-play" id="btnTest">Test auswerten</button>
         <p id="testResult" class="msg" hidden></p>
+        <p id="scoreBox" class="msg" hidden></p>
+        <p id="passwordResult" class="msg" hidden></p>
       </section>
 
       <div class="lesson-actions" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;">
@@ -83,8 +86,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js?v=e3aa5ff4ba"></script>
+  <script src="levels.js?v=1"></script>
   <script src="lessons.js?v=2e1293d4ad"></script>
-  <script src="lesson.js?v=1"></script>
+  <script src="lesson.js?v=2"></script>
 </body>
 
 </html>

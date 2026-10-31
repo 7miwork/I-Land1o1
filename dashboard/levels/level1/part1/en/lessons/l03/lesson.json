@@ -1,0 +1,50 @@
+{
+  "id": "l03",
+  "level": "level1",
+  "part": "part1",
+  "lang": "en",
+  "num": "Lesson 03",
+  "title": "Discover the Island",
+  "desc": "Discover the island and learn its secret passages and hidden places.",
+  "task": "Find the three hidden places on the island and describe them.",
+  "video": "/Videos/EN/Level 1/EN Level 1 Lesson 03.mp4",
+  "explanation": "The island holds many secrets: secret passages, caves, and hidden places. Your task is to find three of these special places and record them in your pirate logbook.",
+  "quiz": [
+    {
+      "question": "How many hidden places do you search for?",
+      "options": ["A) One", "B) Three", "C) Ten", "D) None"],
+      "correct": 1,
+      "feedback": "You search for three hidden places on the island."
+    },
+    {
+      "question": "What do you do with the found places?",
+      "options": ["A) Describe them in your logbook", "B) Ignore them", "C) Blow them up", "D) Eat them"],
+      "correct": 0,
+      "feedback": "Right: Record the places in writing."
+    },
+    {
+      "question": "Where are secret passages located?",
+      "options": ["A) On the island", "B) In space", "C) In the ocean", "D) In the castle"],
+      "correct": 0,
+      "feedback": "Secret passages are located on the island."
+    }
+  ],
+  "test": [
+    {
+      "question": "What do you do with the found places?",
+      "options": ["A) Describe them in your logbook", "B) Ignore them", "C) Blow them up", "D) Forget them"],
+      "correct": 0,
+      "feedback": "Right: Record the places in writing."
+    },
+    {
+      "question": "How many secrets do you search for?",
+      "options": ["A) Three hidden places", "B) One place", "C) No places", "D) All places"],
+      "correct": 0,
+      "feedback": "You search for three hidden places."
+    }
+  ],
+  "password": {
+    "threshold": 80,
+    "encrypted": "aXNsYW5kLWV4cGxvcmVy"
+  }
+}

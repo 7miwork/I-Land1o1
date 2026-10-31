@@ -1,0 +1,50 @@
+{
+  "id": "l03",
+  "level": "level1",
+  "part": "part1",
+  "lang": "zh",
+  "num": "第03课",
+  "title": "探索岛屿",
+  "desc": "探索岛屿，了解其秘密通道和隐藏地点。",
+  "task": "在岛上找到三个隐藏地点并描述它们。",
+  "video": "/Videos/ZH/Level 1/ZH Level 1 Lesson 03.mp4",
+  "explanation": "岛上藏有许多秘密：秘密通道、洞穴和隐藏地点。您的任务是找到三个这样的特殊地点，并在您的海盗日志中记录。",
+  "quiz": [
+    {
+      "question": "您要寻找多少个隐藏地点？",
+      "options": ["A) 一个", "B) 三个", "C) 十个", "D) 没有"],
+      "correct": 1,
+      "feedback": "您要在岛上寻找三个隐藏地点。"
+    },
+    {
+      "question": "找到地点后做什么？",
+      "options": ["A) 在日志中描述它们", "B) 忽略它们", "C) 炸毁它们", "D) 吃掉它们"],
+      "correct": 0,
+      "feedback": "正确：将地点记录在笔记中。"
+    },
+    {
+      "question": "秘密通道在哪里？",
+      "options": ["A) 在岛上", "B) 在太空", "C) 在海洋中", "D) 在城堡里"],
+      "correct": 0,
+      "feedback": "秘密通道位于岛上。"
+    }
+  ],
+  "test": [
+    {
+      "question": "找到地点后做什么？",
+      "options": ["A) 在日志中描述它们", "B) 忽略它们", "C) 炸毁它们", "D) 忘记它们"],
+      "correct": 0,
+      "feedback": "正确：将地点记录在笔记中。"
+    },
+    {
+      "question": "您要寻找多少个秘密？",
+      "options": ["A) 三个隐藏地点", "B) 一个地点", "C) 没有地点", "D) 所有地点"],
+      "correct": 0,
+      "feedback": "您要寻找三个隐藏地点。"
+    }
+  ],
+  "password": {
+    "threshold": 80,
+    "encrypted": "aXNsYW5kLWV4cGxvcmVy"
+  }
+}

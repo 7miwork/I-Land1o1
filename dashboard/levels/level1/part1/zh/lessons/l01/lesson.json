@@ -1,0 +1,50 @@
+{
+  "id": "l01",
+  "level": "level1",
+  "part": "part1",
+  "lang": "zh",
+  "num": "第01课",
+  "title": "指南针",
+  "desc": "学习船上的指南针如何工作以及如何用它导航。",
+  "task": "使用指南针在岛上找到隐藏的宝藏。",
+  "video": "/Videos/ZH/Level 1/ZH Level 1 Lesson 01.mp4",
+  "explanation": "指南针始终显示四个基本方向：北、东、南、西。在 Minecraft Education 中，您可以通过物品栏打开它。这有助于您在地图上导航并找到岛上的隐藏宝藏。",
+  "quiz": [
+    {
+      "question": "指南针不显示哪个方向？",
+      "options": ["A) 北", "B) 东", "C) 通往宝藏的方向（魔法）", "D) 南"],
+      "correct": 2,
+      "feedback": "指南针只显示基本方向，不直接显示宝藏。"
+    },
+    {
+      "question": "在哪里打开 Minecraft Education 中的指南针？",
+      "options": ["A) 在物品栏", "B) 在聊天中", "C) 在设置菜单", "D) 在箱子中"],
+      "correct": 0,
+      "feedback": "正确，通过物品栏。"
+    },
+    {
+      "question": "指南针上的 N、E、S、W 代表什么？",
+      "options": ["A) 北、东、南、西", "B) 装饰性字母", "C) 北、东、南、西", "D) 都一样"],
+      "correct": 2,
+      "feedback": "N=北, E=东, S=南, W=西。"
+    }
+  ],
+  "test": [
+    {
+      "question": "指南针在岛上有什么用途？",
+      "options": ["A) 定位和寻找宝藏", "B) 煮食", "C) 飞行", "D) 挖掘"],
+      "correct": 0,
+      "feedback": "指南针帮助您导航并找到宝藏。"
+    },
+    {
+      "question": "指南针显示多少个主要方向？",
+      "options": ["A) 两个", "B) 四个", "C) 六个", "D) 八个"],
+      "correct": 1,
+      "feedback": "指南针显示四个主要方向。"
+    }
+  ],
+  "password": {
+    "threshold": 80,
+    "encrypted": "Z2VtLXJld2FyZA=="
+  }
+}

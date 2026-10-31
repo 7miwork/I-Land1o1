@@ -1,8 +1,9 @@
 /* ============================================================
-   I-Land1o1 – Single Lesson Page (Level 1, Deutsch)
+   I-Land1o1 – Single Lesson Page (Level 1, Mehrsprachig)
    ------------------------------------------------------------
-   Aufruf: /dashboard/lesson.html?id=l01
-   Zeigt Video + Erklärtext + Quiz + Test einer Lektion.
+   Aufruf: /dashboard/lesson.html?level=level1&part=part1&lang=de&id=l01
+   Lädt Lektion aus JSON, zeigt Video klein mit Play-Overlay,
+   Quiz + Test mit A/B/C/D, Zufallsgenerator, Bewertung + Passwort.
    ============================================================ */
 
 (function () {
@@ -15,15 +16,13 @@
     && cfg.SUPABASE_ANON_KEY.indexOf('HIER_') !== 0
     && cfg.SUPABASE_ANON_KEY.length > 20;
 
-  const LESSONS = window.ILAND_LESSONS || [];
   const params = new URLSearchParams(window.location.search);
+  const level = params.get('level') || 'level1';
+  const part = params.get('part') || 'part1';
+  const lang = params.get('lang') || 'de';
   const lessonId = params.get('id');
-  const lesson = LESSONS.find((l) => l.id === lessonId);
 
-  if (!lesson) {
-    document.body.innerHTML = '<p style="padding:2rem;font-family:Nunito,sans-serif;color:#f0ad4e;">Lektion nicht gefunden. <a href="/dashboard/">Zurück zum Dashboard</a></p>';
-    return;
-  }
+  let lesson = null;
 
   const els = {
     title: document.getElementById('lessonTitle'),
@@ -36,16 +35,61 @@
     testBox: document.getElementById('testBox'),
     quizResult: document.getElementById('quizResult'),
     testResult: document.getElementById('testResult'),
+    passwordResult: document.getElementById('passwordResult'),
+    scoreBox: document.getElementById('scoreBox'),
     doneBtn: document.getElementById('btnDone'),
     backBtn: document.getElementById('btnBack'),
     lock: document.getElementById('lockNotice'),
     content: document.getElementById('lessonContent'),
+    langLabel: document.getElementById('langLabel'),
   };
 
   let sbClient = null;
   let currentUserId = 'anon';
   let hasAccess = null;
   let done = new Set();
+  let quizState = null;
+  let testState = null;
+
+  function shuffle(array) {
+    const a = array.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  async function loadLessonFromJson() {
+    if (!lessonId) {
+      document.body.innerHTML = '<p style="padding:2rem;font-family:Nunito,sans-serif;color:#f0ad4e;">Keine Lektion angegeben. <a href="/dashboard/">Zurück zum Dashboard</a></p>';
+      return;
+    }
+
+    let tries = 0;
+    while (!window.ILAND_LEVELS || Object.keys(window.ILAND_LEVELS).length === 0) {
+      if (tries++ > 50) break;
+      await new Promise(r => setTimeout(r, 100));
+    }
+
+    const key = level + '/' + part + '/' + lang + '/' + lessonId;
+    lesson = window.ILAND_LEVELS[key];
+
+    if (!lesson) {
+      try {
+        const resp = await fetch('/dashboard/levels/' + level + '/' + part + '/' + lang + '/lessons/' + lessonId + '/lesson.json');
+        if (resp.ok) lesson = await resp.json();
+      } catch (e) { console.warn('JSON-Laden fehlgeschlagen:', e); }
+    }
+
+    if (!lesson) {
+      document.body.innerHTML = '<p style="padding:2rem;font-family:Nunito,sans-serif;color:#f0ad4e;">Lektion nicht gefunden. <a href="/dashboard/">Zurück zum Dashboard</a></p>';
+      return;
+    }
+
+    if (els.langLabel) els.langLabel.textContent = '(' + lesson.lang.toUpperCase() + ')';
+    render();
+  }
 
   const STORAGE_PREFIX = 'iland-progress-de-level1:';
   function loadDone() {
@@ -80,47 +124,84 @@
     videoEl.src = lesson.video;
   }
 
+  function prepareQuestions(raw) {
+    const shuffled = shuffle(raw);
+    return shuffled.map(function (q) {
+      const opts = q.options.slice();
+      const correctText = opts[q.correct];
+      const mixedOpts = shuffle(opts);
+      const newCorrect = mixedOpts.indexOf(correctText);
+      return {
+        question: q.question,
+        options: mixedOpts,
+        correct: newCorrect,
+        feedback: q.feedback,
+      };
+    });
+  }
+
   function renderQuestions(box, questions, kind) {
     box.innerHTML = '';
-    questions.forEach((q, qi) => {
+    questions.forEach(function (q, qi) {
       const fieldset = document.createElement('fieldset');
       fieldset.className = 'q-block';
       const legend = document.createElement('legend');
-      legend.textContent = `${qi + 1}. ${q.q}`;
+      legend.textContent = (qi + 1) + '. ' + q.question;
       fieldset.appendChild(legend);
-      q.a.forEach((opt, ai) => {
-        const id = `${kind}-${qi}-${ai}`;
-        const label = document.createElement('label');
+
+      var letters = ['A', 'B', 'C', 'D'];
+      q.options.forEach(function (opt, ai) {
+        var id = kind + '-' + qi + '-' + ai;
+        var label = document.createElement('label');
         label.className = 'q-option';
-        const input = document.createElement('input');
+        var input = document.createElement('input');
         input.type = 'radio';
-        input.name = `${kind}-${qi}`;
+        input.name = kind + '-' + qi;
         input.id = id;
         input.value = ai;
         label.appendChild(input);
-        label.append(' ' + opt);
+        label.append(' ' + letters[ai] + '. ' + opt.replace(/^[A-D]\)\s*/, ''));
         fieldset.appendChild(label);
       });
       box.appendChild(fieldset);
     });
   }
 
-  function score(questions, kind) {
-    let correct = 0;
-    questions.forEach((q, qi) => {
-      const sel = document.querySelector(`input[name="${kind}-${qi}"]:checked`);
+  function scoreQuestions(questions, kind) {
+    var correct = 0;
+    questions.forEach(function (q, qi) {
+      var sel = document.querySelector('input[name="' + kind + '-' + qi + '"]:checked');
       if (sel && parseInt(sel.value, 10) === q.correct) correct++;
     });
     return correct;
   }
 
   function showResult(kind, correct, total) {
-    const box = kind === 'quiz' ? els.quizResult : els.testResult;
-    const pct = Math.round((correct / total) * 100);
+    var box = kind === 'quiz' ? els.quizResult : els.testResult;
+    var pct = Math.round((correct / total) * 100);
     box.hidden = false;
-    box.textContent = `${kind === 'quiz' ? 'Quiz' : 'Test'}: ${correct} / ${total} richtig (${pct}%). ` +
+    box.textContent = (kind === 'quiz' ? 'Quiz' : 'Test') + ': ' + correct + ' / ' + total + ' richtig (' + pct + '%). ' +
       (pct >= 60 ? 'Gut gemacht, Matrose!' : 'Noch einmal versuchen, kleiner Pirat!');
     box.className = pct >= 60 ? 'msg--ok' : 'msg--error';
+
+    if (els.scoreBox) {
+      els.scoreBox.hidden = false;
+      els.scoreBox.textContent = 'Gesamt: ' + pct + '%';
+    }
+
+    if (kind === 'test' && lesson.password && pct >= lesson.password.threshold) {
+      showPassword();
+    }
+  }
+
+  function showPassword() {
+    if (!els.passwordResult) return;
+    var enc = lesson.password.encrypted;
+    var pw = '';
+    try { pw = atob(enc); } catch (e) { pw = enc; }
+    els.passwordResult.hidden = false;
+    els.passwordResult.textContent = '🎉 Passwort freigeschaltet: ' + pw;
+    els.passwordResult.className = 'msg--ok';
   }
 
   async function markDone() {
@@ -136,12 +217,57 @@
     }
   }
 
-  // ---------- Video klein / vergrößert ----------
-  let videoExpanded = false;
-  const videoWrapper = document.getElementById('videoWrapper');
-  const videoPlayOverlay = document.getElementById('videoPlayOverlay');
-  const videoPlayBtn = document.getElementById('videoPlayBtn');
-  const videoExpandBtn = document.getElementById('videoExpandBtn');
+  function render() {
+    if (!lesson) return;
+    if (els.title) els.title.textContent = lesson.title;
+    if (els.num) els.num.textContent = lesson.num;
+    if (els.desc) els.desc.textContent = lesson.desc;
+    if (els.badge) els.badge.textContent = done.has(lesson.id) ? 'ERLEDIGT ✓' : 'OFFEN';
+
+    var locked = lesson.type === 'lektion' && hasAccess === false;
+    if (locked) {
+      if (els.lock) { els.lock.hidden = false; els.lock.textContent = '🔒 Für diese Lektion brauchst du ein aktives Abo.\nDeine Eltern können es unter „⚓ Abo & Zahlung“ buchen.'; }
+      if (els.content) els.content.hidden = true;
+      if (els.doneBtn) els.doneBtn.hidden = true;
+      if (els.video) els.video.hidden = true;
+      return;
+    }
+    if (els.lock) els.lock.hidden = true;
+    if (els.content) els.content.hidden = false;
+    if (els.doneBtn) els.doneBtn.hidden = false;
+    if (els.doneBtn) {
+      els.doneBtn.textContent = done.has(lesson.id) ? '✓ Erledigt' : '✅ Als erledigt markieren';
+      els.doneBtn.disabled = done.has(lesson.id);
+    }
+
+    if (els.explanation) els.explanation.textContent = lesson.explanation || '';
+
+    var showQuiz = lesson.type === 'lektion';
+    document.getElementById('quizSection').hidden = !showQuiz;
+    document.getElementById('testSection').hidden = !showQuiz;
+
+    if (showQuiz) {
+      if (!quizState) {
+        quizState = prepareQuestions(lesson.quiz || []);
+        testState = prepareQuestions(lesson.test || []);
+      }
+      renderQuestions(els.quizBox, quizState, 'quiz');
+      renderQuestions(els.testBox, testState, 'test');
+      document.getElementById('btnQuiz').onclick = function () { showResult('quiz', scoreQuestions(quizState, 'quiz'), quizState.length); };
+      document.getElementById('btnTest').onclick = function () { showResult('test', scoreQuestions(testState, 'test'), testState.length); };
+      if (els.quizResult) els.quizResult.hidden = true;
+      if (els.testResult) els.testResult.hidden = true;
+      if (els.passwordResult) els.passwordResult.hidden = true;
+    }
+
+    loadVideo();
+  }
+
+  var videoExpanded = false;
+  var videoWrapper = document.getElementById('videoWrapper');
+  var videoPlayOverlay = document.getElementById('videoPlayOverlay');
+  var videoPlayBtn = document.getElementById('videoPlayBtn');
+  var videoExpandBtn = document.getElementById('videoExpandBtn');
 
   function setVideoSize(expanded) {
     videoExpanded = expanded;
@@ -165,63 +291,26 @@
   }
 
   if (videoPlayBtn) {
-    videoPlayBtn.addEventListener('click', (e) => {
+    videoPlayBtn.addEventListener('click', function (e) {
       e.stopPropagation();
       setVideoSize(true);
     });
   }
   if (videoExpandBtn) {
-    videoExpandBtn.addEventListener('click', (e) => {
+    videoExpandBtn.addEventListener('click', function (e) {
       e.stopPropagation();
       toggleVideo();
     });
   }
   if (videoWrapper) {
-    videoWrapper.addEventListener('click', () => {
+    videoWrapper.addEventListener('click', function () {
       if (!videoExpanded) setVideoSize(true);
     });
   }
   if (els.video) {
-    els.video.addEventListener('click', () => {
+    els.video.addEventListener('click', function () {
       if (!videoExpanded) setVideoSize(true);
     });
-  }
-
-  function render() {
-    if (els.title) els.title.textContent = lesson.title;
-    if (els.num) els.num.textContent = lesson.num;
-    if (els.desc) els.desc.textContent = lesson.desc;
-    if (els.badge) els.badge.textContent = done.has(lesson.id) ? 'ERLEDIGT ✓' : 'OFFEN';
-
-    const locked = lesson.type === 'lektion' && hasAccess === false;
-    if (locked) {
-      if (els.lock) { els.lock.hidden = false; els.lock.textContent = '🔒 Für diese Lektion brauchst du ein aktives Abo.\nDeine Eltern können es unter „⚓ Abo & Zahlung“ buchen.'; }
-      if (els.content) els.content.hidden = true;
-      if (els.doneBtn) els.doneBtn.hidden = true;
-      if (els.video) els.video.hidden = true;
-      return;
-    }
-    if (els.lock) els.lock.hidden = true;
-    if (els.content) els.content.hidden = false;
-    if (els.doneBtn) els.doneBtn.hidden = false;
-    if (els.doneBtn) {
-      els.doneBtn.textContent = done.has(lesson.id) ? '✓ Erledigt' : '✅ Als erledigt markieren';
-      els.doneBtn.disabled = done.has(lesson.id);
-    }
-
-    if (els.explanation) els.explanation.textContent = lesson.explanation || '';
-
-    const showQuiz = lesson.type === 'lektion';
-    document.getElementById('quizSection').hidden = !showQuiz;
-    document.getElementById('testSection').hidden = !showQuiz;
-    if (showQuiz) {
-      renderQuestions(els.quizBox, lesson.quiz || [], 'quiz');
-      renderQuestions(els.testBox, lesson.test || [], 'test');
-      document.getElementById('btnQuiz').onclick = () => showResult('quiz', score(lesson.quiz || [], 'quiz'), lesson.quiz.length);
-      document.getElementById('btnTest').onclick = () => showResult('test', score(lesson.test || [], 'test'), lesson.test.length);
-    }
-
-    loadVideo();
   }
 
   async function boot() {
@@ -234,21 +323,22 @@
           currentUserId = data.session.user.id;
           try {
             const { data: prof } = await sbClient.from('profiles').select('display_name, role').eq('id', currentUserId).maybeSingle();
-            const who = document.getElementById('authWho');
+            var who = document.getElementById('authWho');
             if (who && prof) who.textContent = '🏴‍☠️ ' + (prof.display_name || data.session.user.email);
           } catch (e) { /* ignore */ }
         } else {
-          window.location.replace('/login/index.html?next=' + encodeURIComponent('/dashboard/lesson.html?id=' + lessonId));
+          window.location.replace('/login/index.html?next=' + encodeURIComponent('/dashboard/lesson.html?level=' + level + '&part=' + part + '&lang=' + lang + '&id=' + lessonId));
           return;
         }
       } catch (err) { console.error('Lesson boot failed:', err); }
     }
     done = loadDone();
+    await loadLessonFromJson();
     checkAccess();
   }
 
   if (els.doneBtn) els.doneBtn.addEventListener('click', markDone);
-  if (els.backBtn) els.backBtn.addEventListener('click', () => { window.location.href = '/dashboard/'; });
+  if (els.backBtn) els.backBtn.addEventListener('click', function () { window.location.href = '/dashboard/'; });
 
   boot();
 })();

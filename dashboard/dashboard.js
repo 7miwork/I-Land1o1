@@ -57,7 +57,7 @@ async function checkAccess() {
 if (resumeBtn) {
   resumeBtn.addEventListener('click', () => {
     const next = LESSONS.find((l) => !done.has(l.id));
-    if (next) window.location.href = 'lesson.html?id=' + encodeURIComponent(next.id);
+    if (next) window.location.href = 'lesson.html?level=level1&part=part1&lang=de&id=' + encodeURIComponent(next.id);
   });
 }
 
@@ -247,7 +247,7 @@ grid.addEventListener('click', (e) => {
   if (!btn) return;
   const lesson = LESSONS.find((l) => l.id === btn.dataset.id);
   if (!lesson) return;
-  if (btn.dataset.action === 'play') window.location.href = 'lesson.html?id=' + encodeURIComponent(lesson.id);
+  if (btn.dataset.action === 'play') window.location.href = 'lesson.html?level=level1&part=part1&lang=de&id=' + encodeURIComponent(lesson.id);
   else toggleDone(lesson.id);
 });
 

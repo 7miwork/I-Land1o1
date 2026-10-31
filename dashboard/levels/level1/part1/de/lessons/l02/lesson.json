@@ -1,0 +1,50 @@
+{
+  "id": "l02",
+  "level": "level1",
+  "part": "part1",
+  "lang": "de",
+  "num": "Lektion 02",
+  "title": "Das Navigationstool",
+  "desc": "Erkunde, wie das Navigationstool deinen Weg auf der Karte anzeigt und dir hilft, die Route zu planen.",
+  "task": "Verfolge die Routen auf der Karte und markiere die wichtigsten Punkte.",
+  "video": "/Videos/DE/Level 1/DE Level 1 Lesson 02.mp4",
+  "explanation": "Das Navigationstool zeichnet deinen Weg auf der Karte auf und zeigt dir wichtige Punkte. So planst du deine Route über die Insel und verlierst nicht den Überblick, wo du schon warst.",
+  "quiz": [
+    {
+      "question": "Was macht das Navigationstool?",
+      "options": ["A) Zeigt deinen Weg auf der Karte", "B) Baut Häuser für dich", "C) Löscht die Insel", "D) Kauft Materialien"],
+      "correct": 0,
+      "feedback": "Es zeichnet deine Route und wichtige Punkte auf."
+    },
+    {
+      "question": "Warum markierst du wichtige Punkte?",
+      "options": ["A) Damit du den Weg nicht vergisst", "B) Um die Insel zu löschen", "C) Zum Spaß", "D) Für andere Spieler"],
+      "correct": 0,
+      "feedback": "Markierte Punkte helfen dir, dich zu orientieren."
+    },
+    {
+      "question": "Was kannst du auf der Karte sehen?",
+      "options": ["A) Deine Route und wichtige Punkte", "B) Nur Wasser", "C) Nur Bäume", "D) Nichts"],
+      "correct": 0,
+      "feedback": "Die Karte zeigt deine Route und markierte Punkte."
+    }
+  ],
+  "test": [
+    {
+      "question": "Warum ist die Route auf der Karte wichtig?",
+      "options": ["A) Damit du dich nicht verläufst", "B) Für die Optik", "C) Zum Löschen", "D) Zum Essen"],
+      "correct": 0,
+      "feedback": "Die Route hilft dir, den Überblick zu behalten."
+    },
+    {
+      "question": "Was planst du mit dem Navigationstool?",
+      "options": ["A) Deine Route über die Insel", "B) Ein Schiff", "C) Einen Drachen", "D) Nichts"],
+      "correct": 0,
+      "feedback": "Du planst deine Route über die Insel."
+    }
+  ],
+  "password": {
+    "threshold": 80,
+    "encrypted": "bml2LXN0b29wLXB3ZA=="
+  }
+}

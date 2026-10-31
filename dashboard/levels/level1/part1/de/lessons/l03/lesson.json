@@ -1,0 +1,50 @@
+{
+  "id": "l03",
+  "level": "level1",
+  "part": "part1",
+  "lang": "de",
+  "num": "Lektion 03",
+  "title": "Die Insel entdecken",
+  "desc": "Entdecke die abielle Insel und lerne ihre geheimen Gänge und versteckten Orte kennen.",
+  "task": "Finde die drei versteckten Orte auf der Insel und beschreibe sie.",
+  "video": "/Videos/DE/Level 1/DE Level 1 Lesson 03.mp4",
+  "explanation": "Die Insel birgt viele Geheimnisse: geheime Gänge, Höhlen und versteckte Orte. Deine Aufgabe ist es, drei dieser besonderen Orte zu finden und sie in deinem Piraten-Tagebuch festzuhalten.",
+  "quiz": [
+    {
+      "question": "Wie viele versteckte Orte suchst du?",
+      "options": ["A) Einen", "B) Drei", "C) Zehn", "D) Keine"],
+      "correct": 1,
+      "feedback": "Du suchst drei versteckte Orte auf der Insel."
+    },
+    {
+      "question": "Was tust du mit den gefundenen Orten?",
+      "options": ["A) Du beschreibst sie in deinem Tagebuch", "B) Du ignorierst sie", "C) Du sprengst sie", "D) Du isst sie"],
+      "correct": 0,
+      "feedback": "Richtig: Halte die Orte schriftlich fest."
+    },
+    {
+      "question": "Wo befinden sich geheime Gänge?",
+      "options": ["A) Auf der Insel", "B) Im Weltall", "C) Im Ozean", "D) Im Schloss"],
+      "correct": 0,
+      "feedback": "Geheime Gänge befinden sich auf der Insel."
+    }
+  ],
+  "test": [
+    {
+      "question": "Was tust du mit den gefundenen Orten?",
+      "options": ["A) Du beschreibst sie in deinem Tagebuch", "B) Du ignorierst sie", "C) Du sprengst sie", "D) Du vergisst sie"],
+      "correct": 0,
+      "feedback": "Richtig: Halte die Orte schriftlich fest."
+    },
+    {
+      "question": "Wie viele Geheimnisse suchst du?",
+      "options": ["A) Drei versteckte Orte", "B) Einen Ort", "C) Keine Orte", "D) Alle Orte"],
+      "correct": 0,
+      "feedback": "Du suchst drei versteckte Orte."
+    }
+  ],
+  "password": {
+    "threshold": 80,
+    "encrypted": "aW5zZWwtZXhwbG9yZXI="
+  }
+}

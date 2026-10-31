@@ -1,0 +1,50 @@
+{
+  "id": "l01",
+  "level": "level1",
+  "part": "part1",
+  "lang": "de",
+  "num": "Lektion 01",
+  "title": "Der Kompass",
+  "desc": "Lerne, wie der Kompass auf dem Schiff funktioniert und wie du mit ihm navigierst.",
+  "task": "Nutze den Kompass, um den versteckten Schatz auf der Insel zu finden.",
+  "video": "/Videos/DE/Level 1/DE Level 1 Lesson 01.mp4",
+  "explanation": "Der Kompass zeigt dir immer die vier Himmelsrichtungen: Norden, Osten, Süden und Westen. In Minecraft Education öffnest du ihn über das Inventar. Damit findest du dich auf der Karte zurecht und kannst den versteckten Schatz auf der Insel lokalisieren.",
+  "quiz": [
+    {
+      "question": "Welche Richtung zeigt ein Kompass nicht an?",
+      "options": ["A) Norden", "B) Osten", "C) Richtung Schatzkiste (magisch)", "D) Süden"],
+      "correct": 2,
+      "feedback": "Ein Kompass zeigt nur die Himmelsrichtungen, nicht direkt den Schatz."
+    },
+    {
+      "question": "Wo öffnest du den Kompass in Minecraft Education?",
+      "options": ["A) Im Inventar", "B) Im Chat", "C) Im Menü Einstellungen", "D) In der Truhe"],
+      "correct": 0,
+      "feedback": "Richtig, über das Inventar."
+    },
+    {
+      "question": "Was bedeuten N, E, S, W am Kompass?",
+      "options": ["A) Nord, East, Süd, West", "B) Nur decorative Buchstaben", "C) North, East, South, West", "D) Alles gleich"],
+      "correct": 2,
+      "feedback": "N=North, E=East, S=South, W=West."
+    }
+  ],
+  "test": [
+    {
+      "question": "Wozu dient der Kompass auf der Insel?",
+      "options": ["A) Zum Orientieren und Schatzfinden", "B) Zum Essen kochen", "C) Zum Fliegen", "D) Zum Graben"],
+      "correct": 0,
+      "feedback": "Der Kompass hilft dir, dich zu orientieren und den Schatz zu finden."
+    },
+    {
+      "question": "Wie viele Himmelsrichtungen zeigt ein Kompass?",
+      "options": ["A) Zwei", "B) Vier", "C) Sechs", "D) Acht"],
+      "correct": 1,
+      "feedback": "Ein Kompass zeigt vier Hauptrichtungen."
+    }
+  ],
+  "password": {
+    "threshold": 80,
+    "encrypted": "a29tcGFzc2EtZHJlbWFt"
+  }
+}

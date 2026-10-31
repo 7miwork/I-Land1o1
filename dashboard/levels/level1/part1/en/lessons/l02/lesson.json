@@ -1,0 +1,50 @@
+{
+  "id": "l02",
+  "level": "level1",
+  "part": "part1",
+  "lang": "en",
+  "num": "Lesson 02",
+  "title": "The Navigation Tool",
+  "desc": "Explore how the navigation tool shows your path on the map and helps you plan your route.",
+  "task": "Follow the routes on the map and mark the important points.",
+  "video": "/Videos/EN/Level 1/EN Level 1 Lesson 02.mp4",
+  "explanation": "The navigation tool records your path on the map and shows important points. This helps you plan your route across the island and not lose track of where you've been.",
+  "quiz": [
+    {
+      "question": "What does the navigation tool do?",
+      "options": ["A) Shows your path on the map", "B) Builds houses for you", "C) Deletes the island", "D) Buys materials"],
+      "correct": 0,
+      "feedback": "It records your route and important points."
+    },
+    {
+      "question": "Why do you mark important points?",
+      "options": ["A) So you don't forget the way", "B) To delete the island", "C) For fun", "D) For other players"],
+      "correct": 0,
+      "feedback": "Marked points help you orient yourself."
+    },
+    {
+      "question": "What can you see on the map?",
+      "options": ["A) Your route and marked points", "B) Only water", "C) Only trees", "D) Nothing"],
+      "correct": 0,
+      "feedback": "The map shows your route and marked points."
+    }
+  ],
+  "test": [
+    {
+      "question": "Why is the route on the map important?",
+      "options": ["A) So you don't get lost", "B) For looks", "C) For deleting", "D) For eating"],
+      "correct": 0,
+      "feedback": "The route helps you keep an overview."
+    },
+    {
+      "question": "What do you plan with the navigation tool?",
+      "options": ["A) Your route across the island", "B) A ship", "C) A dragon", "D) Nothing"],
+      "correct": 0,
+      "feedback": "You plan your route across the island."
+    }
+  ],
+  "password": {
+    "threshold": 80,
+    "encrypted": "bmF2LXRvb2wtcHdk"
+  }
+}

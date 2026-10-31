@@ -1,0 +1,50 @@
+{
+  "id": "l01",
+  "level": "level1",
+  "part": "part1",
+  "lang": "en",
+  "num": "Lesson 01",
+  "title": "The Compass",
+  "desc": "Learn how the compass on the ship works and how to navigate with it.",
+  "task": "Use the compass to find the hidden treasure on the island.",
+  "video": "/Videos/EN/Level 1/EN Level 1 Lesson 01.mp4",
+  "explanation": "The compass always shows the four cardinal directions: North, East, South, and West. In Minecraft Education, you open it via the inventory. This helps you navigate the map and find the hidden treasure on the island.",
+  "quiz": [
+    {
+      "question": "Which direction does a compass NOT show?",
+      "options": ["A) North", "B) East", "C) Direction to treasure (magical)", "D) South"],
+      "correct": 2,
+      "feedback": "A compass shows only cardinal directions, not the treasure directly."
+    },
+    {
+      "question": "Where do you open the compass in Minecraft Education?",
+      "options": ["A) In the inventory", "B) In the chat", "C) In the Settings menu", "D) In the chest"],
+      "correct": 0,
+      "feedback": "Correct, via the inventory."
+    },
+    {
+      "question": "What do N, E, S, W mean on the compass?",
+      "options": ["A) North, East, South, West", "B) Decorative letters", "C) North, East, South, West", "D) All the same"],
+      "correct": 2,
+      "feedback": "N=North, E=East, S=South, W=West."
+    }
+  ],
+  "test": [
+    {
+      "question": "What is the compass used for on the island?",
+      "options": ["A) Orientation and treasure hunting", "B) Cooking food", "C) Flying", "D) Digging"],
+      "correct": 0,
+      "feedback": "The compass helps you navigate and find the treasure."
+    },
+    {
+      "question": "How many main directions does a compass show?",
+      "options": ["A) Two", "B) Four", "C) Six", "D) Eight"],
+      "correct": 1,
+      "feedback": "A compass shows four main directions."
+    }
+  ],
+  "password": {
+    "threshold": 80,
+    "encrypted": "Y29tcGFzcy1yZXdhcmQ="
+  }
+}
