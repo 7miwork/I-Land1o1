@@ -155,6 +155,28 @@
       } catch (e) { console.warn('JSON-Laden fehlgeschlagen:', e); }
     }
 
+    // Fallback: alte lessons.js Daten nutzen, wenn noch keine JSON existiert
+    if (!lesson && window.ILAND_LESSONS) {
+      var old = window.ILAND_LESSONS.find(function (l) { return l.id === lessonId; });
+      if (old) {
+        lesson = {
+          id: old.id,
+          level: level,
+          part: part,
+          lang: lang,
+          num: old.num,
+          title: old.title,
+          desc: old.desc,
+          task: old.task,
+          video: old.video,
+          explanation: old.desc,
+          quiz: [],
+          test: [],
+          password: { threshold: 80, encrypted: '' }
+        };
+      }
+    }
+
     if (!lesson) {
       document.body.innerHTML = '<p style="padding:2rem;font-family:Nunito,sans-serif;color:#f0ad4e;">Lektion nicht gefunden. <a href="/dashboard/">Zurück zum Dashboard</a></p>';
       return;
@@ -252,7 +274,7 @@
 
   function showResult(kind, correct, total) {
     var box = kind === 'quiz' ? els.quizResult : els.testResult;
-    var pct = Math.round((correct / total) * 100);
+    var pct = total > 0 ? Math.round((correct / total) * 100) : 0;
     box.hidden = false;
     box.textContent = (kind === 'quiz' ? 'Quiz' : 'Test') + ': ' + correct + ' / ' + total + ' richtig (' + pct + '%). ' +
       (pct >= 60 ? 'Gut gemacht, Matrose!' : 'Noch einmal versuchen, kleiner Pirat!');
@@ -324,19 +346,26 @@
     if (els.explanation) els.explanation.textContent = lesson.explanation || '';
 
     var showQuiz = lesson.type === 'lektion';
-    document.getElementById('quizSection').hidden = !showQuiz;
-    document.getElementById('testSection').hidden = !showQuiz;
+    var hasQuiz = showQuiz && (lesson.quiz || []).length > 0;
+    var hasTest = showQuiz && (lesson.test || []).length > 0;
+    document.getElementById('quizSection').hidden = !hasQuiz;
+    document.getElementById('testSection').hidden = !hasTest;
 
-    if (showQuiz) {
+    if (hasQuiz) {
       if (!quizState) {
         quizState = prepareQuestions(lesson.quiz || []);
         testState = prepareQuestions(lesson.test || []);
       }
       renderQuestions(els.quizBox, quizState, 'quiz');
-      renderQuestions(els.testBox, testState, 'test');
       document.getElementById('btnQuiz').onclick = function () { showResult('quiz', scoreQuestions(quizState, 'quiz'), quizState.length); };
-      document.getElementById('btnTest').onclick = function () { showResult('test', scoreQuestions(testState, 'test'), testState.length); };
       if (els.quizResult) els.quizResult.hidden = true;
+    }
+    if (hasTest) {
+      if (!testState) {
+        testState = prepareQuestions(lesson.test || []);
+      }
+      renderQuestions(els.testBox, testState, 'test');
+      document.getElementById('btnTest').onclick = function () { showResult('test', scoreQuestions(testState, 'test'), testState.length); };
       if (els.testResult) els.testResult.hidden = true;
       if (els.passwordResult) els.passwordResult.hidden = true;
     }
