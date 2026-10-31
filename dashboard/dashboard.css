@@ -972,22 +972,30 @@ h1 {
 
 /* ---------- Video speziell für Handys (max. 640px) ---------- */
 @media (max-width: 640px) {
+  /* Wrapper: volle Breite, damit das Video nicht zusammenfällt */
+  .video-wrapper {
+    width: 100%;
+    max-width: none;
+  }
+
   /* Video: voller Breite, verzerrungsfrei, nie größer als Viewport */
   .video-wrapper video {
-    max-width: 100%;
+    width: 100%;
     height: auto;
+    aspect-ratio: 16 / 9;
     object-fit: contain;
     background: #000;
   }
 
   /* Expanded-Modus auf Handy: Höhe begrenzen, damit Buttons erreichbar bleiben */
   .video-wrapper.expanded {
-    max-width: 100%;
+    width: 100%;
+    max-width: none;
     max-height: 65vh;
     overflow: hidden;
   }
   .video-wrapper.expanded video {
-    max-width: 100%;
+    width: 100%;
     max-height: 65vh;
     object-fit: contain;
   }
