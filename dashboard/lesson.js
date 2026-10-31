@@ -72,14 +72,12 @@
         });
         if (!error && data && data.url) {
           videoEl.src = data.url;
-          videoEl.play().catch(() => {});
           return;
         }
         if (data && data.locked) { hasAccess = false; render(); return; }
       } catch (err) { console.warn('get-video-url Fehler:', err.message); }
     }
     videoEl.src = lesson.video;
-    videoEl.play().catch(() => {});
   }
 
   function renderQuestions(box, questions, kind) {
@@ -136,6 +134,57 @@
         user_id: currentUserId, lesson_id: lesson.id, done: true, updated_at: new Date().toISOString(),
       }, { onConflict: 'user_id,lesson_id' }).catch(() => {});
     }
+  }
+
+  // ---------- Video klein / vergrößert ----------
+  let videoExpanded = false;
+  const videoWrapper = document.getElementById('videoWrapper');
+  const videoPlayOverlay = document.getElementById('videoPlayOverlay');
+  const videoPlayBtn = document.getElementById('videoPlayBtn');
+  const videoExpandBtn = document.getElementById('videoExpandBtn');
+
+  function setVideoSize(expanded) {
+    videoExpanded = expanded;
+    if (expanded) {
+      videoWrapper.classList.add('expanded');
+      if (videoPlayOverlay) videoPlayOverlay.classList.add('hidden');
+      if (videoExpandBtn) videoExpandBtn.textContent = '⇩';
+      if (videoExpandBtn) videoExpandBtn.title = 'Verkleinern';
+      els.video.play().catch(() => {});
+    } else {
+      videoWrapper.classList.remove('expanded');
+      if (videoPlayOverlay) videoPlayOverlay.classList.remove('hidden');
+      if (videoExpandBtn) videoExpandBtn.textContent = '⛶';
+      if (videoExpandBtn) videoExpandBtn.title = 'Vergrößern';
+      els.video.pause();
+    }
+  }
+
+  function toggleVideo() {
+    setVideoSize(!videoExpanded);
+  }
+
+  if (videoPlayBtn) {
+    videoPlayBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setVideoSize(true);
+    });
+  }
+  if (videoExpandBtn) {
+    videoExpandBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleVideo();
+    });
+  }
+  if (videoWrapper) {
+    videoWrapper.addEventListener('click', () => {
+      if (!videoExpanded) setVideoSize(true);
+    });
+  }
+  if (els.video) {
+    els.video.addEventListener('click', () => {
+      if (!videoExpanded) setVideoSize(true);
+    });
   }
 
   function render() {

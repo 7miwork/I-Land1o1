@@ -42,7 +42,13 @@
 
     <!-- Lektions-Inhalt -->
     <section class="lesson-panel" id="lessonContent">
-      <video id="lessonVideo" controls playsinline preload="auto" poster=""></video>
+      <div class="video-wrapper" id="videoWrapper">
+        <video id="lessonVideo" playsinline preload="auto" poster=""></video>
+        <div class="video-play-overlay" id="videoPlayOverlay">
+          <button class="video-play-btn" id="videoPlayBtn">▶ Play</button>
+        </div>
+        <button class="video-expand-btn" id="videoExpandBtn" title="Vergrößern / Verkleinern">⛶</button>
+      </div>
 
       <div class="text-section">
         <h2 class="section-title">📜 Erklärung</h2>

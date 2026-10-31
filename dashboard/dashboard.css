@@ -880,4 +880,93 @@ h1 {
   border: 2px solid oklch(95% .02 85 / .35);
 }
 .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ---------- Video klein / vergrößert (Lesson-Seite) ---------- */
+.video-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 18px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 4px 4px 0 oklch(82% .16 85 / .15);
+  background: #000;
+}
+
+/* Kleinformat: max ~480px, passt auf jedem Handy */
+.video-wrapper video {
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  display: block;
+  cursor: pointer;
+}
+
+/* Vergrößert: bis ~900px */
+.video-wrapper.expanded {
+  max-width: 920px;
+}
+.video-wrapper.expanded video {
+  max-width: 920px;
+}
+
+/* Play-Overlay über dem kleinen Video */
+.video-play-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 12, 28, .45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  cursor: pointer;
+  opacity: 1;
+  transition: opacity .2s ease;
+}
+.video-play-overlay.hidden { opacity: 0; pointer-events: none; }
+
+.video-play-btn {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--wood-dark);
+  border: none;
+  font-size: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 0 var(--gold-deep), 0 6px 0 rgba(0,0,0,.25);
+  transition: transform .16s ease;
+}
+.video-play-btn:active { transform: scale(.92); }
+
+/* Vergrößern / Verkleinern Button */
+.video-expand-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius);
+  border: 2px solid oklch(95% .02 85 / .45);
+  background: rgba(0, 12, 28, .6);
+  color: var(--parchment);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 3;
+}
+.video-expand-btn:hover { border-color: var(--gold); color: var(--gold); }
+.video-wrapper.expanded .video-expand-btn { color: var(--gold); border-color: var(--gold); }
+
+@media (max-width: 520px) {
+  .video-wrapper { margin: 0 auto 14px; }
+  .video-play-btn { width: 60px; height: 60px; font-size: 26px; }
+  .video-expand-btn { width: 32px; height: 32px; font-size: 16px; top: 8px; right: 8px; }
+}
 }
