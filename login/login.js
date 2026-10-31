@@ -34,6 +34,7 @@
   function showError(msg, kind) {
     if (!msg) {
       errorBox.hidden = true;
+      errorBox.textContent = '';
       return;
     }
     errorBox.hidden = false;
@@ -66,21 +67,32 @@
     const m = (err && err.message) || '';
     if (/invalid login credentials/i.test(m)) return 'E-Mail oder Passwort ist falsch.';
     if (/email not confirmed/i.test(m)) return 'Bitte bestätige zuerst die E-Mail im Postfach.';
-    if (/already registered|already exists/i.test(m)) return 'Diese E-Mail ist schon dabei – bitte anmelden.';
+    if (/already registered|already exists/i.test(m)) return 'Diese E-Mail ist schon registriert – bitte anmelden.';
     if (/confirm/i.test(m)) return 'Bitte bestätige zuerst die E-Mail im Postfach. 📬';
     if (/rate limit|too many/i.test(m)) return 'Zu viele Versuche – bitte kurz warten.';
     if (/password/i.test(m)) return 'Das Passwort ist zu schwach (mindestens 6 Zeichen).';
+    if (/invalid email/i.test(m)) return 'Bitte eine gültige E-Mail-Adresse eingeben.';
     return m || 'Etwas ist schiefgelaufen. Bitte erneut versuchen.';
   }
 
+  function isValidEmail(mail) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail);
+  }
+
   function goDashboard(user) {
-    // Weiter zur naechsten Seite, falls per ?next= gewuenscht
     const next = new URLSearchParams(window.location.search).get('next');
     const safe = next && next.startsWith('/dashboard/') && !next.startsWith('//') ? next : '/dashboard/';
     const url = new URL(safe, window.location.origin);
     url.searchParams.set('fromLogin', '1');
     if (user) url.searchParams.set('angemeldet', '1');
     window.location.replace(url.toString());
+  }
+
+  // Wenn schon eingeloggt -> direkt zum Dashboard
+  if (client) {
+    client.getSession().then(({ data: { session } }) => {
+      if (session) goDashboard(session.user);
+    });
   }
 
   tabLogin.addEventListener('click', () => setMode('login'));
@@ -102,6 +114,14 @@
       showError('Bitte E-Mail und Passwort ausfüllen.');
       return;
     }
+    if (!isValidEmail(mail)) {
+      showError('Bitte eine gültige E-Mail-Adresse eingeben.');
+      return;
+    }
+    if (mode === 'signup' && pw.length < 6) {
+      showError('Das Passwort muss mindestens 6 Zeichen haben.');
+      return;
+    }
 
     submit.disabled = true;
     try {
@@ -120,17 +140,21 @@
         if (error) throw error;
 
         if (!data.session) {
-          // Bestaetigung per E-Mail noetig -> Login-Tab zeigen
+          // E-Mail-Bestätigung nötig → Login-Tab zeigen, Einladung kann erst nach Bestätigung eingelöst werden
           setMode('login');
           showError('Fast geschafft! Bitte bestätige die E-Mail, die wir dir geschickt haben. 📬', 'ok');
           return;
         }
 
-        // Eltern-Code direkt einloesen, falls angegeben
+        // Eltern-Code direkt einlösen, falls angegeben
         const code = invite ? invite.value.trim() : '';
         if (code && selectedRole() === 'student') {
           const { error: linkError } = await client.rpc('accept_invite', { p_code: code });
-          if (linkError) console.warn('Eltern-Code nicht eingelöst:', linkError.message);
+          if (linkError) {
+            showError('Einladungs-Code konnte nicht eingelöst werden: ' + linkError.message);
+            submit.disabled = false;
+            return;
+          }
         }
         goDashboard(data.session.user);
       } else {
