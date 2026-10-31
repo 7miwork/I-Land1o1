@@ -893,22 +893,24 @@ h1 {
   overflow: hidden;
   box-shadow: 4px 4px 0 oklch(82% .16 85 / .15);
   background: #000;
+  /* Niemals breiter als der Viewport – verhindert horizontales Scrollen */
+  max-width: min(480px, 100vw);
 }
 
-/* Kleinformat: max ~480px, passt auf jedem Handy */
+/* Kleinformat: Video passt sich dem Wrapper an, YouTube-ähnlich */
 .video-wrapper video {
   width: 100%;
-  max-width: 480px;
   height: auto;
   aspect-ratio: 16 / 9;
   display: block;
   cursor: pointer;
   object-fit: contain;
+  background: #000;
 }
 
-/* Vergrößert: bis ~900px */
+/* Vergrößert (Desktop): bis ~900px */
 .video-wrapper.expanded {
-  max-width: 920px;
+  max-width: min(920px, 100vw);
 }
 .video-wrapper.expanded video {
   max-width: 920px;
@@ -976,13 +978,14 @@ h1 {
 
 /* ---------- Video speziell für Handys (max. 640px) ---------- */
 @media (max-width: 640px) {
-  /* Wrapper: volle Breite, damit das Video nicht zusammenfällt */
+  /* Wrapper: volle Breite, nie mehr als Viewport – verhindert seitliches Wachsen */
   .video-wrapper {
     width: 100%;
-    max-width: none;
+    max-width: 100vw;
+    margin: 0 auto 14px;
   }
 
-  /* Video: voller Breite, verzerrungsfrei, nie größer als Viewport */
+  /* Video: YouTube-ähnlich – volle Breite, 16:9, nie verzerrt */
   .video-wrapper video {
     width: 100%;
     height: auto;
@@ -991,16 +994,16 @@ h1 {
     background: #000;
   }
 
-  /* Expanded-Modus auf Handy: Höhe begrenzen, damit Buttons erreichbar bleiben */
+  /* Expanded-Modus auf Handy: höher, aber nie über den Bildschirmrand */
   .video-wrapper.expanded {
     width: 100%;
-    max-width: none;
-    max-height: 65vh;
+    max-width: 100vw;
+    max-height: 85vh;
     overflow: hidden;
   }
   .video-wrapper.expanded video {
     width: 100%;
-    max-height: 65vh;
+    max-height: 85vh;
     object-fit: contain;
   }
 
