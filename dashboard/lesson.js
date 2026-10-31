@@ -47,6 +47,7 @@
   let sbClient = null;
   let currentUserId = 'anon';
   let hasAccess = null;
+  let lessonAccess = null;
   let done = new Set();
   let quizState = null;
   let testState = null;
@@ -58,6 +59,78 @@
       [a[i], a[j]] = [a[j], a[i]];
     }
     return a;
+  }
+
+  // ---------- Lektions-Reihenfolge (kein Überspringen) ----------
+  function lessonNumber(id) {
+    var m = String(id).match(/(\d+)/);
+    return m ? parseInt(m[1], 10) : 9999;
+  }
+
+  function getPreviousLessonIds(currentId) {
+    // Alle bekannten Lektionen derselben Sprache/Part mit kleinerer Nummer
+    var all = [];
+    for (var k in window.ILAND_LEVELS) {
+      if (window.ILAND_LEVELS.hasOwnProperty(k)) {
+        var l = window.ILAND_LEVELS[k];
+        if (l.lang === lang && l.part === part && l.level === level) {
+          all.push(l.id);
+        }
+      }
+    }
+    all.sort(function (a, b) { return lessonNumber(a) - lessonNumber(b); });
+    var idx = all.indexOf(currentId);
+    return idx > 0 ? all.slice(0, idx) : [];
+  }
+
+  async function checkLessonAccess(targetId) {
+    var result = { allowed: true, reason: '', remaining: null };
+
+    // 1. Reihenfolge: alle vorherigen Lektionen müssen done sein
+    var previous = getPreviousLessonIds(targetId);
+    for (var i = 0; i < previous.length; i++) {
+      if (!done.has(previous[i])) {
+        var prevLesson = window.ILAND_LEVELS[level + '/' + part + '/' + lang + '/' + previous[i]];
+        var prevName = prevLesson ? prevLesson.num : previous[i];
+        result.allowed = false;
+        result.reason = 'Bitte mache erst die Lektionen der Reihe nach (aktuell: ' + prevName + ').';
+        return result;
+      }
+    }
+
+    // 2. Wenn nicht angemeldet oder kein Supabase -> lokal freigeben (Entwicklung)
+    if (!sbClient || currentUserId === 'anon') { return result; }
+
+    // 3. Genereller Zugang (Einmal-Kauf = alles frei, Abo = geprüft)
+    try {
+      const { data, error } = await sbClient.rpc('has_course_access');
+      if (!error) {
+        if (!data) {
+          result.allowed = false;
+          result.reason = 'Du brauchst ein aktives Abo oder einen einmaligen Kauf für diese Lektion.';
+          return result;
+        }
+      } else {
+        console.warn('has_course_access Fehler:', error.message);
+      }
+    } catch (err) { console.warn('Zugang nicht prüfbar:', err.message); }
+
+    // 4. Monatliches Kontingent für Abo-Nutzer (nur wenn has_course_access true war)
+    try {
+      const { data: quota, error: qerr } = await sbClient.rpc('get_lesson_quota', { target_lesson_id: targetId });
+      if (!qerr && quota) {
+        if (quota.allowed === false) {
+          result.allowed = false;
+          result.reason = quota.reason || 'Dein monatliches Lektionskontingent ist aufgebraucht.';
+        }
+        if (quota.remaining !== undefined) result.remaining = quota.remaining;
+      }
+    } catch (err) {
+      // RPC existiert noch nicht -> Kontingent-Prüfung überspringen (graceful)
+      console.warn('get_lesson_quota RPC noch nicht verfügbar:', err.message);
+    }
+
+    return result;
   }
 
   async function loadLessonFromJson() {
@@ -88,6 +161,7 @@
     }
 
     if (els.langLabel) els.langLabel.textContent = '(' + lesson.lang.toUpperCase() + ')';
+    lessonAccess = await checkLessonAccess(lesson.id);
     render();
   }
 
@@ -215,6 +289,13 @@
         user_id: currentUserId, lesson_id: lesson.id, done: true, updated_at: new Date().toISOString(),
       }, { onConflict: 'user_id,lesson_id' }).catch(() => {});
     }
+
+    // Monatliches Kontingent serverseitig erhöhen (nur Abo-Nutzer, graceful wenn RPC fehlt)
+    if (sbClient && currentUserId !== 'anon') {
+      try {
+        await sbClient.rpc('increment_lesson_quota', { finished_lesson_id: lesson.id }).catch(() => {});
+      } catch (e) { /* RPC existiert noch nicht */ }
+    }
   }
 
   function render() {
@@ -224,9 +305,9 @@
     if (els.desc) els.desc.textContent = lesson.desc;
     if (els.badge) els.badge.textContent = done.has(lesson.id) ? 'ERLEDIGT ✓' : 'OFFEN';
 
-    var locked = lesson.type === 'lektion' && hasAccess === false;
+    var locked = lesson.type === 'lektion' && lessonAccess && !lessonAccess.allowed;
     if (locked) {
-      if (els.lock) { els.lock.hidden = false; els.lock.textContent = '🔒 Für diese Lektion brauchst du ein aktives Abo.\nDeine Eltern können es unter „⚓ Abo & Zahlung“ buchen.'; }
+      if (els.lock) { els.lock.hidden = false; els.lock.textContent = '🔒 ' + (lessonAccess.reason || 'Diese Lektion ist gesperrt.'); }
       if (els.content) els.content.hidden = true;
       if (els.doneBtn) els.doneBtn.hidden = true;
       if (els.video) els.video.hidden = true;
@@ -334,7 +415,7 @@
     }
     done = loadDone();
     await loadLessonFromJson();
-    checkAccess();
+    // checkLessonAccess wurde bereits in loadLessonFromJson aufgerufen
   }
 
   if (els.doneBtn) els.doneBtn.addEventListener('click', markDone);
