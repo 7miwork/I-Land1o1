@@ -969,4 +969,75 @@ h1 {
   .video-play-btn { width: 60px; height: 60px; font-size: 26px; }
   .video-expand-btn { width: 32px; height: 32px; font-size: 16px; top: 8px; right: 8px; }
 }
+
+/* ---------- Mobil-Optimierung (Handy) ---------- */
+@media (max-width: 640px) {
+  /* Topbar: kompakter, Logo kleiner */
+  .topbar {
+    padding: 10px 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .logo { font-size: 20px; }
+  .logo img { width: 34px; height: 34px; }
+  .topnav {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .topnav a { font-size: 12px; padding: 6px 10px; }
+  .who { font-size: 12px; }
+
+  /* Hero: kleinere Schriftgrößen */
+  .kicker { font-size: 9px; padding: 6px 10px; letter-spacing: 1px; }
+  h1 { font-size: clamp(30px, 8vw, 48px); }
+  .sub { font-size: 14px; line-height: 1.5; }
+  .section-title { font-size: clamp(22px, 6vw, 32px); }
+
+  /* Wrap: weniger Padding */
+  .wrap { padding: 16px 12px 48px; }
+
+  /* Lektions-Panels: kompakter */
+  .lesson-panel { padding: 12px; margin-top: 16px; }
+
+  /* Video: voller Breite */
+  .video-wrapper video { max-width: 100%; }
+  .video-wrapper.expanded video { max-width: 100%; }
+  .video-wrapper.expanded { max-width: 100%; }
+
+  /* Text-Bereich */
+  .text-section p { font-size: 15px; line-height: 1.6; }
+
+  /* Quiz/Test Optionen: größerer Touch-Bereich */
+  .q-option { font-size: 14px; padding: 8px 0; }
+  .q-option input { width: 22px; height: 22px; }
+  .q-block legend { font-size: 16px; }
+
+  /* Buttons: volle Breite */
+  .btn { padding: 10px 14px; font-size: 13px; }
+  .lesson-actions { flex-direction: column; }
+  .lesson-actions .btn { width: 100%; text-align: center; }
+
+  /* Grid: 1 Spalte */
+  .grid { grid-template-columns: 1fr; gap: 14px; }
+
+  /* Karten: kompakter */
+  .card { padding: 14px; }
+  .card-title { font-size: 22px; }
+  .card-desc { font-size: 13px; }
+
+  /* Fortschritt */
+  .progress-card { padding: 12px 14px; }
+  .progress-label { font-size: 14px; }
+  .progress-count { font-size: 11px; }
+
+  /* Footer */
+  .footer { padding: 16px 12px; font-size: 12px; }
+
+  /* Lesson-Header */
+  .lesson-num { font-size: 11px; }
+  .lesson-badge { font-size: 10px; padding: 4px 8px; }
+}
 }
