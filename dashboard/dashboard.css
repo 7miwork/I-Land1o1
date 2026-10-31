@@ -1040,4 +1040,54 @@ h1 {
   .lesson-num { font-size: 11px; }
   .lesson-badge { font-size: 10px; padding: 4px 8px; }
 }
+
+/* ---------- Telefon-Feld (Registrierung) ---------- */
+.phone-row {
+  margin-top: 14px;
+}
+.phone-input-wrap {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+.phone-country {
+  padding: 8px 10px;
+  border: 2px solid oklch(95% .02 85 / .35);
+  border-radius: var(--radius);
+  background: var(--parchment);
+  color: var(--ink);
+  font-size: 14px;
+  min-width: 150px;
+  cursor: pointer;
+}
+.phone-country:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+.phone-input-wrap input[type="tel"] {
+  flex: 1;
+  padding: 8px 10px;
+  border: 2px solid oklch(95% .02 85 / .35);
+  border-radius: var(--radius);
+  background: var(--parchment);
+  color: var(--ink);
+  font-size: 14px;
+}
+.phone-input-wrap input[type="tel"]:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+.req {
+  color: var(--red);
+  font-weight: bold;
+}
+
+@media (max-width: 520px) {
+  .phone-input-wrap {
+    flex-direction: column;
+  }
+  .phone-country {
+    min-width: auto;
+    width: 100%;
+  }
 }
