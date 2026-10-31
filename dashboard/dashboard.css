@@ -887,6 +887,8 @@ h1 {
   display: flex;
   justify-content: center;
   margin: 0 auto 18px;
+  width: 100%;
+  max-width: 480px;
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: 4px 4px 0 oklch(82% .16 85 / .15);
@@ -901,6 +903,7 @@ h1 {
   aspect-ratio: 16 / 9;
   display: block;
   cursor: pointer;
+  object-fit: contain;
 }
 
 /* Vergrößert: bis ~900px */
@@ -909,6 +912,7 @@ h1 {
 }
 .video-wrapper.expanded video {
   max-width: 920px;
+  object-fit: contain;
 }
 
 /* Play-Overlay über dem kleinen Video */
@@ -1051,11 +1055,6 @@ h1 {
 
   /* Lektions-Panels: kompakter */
   .lesson-panel { padding: 12px; margin-top: 16px; }
-
-  /* Video: voller Breite */
-  .video-wrapper video { max-width: 100%; }
-  .video-wrapper.expanded video { max-width: 100%; }
-  .video-wrapper.expanded { max-width: 100%; }
 
   /* Text-Bereich */
   .text-section p { font-size: 15px; line-height: 1.6; }
