@@ -107,7 +107,7 @@ function render() {
       ${lesson.task ? `<p class="card-task">🎯 ${esc(lesson.task)}</p>` : ''}
       <div class="card-actions">
         <button class="btn btn-play" data-action="play" data-id="${esc(lesson.id)}">${
-      locked ? '🔒 Gesperrt' : '▶ Video starten'
+      locked ? '🔒 Gesperrt' : '▶ Lektion starten'
     }</button>
         <button class="btn btn-done" data-action="toggle" data-id="${esc(lesson.id)}">
           ${isDone ? '✓ Erledigt' : 'Als erledigt markieren'}
