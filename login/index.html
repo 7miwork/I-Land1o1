@@ -78,6 +78,37 @@
             <label class="field-label" for="name">Dein Name</label>
             <input id="name" type="text" autocomplete="name" placeholder="z. B. kleine Piratin" />
 
+            <!-- Handynummer nur für Registrierung (international) -->
+            <div class="phone-row">
+              <label class="field-label" for="phone">Handynummer <span class="req">*</span></label>
+              <div class="phone-input-wrap">
+                <select id="phoneCountry" class="phone-country">
+                  <option value="+49">🇩🇪 Deutschland +49</option>
+                  <option value="+43">🇦🇹 Österreich +43</option>
+                  <option value="+41">🇨🇭 Schweiz +41</option>
+                  <option value="+1">🇺🇸 USA +1</option>
+                  <option value="+44">🇬🇧 Vereinigtes Königreich +44</option>
+                  <option value="+33">🇫🇷 Frankreich +33</option>
+                  <option value="+34">🇪🇸 Spanien +34</option>
+                  <option value="+39">🇮🇹 Italien +39</option>
+                  <option value="+31">🇳🇱 Niederlande +31</option>
+                  <option value="+40">🇷🇴 Rumänien +40</option>
+                  <option value="+48">🇵🇱 Polen +48</option>
+                  <option value="+7">🇷🇺 Russland +7</option>
+                  <option value="+86">🇨🇳 China +86</option>
+                  <option value="+81">🇯🇵 Japan +81</option>
+                  <option value="+82">🇰🇷 Südkorea +82</option>
+                  <option value="+61">🇦🇺 Australien +61</option>
+                  <option value="+65">🇸🇬 Singapur +65</option>
+                  <option value="+60">🇲🇾 Malaysia +60</option>
+                  <option value="+66">🇹🇭 Thailand +66</option>
+                  <option value="+1">🇨🇦 Kanada +1</option>
+                </select>
+                <input id="phone" type="tel" autocomplete="tel" placeholder="z. B. 171 2345678" />
+              </div>
+              <p class="hint">Eine gültige Handynummer ist erforderlich, um sich zu registrieren.</p>
+            </div>
+
             <div id="inviteBlock" hidden>
               <label class="field-label" for="invite">Eltern-Code (falls vorhanden)</label>
               <input id="invite" type="text" placeholder="ILAND-XXXXXX" />

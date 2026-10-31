@@ -20,6 +20,8 @@
   const email = document.getElementById('email');
   const password = document.getElementById('password');
   const name = document.getElementById('name');
+  const phoneCountry = document.getElementById('phoneCountry');
+  const phone = document.getElementById('phone');
   const invite = document.getElementById('invite');
   const signupFields = document.getElementById('signupFields');
   const inviteBlock = document.getElementById('inviteBlock');
@@ -79,6 +81,17 @@
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail);
   }
 
+  // Handynummer: Mindestens 5 Ziffern, Leerzeichen und + erlaubt
+  function isValidPhone(number) {
+    const digits = number.replace(/[^0-9]/g, '');
+    return digits.length >= 5;
+  }
+
+  function formattedPhone() {
+    if (!phone || !phoneCountry) return '';
+    return phoneCountry.value + ' ' + phone.value.trim();
+  }
+
   function goDashboard(user) {
     const next = new URLSearchParams(window.location.search).get('next');
     const safe = next && next.startsWith('/dashboard/') && !next.startsWith('//') ? next : '/dashboard/';
@@ -122,17 +135,26 @@
       showError('Das Passwort muss mindestens 6 Zeichen haben.');
       return;
     }
+    if (mode === 'signup') {
+      const phoneNumber = formattedPhone();
+      if (!phoneNumber || !isValidPhone(phoneNumber)) {
+        showError('Bitte eine gültige Handynummer mit Ländervorwahl eingeben.');
+        return;
+      }
+    }
 
     submit.disabled = true;
     try {
       if (mode === 'signup') {
         const payload = name.value.trim();
+        const phoneNumber = formattedPhone();
         const { data, error } = await client.auth.signUp({
           email: mail,
           password: pw,
           options: {
             data: {
               ...(payload ? { display_name: payload } : {}),
+              phone: phoneNumber,
               role: selectedRole(),
             },
           },
