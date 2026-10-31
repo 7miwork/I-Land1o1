@@ -57,7 +57,7 @@ async function checkAccess() {
 if (resumeBtn) {
   resumeBtn.addEventListener('click', () => {
     const next = LESSONS.find((l) => !done.has(l.id));
-    if (next) openModal(next);
+    if (next) window.location.href = 'lesson.html?id=' + encodeURIComponent(next.id);
   });
 }
 
@@ -247,20 +247,8 @@ grid.addEventListener('click', (e) => {
   if (!btn) return;
   const lesson = LESSONS.find((l) => l.id === btn.dataset.id);
   if (!lesson) return;
-  if (btn.dataset.action === 'play') openModal(lesson);
+  if (btn.dataset.action === 'play') window.location.href = 'lesson.html?id=' + encodeURIComponent(lesson.id);
   else toggleDone(lesson.id);
-});
-
-modalDone.addEventListener('click', () => {
-  if (!currentLesson) return;
-  if (!done.has(currentLesson.id)) toggleDone(currentLesson.id);
-  closeModal();
-});
-
-modalClose.addEventListener('click', closeModal);
-modalBackdrop.addEventListener('click', closeModal);
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && !modal.hidden) closeModal();
 });
 
 // Start erfolgt durch auth.js -> initDashboard(userId, supabaseClient)

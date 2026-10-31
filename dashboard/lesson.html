@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>I-Land1o1 – Lektion | Level 1</title>
+  <meta name="description" content="Lektionsseite mit Video, Erklärungstext, Quiz und Test." />
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&family=Press+Start+2P&family=Pirata+One&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="dashboard.css?v=53ff97cd06" />
+</head>
+
+<body>
+  <header class="topbar">
+    <a class="logo" href="/">🏴‍☠️ I-Land<span>1o1</span></a>
+    <nav class="topnav">
+      <span class="who" id="authWho" hidden></span>
+      <a href="/dashboard/">← Zurück zum Dashboard</a>
+    </nav>
+  </header>
+
+  <main class="wrap" id="appContent">
+    <section class="hero">
+      <p class="kicker">⚓ Level 1 – Deine Lektion</p>
+      <h1 id="lessonTitle">Lektion</h1>
+      <div class="progress-head" style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px;">
+        <span id="lessonNum" class="card-num" style="font-family:var(--font-pixel);color:var(--gold);font-size:13px;"></span>
+        <span id="lessonBadge" class="card-badge" style="position:static;font-size:11px;padding:6px 10px;"></span>
+      </div>
+      <p class="sub" id="lessonDesc"></p>
+    </section>
+
+    <!-- Zugriffssperre (kein Abo) -->
+    <section class="lesson-panel" id="lockNotice" hidden>
+      <p id="lockText" class="modal-lock"></p>
+    </section>
+
+    <!-- Lektions-Inhalt -->
+    <section class="lesson-panel" id="lessonContent">
+      <video id="lessonVideo" controls playsinline preload="auto" poster=""></video>
+
+      <div class="text-section">
+        <h2 class="section-title">📜 Erklärung</h2>
+        <p id="lessonExplanation"></p>
+      </div>
+
+      <section id="quizSection">
+        <h2 class="section-title">🏴‍☠️ Quiz</h2>
+        <div id="quizBox"></div>
+        <button class="btn btn-play" id="btnQuiz">Quiz auswerten</button>
+        <p id="quizResult" class="msg" hidden></p>
+      </section>
+
+      <section id="testSection">
+        <h2 class="section-title">🧭 Test</h2>
+        <div id="testBox"></div>
+        <button class="btn btn-play" id="btnTest">Test auswerten</button>
+        <p id="testResult" class="msg" hidden></p>
+      </section>
+
+      <div class="lesson-actions" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;">
+        <button class="btn btn-done" id="btnDone">✅ Als erledigt markieren</button>
+        <button class="btn btn-ghost" id="btnBack">← Zurück zum Dashboard</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>🏴‍☠️ I-Land1o1 Learning Platform – Coding-Abenteuer für junge Piraten</p>
+    <p class="footer-legal"><a href="/impressum/">Impressum</a> · <a href="/datenschutz/">Datenschutz</a> · <a href="/agb/">AGB</a></p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js?v=e3aa5ff4ba"></script>
+  <script src="lessons.js?v=2e1293d4ad"></script>
+  <script src="lesson.js?v=1"></script>
+</body>
+
+</html>

@@ -1,0 +1,205 @@
+/* ============================================================
+   I-Land1o1 – Single Lesson Page (Level 1, Deutsch)
+   ------------------------------------------------------------
+   Aufruf: /dashboard/lesson.html?id=l01
+   Zeigt Video + Erklärtext + Quiz + Test einer Lektion.
+   ============================================================ */
+
+(function () {
+  const cfg = window.ILAND_CONFIG || {};
+  const isConfigured =
+    typeof cfg.SUPABASE_URL === 'string'
+    && cfg.SUPABASE_URL.indexOf('HIER_') !== 0
+    && /^https:\/\/.+\..+/.test(cfg.SUPABASE_URL)
+    && typeof cfg.SUPABASE_ANON_KEY === 'string'
+    && cfg.SUPABASE_ANON_KEY.indexOf('HIER_') !== 0
+    && cfg.SUPABASE_ANON_KEY.length > 20;
+
+  const LESSONS = window.ILAND_LESSONS || [];
+  const params = new URLSearchParams(window.location.search);
+  const lessonId = params.get('id');
+  const lesson = LESSONS.find((l) => l.id === lessonId);
+
+  if (!lesson) {
+    document.body.innerHTML = '<p style="padding:2rem;font-family:Nunito,sans-serif;color:#f0ad4e;">Lektion nicht gefunden. <a href="/dashboard/">Zurück zum Dashboard</a></p>';
+    return;
+  }
+
+  const els = {
+    title: document.getElementById('lessonTitle'),
+    num: document.getElementById('lessonNum'),
+    badge: document.getElementById('lessonBadge'),
+    desc: document.getElementById('lessonDesc'),
+    video: document.getElementById('lessonVideo'),
+    explanation: document.getElementById('lessonExplanation'),
+    quizBox: document.getElementById('quizBox'),
+    testBox: document.getElementById('testBox'),
+    quizResult: document.getElementById('quizResult'),
+    testResult: document.getElementById('testResult'),
+    doneBtn: document.getElementById('btnDone'),
+    backBtn: document.getElementById('btnBack'),
+    lock: document.getElementById('lockNotice'),
+    content: document.getElementById('lessonContent'),
+  };
+
+  let sbClient = null;
+  let currentUserId = 'anon';
+  let hasAccess = null;
+  let done = new Set();
+
+  const STORAGE_PREFIX = 'iland-progress-de-level1:';
+  function loadDone() {
+    try { return new Set(JSON.parse(localStorage.getItem(STORAGE_PREFIX + currentUserId) || '[]')); } catch { return new Set(); }
+  }
+  function saveDone(set) { localStorage.setItem(STORAGE_PREFIX + currentUserId, JSON.stringify([...set])); }
+
+  async function checkAccess() {
+    if (!sbClient || currentUserId === 'anon') { hasAccess = true; render(); return; }
+    try {
+      const { data, error } = await sbClient.rpc('has_course_access');
+      if (!error) hasAccess = !!data;
+    } catch (err) { console.warn('Zugang nicht prüfbar:', err.message); hasAccess = true; }
+    render();
+  }
+
+  async function loadVideo() {
+    const videoEl = els.video;
+    if (!videoEl) return;
+    if (sbClient) {
+      try {
+        const { data, error } = await sbClient.functions.invoke('get-video-url', {
+          body: { lessonId: lesson.id },
+        });
+        if (!error && data && data.url) {
+          videoEl.src = data.url;
+          videoEl.play().catch(() => {});
+          return;
+        }
+        if (data && data.locked) { hasAccess = false; render(); return; }
+      } catch (err) { console.warn('get-video-url Fehler:', err.message); }
+    }
+    videoEl.src = lesson.video;
+    videoEl.play().catch(() => {});
+  }
+
+  function renderQuestions(box, questions, kind) {
+    box.innerHTML = '';
+    questions.forEach((q, qi) => {
+      const fieldset = document.createElement('fieldset');
+      fieldset.className = 'q-block';
+      const legend = document.createElement('legend');
+      legend.textContent = `${qi + 1}. ${q.q}`;
+      fieldset.appendChild(legend);
+      q.a.forEach((opt, ai) => {
+        const id = `${kind}-${qi}-${ai}`;
+        const label = document.createElement('label');
+        label.className = 'q-option';
+        const input = document.createElement('input');
+        input.type = 'radio';
+        input.name = `${kind}-${qi}`;
+        input.id = id;
+        input.value = ai;
+        label.appendChild(input);
+        label.append(' ' + opt);
+        fieldset.appendChild(label);
+      });
+      box.appendChild(fieldset);
+    });
+  }
+
+  function score(questions, kind) {
+    let correct = 0;
+    questions.forEach((q, qi) => {
+      const sel = document.querySelector(`input[name="${kind}-${qi}"]:checked`);
+      if (sel && parseInt(sel.value, 10) === q.correct) correct++;
+    });
+    return correct;
+  }
+
+  function showResult(kind, correct, total) {
+    const box = kind === 'quiz' ? els.quizResult : els.testResult;
+    const pct = Math.round((correct / total) * 100);
+    box.hidden = false;
+    box.textContent = `${kind === 'quiz' ? 'Quiz' : 'Test'}: ${correct} / ${total} richtig (${pct}%). ` +
+      (pct >= 60 ? 'Gut gemacht, Matrose!' : 'Noch einmal versuchen, kleiner Pirat!');
+    box.className = pct >= 60 ? 'msg--ok' : 'msg--error';
+  }
+
+  async function markDone() {
+    if (done.has(lesson.id)) return;
+    done.add(lesson.id);
+    saveDone(done);
+    if (els.doneBtn) { els.doneBtn.textContent = '✓ Erledigt'; els.doneBtn.disabled = true; }
+    if (els.badge) { els.badge.textContent = 'ERLEDIGT ✓'; els.badge.style.background = 'var(--green)'; }
+    if (sbClient && currentUserId !== 'anon') {
+      await sbClient.from('lesson_progress').upsert({
+        user_id: currentUserId, lesson_id: lesson.id, done: true, updated_at: new Date().toISOString(),
+      }, { onConflict: 'user_id,lesson_id' }).catch(() => {});
+    }
+  }
+
+  function render() {
+    if (els.title) els.title.textContent = lesson.title;
+    if (els.num) els.num.textContent = lesson.num;
+    if (els.desc) els.desc.textContent = lesson.desc;
+    if (els.badge) els.badge.textContent = done.has(lesson.id) ? 'ERLEDIGT ✓' : 'OFFEN';
+
+    const locked = lesson.type === 'lektion' && hasAccess === false;
+    if (locked) {
+      if (els.lock) { els.lock.hidden = false; els.lock.textContent = '🔒 Für diese Lektion brauchst du ein aktives Abo.\nDeine Eltern können es unter „⚓ Abo & Zahlung“ buchen.'; }
+      if (els.content) els.content.hidden = true;
+      if (els.doneBtn) els.doneBtn.hidden = true;
+      if (els.video) els.video.hidden = true;
+      return;
+    }
+    if (els.lock) els.lock.hidden = true;
+    if (els.content) els.content.hidden = false;
+    if (els.doneBtn) els.doneBtn.hidden = false;
+    if (els.doneBtn) {
+      els.doneBtn.textContent = done.has(lesson.id) ? '✓ Erledigt' : '✅ Als erledigt markieren';
+      els.doneBtn.disabled = done.has(lesson.id);
+    }
+
+    if (els.explanation) els.explanation.textContent = lesson.explanation || '';
+
+    const showQuiz = lesson.type === 'lektion';
+    document.getElementById('quizSection').hidden = !showQuiz;
+    document.getElementById('testSection').hidden = !showQuiz;
+    if (showQuiz) {
+      renderQuestions(els.quizBox, lesson.quiz || [], 'quiz');
+      renderQuestions(els.testBox, lesson.test || [], 'test');
+      document.getElementById('btnQuiz').onclick = () => showResult('quiz', score(lesson.quiz || [], 'quiz'), lesson.quiz.length);
+      document.getElementById('btnTest').onclick = () => showResult('test', score(lesson.test || [], 'test'), lesson.test.length);
+    }
+
+    loadVideo();
+  }
+
+  async function boot() {
+    if (isConfigured && window.supabase) {
+      sbClient = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+      try {
+        const { data, error } = await sbClient.auth.getSession();
+        if (error) console.error('getSession error:', error);
+        if (data && data.session && data.session.user) {
+          currentUserId = data.session.user.id;
+          try {
+            const { data: prof } = await sbClient.from('profiles').select('display_name, role').eq('id', currentUserId).maybeSingle();
+            const who = document.getElementById('authWho');
+            if (who && prof) who.textContent = '🏴‍☠️ ' + (prof.display_name || data.session.user.email);
+          } catch (e) { /* ignore */ }
+        } else {
+          window.location.replace('/login/index.html?next=' + encodeURIComponent('/dashboard/lesson.html?id=' + lessonId));
+          return;
+        }
+      } catch (err) { console.error('Lesson boot failed:', err); }
+    }
+    done = loadDone();
+    checkAccess();
+  }
+
+  if (els.doneBtn) els.doneBtn.addEventListener('click', markDone);
+  if (els.backBtn) els.backBtn.addEventListener('click', () => { window.location.href = '/dashboard/'; });
+
+  boot();
+})();

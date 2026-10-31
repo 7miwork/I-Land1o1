@@ -829,4 +829,55 @@ h1 {
 .msg--error { border-color: var(--red); background: rgba(232, 88, 84, .12); color: #ffb3b0; }
 .msg--ok { border-color: var(--green); background: rgba(49, 170, 64, .14); color: #9be8a5; }
 .msg[hidden] { display: none; }
+
+/* ---------- Single Lesson Page ---------- */
+.lesson-panel {
+  background: var(--parchment);
+  border: 2px solid oklch(90% .02 85);
+  box-shadow: 6px 6px 0 oklch(82% .16 85 / .12);
+  border-radius: var(--radius);
+  padding: clamp(16px, 3vw, 26px);
+  margin-top: 24px;
+  color: var(--ink);
+}
+
+.lesson-panel video {
+  width: 100%;
+  max-width: 720px;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: var(--radius);
+  display: block;
+  margin: 0 auto 18px;
+}
+
+.text-section h2 { margin-top: 0; }
+.text-section p { line-height: 1.7; font-size: 16px; color: oklch(45% .05 65); }
+
+/* Quiz / Test Optionen */
+.q-block { margin: 0 0 14px; padding: 0; border: none; }
+.q-block legend {
+  font-family: var(--font-pirate);
+  font-size: 18px;
+  color: var(--ocean);
+  margin-bottom: 8px;
+  padding: 0;
+}
+.q-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-size: 15px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.q-option input { accent-color: var(--gold); width: 18px; height: 18px; }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--parchment);
+  border: 2px solid oklch(95% .02 85 / .35);
+}
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
 }
