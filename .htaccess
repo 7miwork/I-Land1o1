@@ -10,6 +10,8 @@
   # Eigene Login-Seite (supabase) statt der alten React-Demo-Seite.
   # RedirectMatch ist zuverlässiger als RewriteRule auf LiteSpeed-Servern.
   RedirectMatch 301 ^/login/?$ /login/index.html
+  RewriteRule ^/login\.html$ /login/index.html [R=301,L]
+  RewriteRule ^/register/?$ /login/index.html#signup [R=301,NE,L]
 
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
