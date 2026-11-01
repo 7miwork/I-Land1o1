@@ -150,6 +150,14 @@
   tabSignup.addEventListener('click', () => setMode('signup'));
   form.addEventListener('change', syncRole);
 
+  // Hash-Handler: #signup in der URL öffnet automatisch den Registrieren-Tab
+  (function () {
+    if (window.location.hash === '#signup') {
+      setMode('signup');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  })();
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     showError('');
