@@ -30,8 +30,13 @@
       </nav>
 
       <div class="auth-actions flex items-center gap-3">
-        <a href="/login/index.html" class="btn-outline">Login</a>
-        <a href="/login/index.html#signup" class="btn-outline">Registrieren</a>
+        <div class="account-dropdown">
+          <button class="btn-outline account-btn" type="button" id="accountBtn">⚓ Konto</button>
+          <div class="account-menu" id="accountMenu">
+            <a href="/login/index.html" class="menu-item">Anmelden</a>
+            <a href="/login/index.html#signup" class="menu-item">Registrieren</a>
+          </div>
+        </div>
         <a href="/enroll/" class="btn-gold">Enroll</a>
       </div>
 
@@ -137,6 +142,35 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/dashboard/config.js"></script>
   <script src="login.js?v=e41eef7af5"></script>
+  <script>
+    (function () {
+      var btn = document.getElementById('accountBtn');
+      var menu = document.getElementById('accountMenu');
+      if (!btn || !menu) return;
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var open = btn.classList.toggle('open');
+        menu.classList.toggle('show', open);
+        btn.setAttribute('aria-expanded', open);
+      });
+      // Schließen bei Klick außerhalb
+      document.addEventListener('click', function (e) {
+        if (!btn.contains(e.target) && !menu.contains(e.target)) {
+          btn.classList.remove('open');
+          menu.classList.remove('show');
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+      // Schließen bei Escape
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          btn.classList.remove('open');
+          menu.classList.remove('show');
+          btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+    })();
+  </script>
 </body>
 
 </html>
