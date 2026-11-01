@@ -97,44 +97,18 @@
     return digits.length >= 5;
   }
 
-  // Nach erfolgreichem Login/Registrierung: prüfen ob Telefon verifiziert ist
-  async function routeAfterAuth(user) {
-    if (!client) {
-      window.location.href = '/dashboard/';
-      return;
-    }
-    try {
-      const { data: profile, error } = await client
-        .from('profiles')
-        .select('phone_verified, phone_number')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      if (error || !profile) {
-        window.location.href = '/dashboard/';
-        return;
-      }
-
-      if (!profile.phone_verified) {
-        const phoneToVerify = profile.phone_number || formattedPhone();
-        window.location.href = '/dashboard/verify-sms.html?phone=' + encodeURIComponent(phoneToVerify);
-      } else {
-        window.location.href = '/dashboard/';
-      }
-    } catch (err) {
-      console.error('Route check failed:', err);
-      window.location.href = '/dashboard/';
-    }
+  function goDashboard() {
+    window.location.href = '/dashboard/';
   }
 
-  function goDashboard(user) {
-    routeAfterAuth(user);
+  function goVerifySms(phone) {
+    window.location.href = '/dashboard/verify-sms.html?phone=' + encodeURIComponent(phone);
   }
 
-  // Wenn schon eingeloggt -> Routing prüfen
+  // Wenn schon eingeloggt -> direkt ins Dashboard (keine SMS-Prüfung)
   if (client) {
     client.auth.getSession().then(({ data: { session } }) => {
-      if (session) routeAfterAuth(session.user);
+      if (session) goDashboard();
     });
   }
 
@@ -208,11 +182,11 @@
             return;
           }
         }
-        goDashboard(data.session.user);
+        goVerifySms(formattedPhone());
       } else {
         const { data, error } = await client.auth.signInWithPassword({ email: mail, password: pw });
         if (error) throw error;
-        goDashboard(data.session.user);
+        goDashboard();
       }
     } catch (err) {
       showError(readableError(err));
