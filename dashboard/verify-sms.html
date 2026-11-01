@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Telefon verifizieren | I-Land1o1</title>
+  <meta name="description" content="Geben Sie den per SMS erhaltenen Verifizierungscode ein." />
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&family=Press+Start+2P&family=Pirata+One&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="dashboard.css?v=20261031" />
+  <style>
+    .verify-wrap {
+      max-width: 420px;
+      margin: 40px auto;
+      padding: 0 16px;
+    }
+    .verify-card {
+      background: var(--parchment);
+      border: 2px solid oklch(90% .02 85);
+      box-shadow: 6px 6px 0 oklch(82% .16 85 / .12);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      color: var(--ink);
+    }
+    .verify-title {
+      font-family: var(--font-pirate);
+      font-size: clamp(24px, 6vw, 32px);
+      color: var(--ocean);
+      margin: 0 0 8px;
+      text-align: center;
+    }
+    .verify-sub {
+      text-align: center;
+      font-size: 15px;
+      color: oklch(45% .05 65);
+      margin-bottom: 24px;
+    }
+    .verify-field {
+      margin-bottom: 16px;
+    }
+    .verify-field label {
+      display: block;
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: var(--ink);
+    }
+    .verify-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid oklch(95% .02 85 / .35);
+      border-radius: var(--radius);
+      background: rgba(0, 12, 28, .1);
+      color: var(--ink);
+      font-size: 18px;
+      letter-spacing: 2px;
+      text-align: center;
+      font-family: var(--font-pixel);
+    }
+    .verify-input:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+    .verify-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--gold);
+      color: var(--ink);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 16px;
+      font-weight: 800;
+      font-family: var(--font-body);
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .verify-btn:hover {
+      background: var(--gold-dark);
+    }
+    .verify-btn:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+    .verify-result {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: var(--radius);
+      text-align: center;
+      font-weight: 700;
+      font-size: 14px;
+      hidden: true;
+    }
+    .verify-result--ok {
+      background: rgba(49, 170, 64, .14);
+      border: 1px solid var(--green);
+      color: #9be8a5;
+    }
+    .verify-result--error {
+      background: rgba(232, 88, 84, .12);
+      border: 1px solid var(--red);
+      color: #ffb3b0;
+    }
+    .verify-hint {
+      margin-top: 16px;
+      font-size: 13px;
+      color: oklch(45% .05 65);
+      text-align: center;
+    }
+    .verify-phone {
+      font-family: var(--font-pixel);
+      color: var(--gold);
+      font-weight: 700;
+    }
+    @media (max-width: 520px) {
+      .verify-wrap { margin: 20px auto; padding: 0 12px; }
+      .verify-card { padding: 20px 16px; }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <a class="logo" href="/">🏴‍☠️ I-Land<span>1o1</span></a>
+    <nav class="topnav">
+      <a href="/dashboard/">← Zurück zum Dashboard</a>
+    </nav>
+  </header>
+
+  <main class="wrap" id="appContent">
+    <div class="verify-wrap">
+      <div class="verify-card">
+        <h1 class="verify-title">📱 Telefon verifizieren</h1>
+        <p class="verify-sub">Geben Sie den 6-stelligen Code ein, den Sie per SMS erhalten haben.</p>
+
+        <div class="verify-field">
+          <label for="verifyPhone">Handynummer</label>
+          <input type="tel" id="verifyPhone" readonly class="verify-input" />
+        </div>
+
+        <div class="verify-field">
+          <label for="verifyCode">Verifizierungscode</label>
+          <input type="text" id="verifyCode" maxlength="6" inputmode="numeric" class="verify-input" placeholder="123456" />
+        </div>
+
+        <button class="verify-btn" id="verifyBtn">Verifizieren ⚓</button>
+
+        <div id="verifyResult" class="verify-result" hidden></div>
+
+        <p class="verify-hint">Haben Sie keine SMS erhalten? <a href="#" id="resendLink">Code erneut anfordern</a></p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>🏴‍☠️ I-Land1o1 Learning Platform – Coding-Abenteuer für junge Piraten</p>
+    <p class="footer-legal"><a href="/impressum/">Impressum</a> · <a href="/datenschutz/">Datenschutz</a> · <a href="/agb/">AGB</a></p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js?v=e3aa5ff4ba"></script>
+  <script src="verify-sms.js?v=1"></script>
+</body>
+
+</html>
