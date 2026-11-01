@@ -81,30 +81,68 @@
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail);
   }
 
-  // Handynummer: Mindestens 5 Ziffern, Leerzeichen und + erlaubt
-  function isValidPhone(number) {
-    const digits = number.replace(/[^0-9]/g, '');
+  // Handynummer: Ländervorwahl + Nummer zusammensetzen, Leerzeichen entfernen
+  function formattedPhone() {
+    if (!phoneCountry || !phone) return '';
+    const cc = phoneCountry.value.trim();
+    const num = phone.value.replace(/\s+/g, '').replace(/^\+/, '');
+    if (!num) return '';
+    return cc + num;
+  }
+
+  // Handynummer validieren: Mindestens 5 Ziffern insgesamt (ohne + und Leerzeichen)
+  function isValidPhone(pn) {
+    if (!pn) return false;
+    const digits = pn.replace(/\D/g, '');
     return digits.length >= 5;
   }
 
   function formattedPhone() {
-    if (!phone || !phoneCountry) return '';
-    return phoneCountry.value + ' ' + phone.value.trim();
+    if (!phoneCountry || !phone) return '';
+    const cc = phoneCountry.value.trim();
+    const num = phone.value.replace(/\s+/g, '').replace(/^\+/, '');
+    if (!num) return '';
+    return cc + num;
+  }
+
+  // Nach erfolgreichem Login/Registrierung: prüfen ob Telefon verifiziert ist
+  async function routeAfterAuth(user) {
+    if (!client) {
+      window.location.href = '/dashboard/';
+      return;
+    }
+    try {
+      const { data: profile, error } = await client
+        .from('profiles')
+        .select('phone_verified, phone_number')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (error || !profile) {
+        window.location.href = '/dashboard/';
+        return;
+      }
+
+      if (!profile.phone_verified) {
+        const phoneToVerify = profile.phone_number || formattedPhone();
+        window.location.href = '/dashboard/verify-sms.html?phone=' + encodeURIComponent(phoneToVerify);
+      } else {
+        window.location.href = '/dashboard/';
+      }
+    } catch (err) {
+      console.error('Route check failed:', err);
+      window.location.href = '/dashboard/';
+    }
   }
 
   function goDashboard(user) {
-    const next = new URLSearchParams(window.location.search).get('next');
-    const safe = next && next.startsWith('/dashboard/') && !next.startsWith('//') ? next : '/dashboard/';
-    const url = new URL(safe, window.location.origin);
-    url.searchParams.set('fromLogin', '1');
-    if (user) url.searchParams.set('angemeldet', '1');
-    window.location.replace(url.toString());
+    routeAfterAuth(user);
   }
 
-  // Wenn schon eingeloggt -> direkt zum Dashboard
+  // Wenn schon eingeloggt -> Routing prüfen
   if (client) {
     client.getSession().then(({ data: { session } }) => {
-      if (session) goDashboard(session.user);
+      if (session) routeAfterAuth(session.user);
     });
   }
 
