@@ -97,14 +97,6 @@
     return digits.length >= 5;
   }
 
-  function formattedPhone() {
-    if (!phoneCountry || !phone) return '';
-    const cc = phoneCountry.value.trim();
-    const num = phone.value.replace(/\s+/g, '').replace(/^\+/, '');
-    if (!num) return '';
-    return cc + num;
-  }
-
   // Nach erfolgreichem Login/Registrierung: prüfen ob Telefon verifiziert ist
   async function routeAfterAuth(user) {
     if (!client) {
@@ -141,7 +133,7 @@
 
   // Wenn schon eingeloggt -> Routing prüfen
   if (client) {
-    client.getSession().then(({ data: { session } }) => {
+    client.auth.getSession().then(({ data: { session } }) => {
       if (session) routeAfterAuth(session.user);
     });
   }
@@ -149,14 +141,6 @@
   tabLogin.addEventListener('click', () => setMode('login'));
   tabSignup.addEventListener('click', () => setMode('signup'));
   form.addEventListener('change', syncRole);
-
-  // Hash-Handler: #signup in der URL öffnet automatisch den Registrieren-Tab
-  (function () {
-    if (window.location.hash === '#signup') {
-      setMode('signup');
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  })();
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -237,5 +221,5 @@
     }
   });
 
-  setMode('login');
+  setMode(window.location.hash === '#signup' ? 'signup' : 'login');
 })();

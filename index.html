@@ -32,7 +32,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&family=Press+Start+2P&family=Pirata+One&display=swap" rel="stylesheet" />
-    <script type="module" crossorigin src="/assets/index-Btd8bRLy.js?v=8b93471222"></script>
+    <script type="module" crossorigin src="/assets/index-Btd8bRLy.js?v=fix1"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-SEVzprOP.css?v=1ce33fe27a">
     <!-- Eigene Supabase-Login-Seite (ersetzt die alte React-Demo-Anmeldung) -->
   <script>
@@ -52,10 +52,6 @@
       });
     })();
   </script>
-  <!-- Login-Link für ung eingeloggte Besucher -->
-  <div class="topbar-login-link">
-    <a href="/login/index.html" class="btn-outline" style="margin-left: 20px;">Login / Registrierung</a>
-  </div>
   <!-- Login-Link-Fix: alle /login Links sofort und dauerhaft auf /login/index.html umleiten -->
   <script>
     (function () {
@@ -87,7 +83,7 @@
         mutations.forEach(function (m) {
           m.addedNodes.forEach(function (node) {
             if (node.nodeType === 1) {
-              if (node.matches && node.matches('a[href*="/login]')) shouldFix = true;
+              if (node.matches && node.matches('a[href*="/login"]')) shouldFix = true;
               if (node.querySelectorAll && node.querySelectorAll('a[href*="/login"]').length > 0) shouldFix = true;
             }
           });
