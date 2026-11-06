@@ -1,236 +1,53 @@
-# Cline-Regeln – I-Land1o1 (Projekt Z:\I-Land1o1\Webseite)
+# Projektregeln für Cline
 
-Diese Datei liegt im Projekt-Root und beschreibt zwei **getrennte
-Projekte**, die beide auf `https://i-land1o1.com` landen – Verwechslung
-war in der Vergangenheit die häufigste Fehlerquelle.
+## Kontext
 
-**Dieses Projekt** (`Z:\I-Land1o1\Webseite`) liefert `/login` und `/dashboard/`
-und enthält alle Supabase-Scripts. Die Hauptseite kommt aus einem zweiten
-Projekt (siehe Abschnitt 1).
+Dieses Repository enthält die I-Land1o1-Lernplattform mit Website, Schüler-Dashboard, Supabase-Integration, Stripe-Zahlungsfunktionen und Video-Inhalten.
 
----
+Die Repository-Dateien sind die maßgebliche technische Quelle. Lies zuerst die betroffenen Dateien und prüfe die aktuelle Projektstruktur. Verlasse dich nicht ausschließlich auf README-Aussagen.
 
-## 1. Die zwei Projekte – nicht verwechseln
+## Allgemeine Arbeitsweise
 
-| | **Webseite (dieses)** | **I-Land1o1 (React)** |
-|---|---|---|
-| Pfad | `Z:\I-Land1o1\Webseite` | `Z:\Codes\Codes\I-Land1o1` |
-| Art | Statisches HTML/CSS/JS | Vite + TanStack Start (SPA) |
-| Build | keiner | `npm run build:hostinger` |
-| Git | dieses Repo | `i-land1o1-8b3659f4` (**existiert nicht, Push scheitert**) |
-| Liefert | `/login`, `/dashboard/` | `/` (Hauptseite, `/assets/index-*.js`) |
+- Stelle bei unklaren Anforderungen zuerst eine konkrete Rückfrage.
+- Untersuche vor Änderungen den Status und den relevanten Code.
+- Arbeite in kleinen, fokussierten Änderungen.
+- Erhalte bestehende Namenskonventionen, Architektur und Nutzerabläufe.
+- Verwende nur Befehle und Skripte, deren Existenz und Zweck im Repository geprüft wurden.
+- Führe passende Tests oder Prüfungen aus und berichte ehrlich, wenn sie nicht ausgeführt werden konnten.
+- Erfinde keine Konfiguration, Dateien, Umgebungsvariablen oder API-Verträge.
+- Ändere keine fachlichen Produktentscheidungen ohne klare Anforderung.
+- Schreibe Dokumentation in der Sprache und im Stil der betroffenen Datei.
 
-**Merksatz:** Das Live-HTML lädt `/assets/index-HASH.js` → Vite →
-nur `Codes\I-Land1o1` kann es bauen. Das Next.js-Projekt `Codes\I-Land`
-ist **nicht** die Quelle der Live-Seite und wird nicht deployed.
+## Sicherheit und Datenschutz
 
-Beide liegen im gleichen `/public_html/` auf Hostinger. Änderungen in einem
-Projekt können das andere betreffen – besonders über `.htaccess`.
+- Gib keine Secrets, Tokens, Zugangsdaten, privaten URLs mit Tokens oder personenbezogenen Daten aus.
+- Lege niemals Stripe-Secret-Keys, Supabase-Service-Role-Keys, Passwörter oder Webhook-Secrets im Frontend oder in versionierten Dateien ab.
+- Lies lokale Secret-Dateien nicht aus, wenn deren Inhalt für die Aufgabe nicht zwingend erforderlich ist. Gib deren Werte niemals wieder.
+- Verwende keine produktiven Zugangsdaten und führe keine produktiven Änderungen aus.
+- Ändere keine Supabase-Produktivdaten, Stripe-Live-Einstellungen oder Hosting-Konfiguration ohne ausdrückliche Freigabe.
+- Achte bei Änderungen an Supabase auf RLS, Rollen und Eigentümerprüfungen.
+- Gib geschützte Videos nicht über öffentliche URLs oder unzureichend geprüfte Berechtigungen frei.
 
----
+## Stripe und Supabase
 
-## 2. Bevor du eine Datei suchst: prüfe den Fingerabdruck
+- Zahlungszugriff muss serverseitig anhand vertrauenswürdiger Zahlungsinformationen geprüft werden.
+- Vertraue nicht auf Preise, Rollen, Berechtigungen oder Zahlungsstatus, die ausschließlich vom Browser übermittelt werden.
+- Prüfe Webhook-Signaturen, Idempotenz und Fehlerbehandlung, bevor Zahlungsabläufe geändert werden.
+- Verwende Testmodus und Testdaten, sofern eine ausdrücklich angeforderte Aufgabe Zahlungsabläufe betrifft.
+- Ändere keine Policies oder Datenbankschemas ohne Prüfung der bestehenden Abhängigkeiten und Auswirkungen.
+- Bei Unsicherheit über Berechtigungen oder Datenmigrationen: anhalten und Rückfrage stellen.
 
-Vor jeder Reparatur erst feststellen, **welches Projekt live läuft**:
+## Rechtliche Inhalte
 
-```powershell
-(Invoke-WebRequest -Uri 'https://i-land1o1.com/' -UseBasicParsing).Content
-```
+- Erfinde keine Betreiberangaben, Adressen, Preise, Vertragsbedingungen oder rechtlichen Aussagen.
+- Kennzeichne unvollständige Angaben als offene Punkte.
+- Stelle rechtliche Inhalte nicht als geprüft oder verbindlich dar.
+- Empfiehl für die Veröffentlichung eine Prüfung durch fachkundige Personen.
 
-- `/assets/index-*.js` → Vite-Projekt (`Codes\I-Land1o1`)
-- `/_next/static/` → Next.js (nicht deployed)
+## Änderungen und Abschluss
 
-Niemals raten, welcher Ordner „das" Projekt ist.
-
----
-
-## 3. Supabase & Secrets
-
-- Projekt-URL: `https://lmlbjtazgcylsrtzzisr.supabase.co`
-- Schlüssel liegen **nur** in `supabase/.env.local`
-  (gitignoriert, **nie** ausgeben, nie committen)
-- Immer über `supabase/keys.mjs` lesen: `getKey()`, `getProjectUrl()`,
-  `getAnonKey()`
-- **`getKey('SUPABASE_ANON_KEY')` ist leer** – der Anon-Key kommt aus
-  `getAnonKey()` (liest `dashboard/config.js`)
-- Service-Role-Key nur für lokale Scripte. Er umgeht RLS komplett.
-
-### Edge Functions
-
-Vier Funktionen, jede existiert **doppelt** – Quelle und Einzeldatei:
-
-```
-supabase/functions/<name>/index.ts       <- Quelle (mit _shared-Imports)
-supabase/functions-deploy/<name>.ts      <- fürs Dashboard (alles eingebettet)
-```
-
-**Bei jeder Änderung beide Dateien synchron halten.** Die deployete Version
-ist die im Dashboard – dort driftet der Code sonst auseinander. Prüfen, welche
-Version läuft: verbesserte Fehlermeldung im Response = neu.
-
-- Nur `stripe-webhook` hat **Verify JWT deaktiviert** (Stripe sendet kein
-  Token; Sicherheit kommt aus `STRIPE_WEBHOOK_SECRET`)
-- Alle anderen **müssen** JWT verlangen (401 bei fehlendem Login)
-
-### Testkonten – absichtlich nur drei
-
-`eltern@` (parent) · `kind@` (student) · `admin@` (admin) — Passwort `Pirat1234!`
-
-
----
-
-## 4. Stripe
-
-- **Testmodus.** `sk_test_…` in den Supabase-Secrets, nicht in `.env.local`
-  (die Function liest nur Server-Secrets!)
-- Nur zwei Pläne: `level1-monthly` (99 €) und `level1-once` (499 €).
-  **`level1-yearly` wurde entfernt** – an 7 Stellen (plans.ts, alle
-  functions-deploy, billing.js). Nicht wieder einführen.
-- Preise: `price_1UMSNrGrOz3Fo9oHXqEvSOAb` (monatlich),
-  `price_1UMSNrGrOz3Fo9oHKlsuSCNK` (einmalig)
-- Produkt braucht `tax_code` (`txcd_10000000`) – Managed Payments verlangt es,
-  sonst **500** beim Checkout
-- Der Browser schickt nur **Plan-Namen**, niemals Preise
-
-
-
-## 5. Stil im React-Projekt (`Z:\Codes\Codes\I-Land1o1`)
-
-### Verfügbare Tailwind-Farben
-
-`gold` · `gold-dark` · `gold-deep` · `gold-ink` · `sea` · `sea-deep` ·
-`sea-light` · `coral` · `sand` · `sand-dark` · `wood` · `wood-dark` ·
-`parchment` · `ink` · `sky` · `grass`
-
-**`treasure` existiert NICHT.** Klassen wie `bg-treasure-500` rendern
-unsichtbar. Vor dem Benutzen einer Farbklasse in `src/styles.css` prüfen.
-
-### Übersetzungen
-
-Alle Texte über `useT()` aus `@/i18n` (`src/i18n/index.tsx`), Schlüssel in
-**drei** Dictionaries pflegen: `en`, `de`, `zh`. Ein neuer Schlüssel ohne alle
-drei Sprachen ist unvollständig.
-
-### Routing – wichtig
-
-`/login` und `/dashboard/` sind **statische Seiten außerhalb der SPA**.
-Immer einen echten `<a href="...">` benutzen, **nie** Tanstacks `<Link>`:
-`<Link>` fängt den Klick ab und sucht die Route in der SPA → „not found".
-
-### Build
-
-```powershell
-npm run build:hostinger
-```
-
-Das Script endet mit `mv` (Linux) und **scheitert unter Windows**. Der Build
-selbst läuft durch; danach manuell:
-`Copy-Item dist/client/_shell.html dist/client/index.html -Force`
-
-Im GitHub-Deploy (ubuntu) funktioniert `mv` – dort kein Problem nötig.
-
----
-
-## 6. Videos & Storage
-
-Bucket `course-videos`, privat, 500 MB Limit. **Supabase Free blockt Uploads
-über 50 MB mit `413`** – das ist eine Plan-Grenze, **nicht** lösbar im Code.
-
-TUS braucht zwingend `bucketName` und `objectName` in `Upload-Metadata`
-(Space zwischen Key und Wert, Komma zwischen Paaren). Ohne das:
-„Bucket name invalid".
-
-Vier Dateien liegen nur lokal: `l01`–`l04` (51–85 MB). Sie bleiben
-`published: false` – `register-lesson-videos.mjs` markiert nur Videos als
-veröffentlicht, die **wirklich** im Bucket liegen.
-
----
-
-## 7. Arbeitsweise
-
-- **Vor dem Beantworten prüfen, nicht annehmen.** Behauptungen über den
-  Server-/DB-Zustand immer per API verifizieren. (Die Telefon-Warnung wurde
-  zweimal fälschlich als „erledigt" gemeldet.)
-- **SQL geht nicht per API.** Schema-Änderungen (Spalten, FK, Funktionen)
-  müssen als `.sql`-Datei entstehen, die der Nutzer im Supabase-Dashboard
-  ausführt. Keine Lösungen „einbauen", die dort nicht ankommen.
-- **Deploy nicht als getan melden**, wenn `git push` scheiterte.
-- Am Ende einer Aufgabe: Dateien prüfen, bauen/testen wenn möglich, Ergebnis
-  belegen statt behaupten.
-- Reparatur-SQL ist idempotent (`if not exists`, `if exists`) und kommentiert
-  mit dem **Befund**, nicht nur mit dem Fix.
-
----
-
-## 8. Bekannte offene Punkte (Stand 12.10.2026 nach System-Check)
-
-- **Drei Stripe-Functions müssen neu deployt werden** – apiVersion
-  `2024-06-20` → `2025-03-31.basil`; das Konto lehnte die alte Version ab
-  (`Managed Payments is not supported`) → die Kasse startete nie.
-  Quelldateien: `supabase/functions-deploy/*.ts` (neu gebaut).
-  Ablauf: `WAS-DU-MACHEN-MUSST.md` (Schritt 1).
-- `.htaccess` mit `/Videos`-403-Block liegt in **beiden** Projekten
-  (dieses als Referenz, `React/public/.htaccess` wird mit dem Deploy
-  ausgeliefert) – bis zum Deploy sind die Originale noch abrufbar.
-  Login-Rewrite ist in der React-Fassung jetzt auch enthalten (wurde
-  sonst vom SPA-Rewrite verschluckt).
-- Echter Stripe-Testkauf (`4242 4242 4242 4242`) steht aus. Das Test-Abo
-  wurde **gelöscht** (`subscriptions` = 0), Paywall greift wieder (403).
-  Bewiesen: signiertes Webhook-Event → Zeile in `subscriptions` →
-  `has_course_access()` = true → signierte Video-URL (HTTP 206).
-- **Secrets-Rotation steht aus**: `sk_live_`, service_role und `whsec_`
-  lagen als echte Werte in der `.env.example` im Git-Verlauf (Datei ist
-  bereinigt; Werte rotieren, dann Supabase-Secrets + lokale
-  `supabase/.env.local` nachziehen).
-- GitHub-Repo `7miwork/I-Land1o1-React` braucht die drei
-  `HOSTINGER_FTP_*`-Secrets, sonst scheitert das Deploy (der Build selbst
-  ist grün). Danach: `gh workflow run "Deploy to Hostinger"`.
-- `fix-signup-role.sql` / Rollen: erledigt (`fix-roles.mjs` lief durch).
-- Videos `l01`–`l04`: erledigt – alle 13 Lektionen liegen komprimiert im
-  Bucket (`compress-videos.ps1`, SSIM ≥ 0.989).
-- SMTP für Auth-Mails + E-Mail-Bestätigung, Rechtsseiten
-  (Impressum/Datenschutz/AGB) noch offen.
-
-**Notizen (bewusst so entschieden):**
-- `AGENTS.md` im React-Projekt enthält Merge-Konfliktmarker – **bewusst
-  ignoriert** (Entscheidung des Inhabers), weder reparieren noch als
-  Regelwerk nutzen.
-- Alle `demo-*`-Konten wurden **gelöscht**. `create-test-users.mjs`
-  und `fix-roles.mjs` erzeugen bewusst keine neuen Testkonten an.
-  Nicht wieder einführen.
-- Der Browser schickt nur **Plan-Namen**, niemals Preise (Preis-IDs
-  werden serverseitig in `_shared/plans.ts` aufgelöst).
-
----
-
-## 9. Design & Rollen-Regeln (Dashboard / Login)
-
-### 9.1 Kauf/Zahlung NUR für Eltern – Kinder-Dashboard frei davon
-- `billing.js` darf **nicht** als statisches `<script>` in `dashboard/index.html` stehen (wird sonst für alle geladen, auch Kinder).
-- `auth.js` lädt `billing.js` **dynamisch** nur wenn `profile.role === 'parent'` und ruft dann `window.initBilling(client)` auf.
-- `<section class="premium" id="premiumSection">` bleibt `hidden` für Kinder und wird erst für Eltern durch `initBilling()` sichtbar.
-- Kinder sehen **keine** Stripe-Checkout-Schaltflächen, keine Preise, kein Abo-Management.
-
-### 9.2 Rollen-basierter Redirect nach dem Login
-Nach erfolgreichem Login wird anhand der `role` aus der `profiles`-Tabelle weitergeleitet:
-- `admin` → `/dashboard/admin/`
-- `parent` und `student` → `/dashboard/` (das eine Dashboard passt sich an die Rolle an – Eltern sehen Abo+Familie, Kinder nur Lektionen)
-- Umgesetzt in `login/login.js`: `goDashboard(user)` liest `profiles.role` und wählt das Ziel.
-
-### 9.3 Pirate-Design-Ausrichtung (Dashboard + Login ≈ Root index.html)
-Dashboard und Login müssen das Piraten-Design der Hauptseite (`/`) spiegeln:
-- **Schriften:** `Pirata One` (Logo/Überschriften), `Press Start 2P` (Pixel-Elemente, Kicker), `Fredoka One` (Display), `Nunito` (Body).
-- **Farben (oklch-Tokens):** `--gold`, `--gold-dark`, `--gold-deep`, `--gold-ink`, `--ink`, `--ocean`, `--ocean-deep`, `--parchment`, `--parchment-2`, `--parchment-3`, `--sand`, `--skytext`, `--wood-dark`, `--green`, `--green-deep`, `--red`, `--grey`.
-- **Stil:** ECKIGE Kanten (`--radius: 4px`), **keine Pillen**; Gold-Akzente, Marineblau-Gradient, Pergament-Hintergrund, Schatten `4px 4px 0 oklch(82% .16 85 / .15)`.
-- `dashboard/dashboard.css` und `login/login.css` müssen konsistent mit `assets/index-*.css` der Hauptseite bleiben.
-
-### 9.4 Diese Regeln dokumentieren
-- Jede der obigen Regeln wird in `.clinerules` festgehalten, damit zukünftige Änderungen nicht gegen die Architektur verstoßen (z. B. `billing.js` nicht wieder statisch ins Dashboard-HTML einbauen).
-
-### 9.5 Login-Flacker-Verhinderung (Stand nach Fix: Capture-Phase + Kopf-Redirect)
-- **Redirect im `<head>`:** Der Redirect-Block steht jetzt **ganz oben im `<head>`**, direkt nach `<meta charset="UTF-8">` – **vor** dem React-App Script (`/assets/index-HASH.js`). Wenn `/login` geladen wird, wird der Browser **sofort** auf `/login/index.html` weitergeleitet, **bevor** die React-App die alte Login-Seite rendert. Es gibt kein kurzes Aufblitzen der alten Login-Seite mehr.
-- **Kein globales `visibility: hidden` mehr:** Es wird kein `visibility: hidden` mehr auf der Hauptseite eingesetzt. Es gilt nur für `/login`, falls doch einmal nötig.
-- **Klick-Handler in Capture-Phase:** Der Klick-Handler für Login-Links läuft in der **Capture-Phase** (`true` als dritter Parameter von `addEventListener`), damit er **vor** React ausgeführt wird. `e.stopPropagation()` verhindert, dass React den Klick weiterverarbeitet und die alte Login-Seite rendert. Sofortige Weiterleitung auf `/login/index.html`.
-- **Aufnahme in `.clinerules` erwünscht:** Jede spätere Änderung an Login/Redirect-Logik sollte erneut in `.clinerules` aufgenommen werden, um Architektur-Entgleisungen zu vermeiden (vgl. Regel 9.4).
-
-**Hintergrund:** Früher renderten React-Apps die alte Login-Seite kurz, bevor der Client-Redirect greifen konnte. Der nun mögliche "Capture-Phase"-Handler und der Kopf-Redirect beheben das, indem sie *vor* React eingreifen.
+- Vermeide großflächige Refactorings, wenn die Aufgabe eine begrenzte Änderung verlangt.
+- Entferne keine bestehenden Funktionen, Daten oder Dateien ohne ausdrückliche Begründung.
+- Dokumentiere betroffene Dateien, Prüfungen, Ergebnisse und bekannte Einschränkungen.
+- Behaupte nicht, dass Tests bestanden haben, wenn sie nicht ausgeführt wurden.
+- Stoppe vor irreversiblen Aktionen und hole eine ausdrückliche Bestätigung ein.
