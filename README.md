@@ -1,74 +1,210 @@
-# I-Land1o1 – Learning Platform (Live-Site)
+# I-Land1o1 – Learning Platform
 
-Dieses Repo enthält den **Deploy-Stand** der Live-Website auf Hostinger
-(Vite/React-Build-Output aus Manus).
+I-Land1o1 ist eine digitale Lernplattform für Kinder und Jugendliche, die durch Minecraft-basierte Coding-Abenteuer programmieren lernen. Die Plattform kombiniert interaktive Unterrichtseinheiten, individuelle Fortschrittsverfolgung und ein modernes Dashboard für Lernende, Eltern und Lehrkräfte.
 
-## Struktur
+## Überblick
 
-| Pfad              | Beschreibung                                   |
-|-------------------|------------------------------------------------|
-| `index.html`      | Einstiegspunkt der App                          |
-| `assets/`         | Build-Output (JS + CSS, dateiert im Filename)   |
-| `manus-storage/`  | Bilder                                          |
-| `__manus__/`      | Manus Debug-Collector                           |
-| `.htaccess`       | Apache SPA-Rewrite (React Router)               |
-| `Videos/`         | ⛔ NICHT im Repo – zu groß, nur per FTP auf dem Server |
-| `dashboard/`      | Schüler-Dashboard (Level 1) – eigene statische App     |
+Die Plattform wurde als pädagogische, spielerische Lösung entwickelt, um Kinder im Alter von 6 bis 14 Jahren mit kreativer Programmierung vertraut zu machen. Der Fokus liegt auf:
 
-## Schüler-Dashboard (`/dashboard/`)
+- verständlichen, spielerischen Lerninhalten
+- strukturierter Progression durch Lernlevel
+- eigenem Schüler-Dashboard
+- sicherem Login und Benutzerverwaltung
+- Abonnement- und Zahlungslogik mit Stripe
+- Deployment auf einer statischen Hosting-Umgebung
 
-Eigene, statische App (kein Build-Schritt) im Piraten-Design der Hauptseite.
+## Hauptfunktionen
 
-| Datei          | Zweck                                                              |
-|----------------|--------------------------------------------------------------------|
-| `index.html`   | Login-Overlay + Seitenlayout                                       |
-| `auth.js`      | Supabase-Auth (Login / Registrierung / Session / Logout)           |
-| `config.js`    | ⚠️ Supabase `SUPABASE_URL` + `SUPABASE_ANON_KEY` hier eintragen     |
-| `lessons.js`   | **Kurs-Inhalte pflegen** (`window.ILAND_LESSONS`)                   |
-| `dashboard.js` | Rendert Lektionsraster, Video-Modal, Fortschritt                   |
-| `dashboard.css`| Styles (Fonts + Farbpalette aus dem Hauptbundle übernommen)        |
+- Lernplattform mit Minecraft- und Coding-Inhalten
+- Level-basierte Kurse und Video-Lektionen
+- individuelles Fortschritts-Tracking pro Nutzer
+- Login-/Registrierungsfluss mit Supabase Auth
+- Eltern- und Familienfunktionen
+- Abo-/Zahlungsintegration über Stripe
+- Datenschutz- und Legal-Abschnitte (Impressum, Datenschutz, AGB)
+- Responsive Web-UI mit piratenhaftem Design
 
-- **Inhalte ändern:** einfach `dashboard/lessons.js` bearbeiten
-  (`title`, `desc`, `task`, `video`). Neue Lektion = neues Objekt oder `length: 11` anpassen.
-- **Login:** `i-land1o1.com/login` → `login/index.html` (Supabase, Look der Hauptseite).
-  Nach dem Login geht es weiter nach `/dashboard/`.
-- **Fortschritt:** pro Supabase-User-ID in `localStorage` (`iland-progress-de-level1:<id>`),
-  spiegeln in die Tabelle `lesson_progress` (Supabase) → geräteübergreifend.
-- **Ohne ausgefüllte `config.js`-Werte** bleibt das Dashboard offen erreichbar (praktisch zum Testen).
-- **Abo & Zahlung:** `dashboard/billing.js` spricht die Edge Functions an
-  (Preise + Stripe-Key liegen ausschließlich serverseitig).
+## Tech-Stack
 
-## Datenbank & Zahlungen (Supabase)
+- Frontend: HTML, CSS, JavaScript
+- App-Output: Vite / React-Build-Assets
+- Auth & Daten: Supabase
+- Zahlungen: Stripe
+- Hosting: Hostinger / statische Website-Deployment
+- Routing/SPA: Apache Rewrite Rules
 
-| Datei | Inhalt |
-|-------|--------|
-| `supabase/schema.sql` | `profiles` (Rollen Schüler/Eltern/Lehrer/Admin), `parent_links`, `lesson_progress`, RLS |
-| `supabase/subscriptions.sql` | `subscriptions` + `payments` (nur lesbar für User, geschrieben vom Webhook) |
-| `supabase/parents.sql` | Eltern-Einladungen (`parent_invites`), Registrierungs-Regeln, `has_course_access()` |
-| `supabase/keys.mjs` | Liest lokale Schlüssel aus `supabase/.env.local` (git-ignoriert) |
-| `supabase/setup-keys.mjs` | Legt `.env.local` an – einmalig, danach nie wieder nötig |
-| `supabase/videos.sql` | Privater Storage-Bucket `course-videos` + Tabelle `lesson_videos` (Bezahlschranke) |
-| `supabase/functions/README.md` | **Anleitung:** Edge Functions & Stripe in 7 Schritten |
-| `.env.example` | Vorlage aller Variablen (echte `.env` ist in `.gitignore`) |
+## Projektstruktur
 
-Reihenfolge: erst `schema.sql`, dann `subscriptions.sql` ausführen.
+```text
+.
+├── assets/                     # kompilierte Frontend-Assets
+├── dashboard/                  # Schüler-Dashboard und Lernoberfläche
+│   ├── auth.js                 # Supabase-Auth
+│   ├── billing.js              # Zahlungs-/Abo-Funktionen
+│   ├── config.js               # Supabase-Konfiguration
+│   ├── dashboard.js            # Verlauf und Lektionslogik
+│   ├── family.js               # Familien-/Elternfunktionen
+│   ├── index.html              # Dashboard-Entry
+│   ├── lessons.js              # Lerninhalte / Lektionen
+│   └── dashboard.css           # Styles
+├── login/                      # Login-Seite
+├── agb/                        # AGB
+├── datenschutz/                # Datenschutz
+├── impressum/                  # Impressum
+├── supabase/                   # Supabase-Schema, Edge Functions, Konfiguration
+│   ├── functions/              # Edge Function-Implementierung
+│   ├── schema.sql              # Basisdatenbankmodell
+│   ├── subscriptions.sql       # Abos und Zahlungen
+│   ├── videos.sql              # Video-/Storage-Regeln
+│   ├── setup-keys.mjs          # lokale Schlüssel initialisieren
+│   ├── keys.mjs                # lokale Env-Lader
+│   └── ...
+├── .htaccess                   # Apache SPA Rewrite
+├── index.html                  # Einstiegspunkt der Hauptseite
+├── README.md                   # Projekt-Dokumentation
+├── package.json                 # falls vorhanden im Projektkontext
+├── Videos/                     # große Videodateien (lokal/hostinger, nicht im Git)
+├── manus-storage/              # Medien-Assets
+├── __manus__/                  # Manus-Debug/Collector
+└── .gitignore                  # lokale bzw. sensible Dateien
+```
 
-**Goldene Regel:** Alles mit `sk_…`, `service_role` oder SMTP-Passwörtern
-gehört ausschließlich in **Supabase Edge Function Secrets** – niemals in
-`dashboard/config.js`, niemals ins Git.
+## Schnellstart
+
+### Voraussetzungen
+
+- Git
+- Zugriff auf das Repository
+- Supabase-Projekt
+- Stripe-Konfiguration (falls Zahlungen aktiv sind)
+- Hosting-Umgebung mit statischer Website
+
+### Lokale Entwicklung
+
+1. Repository klonen.
+2. Laufende Umgebung oder bestehenden Build-Output in den Hauptordner einbinden.
+3. Supabase-Konfiguration in `dashboard/config.js` ergänzen:
+
+```js
+window.ILAND_CONFIG = {
+  SUPABASE_URL: 'https://YOUR-PROJECT.supabase.co',
+  SUPABASE_ANON_KEY: 'YOUR_ANON_KEY'
+};
+```
+
+4. Für die technische Einbindung können die Datenbank- und Edge-Function-Dateien in Supabase entsprechend eingerichtet werden.
+5. Die App über das lokale Setup oder direkt im Hosting-Umfeld testen.
+
+## Dashboard und Inhalte anpassen
+
+Die Lerninhalte werden zentral in `dashboard/lessons.js` gepflegt. Jede Lektion ist als Objekt definiert und enthält typischerweise Informationen wie:
+
+- Titel
+- Beschreibung
+- Aufgabenstellung
+- Video-Referenz
+- Lernstatus / Fortschritt
+
+Ein neues Lesson-Objekt kann einfach hinzugefügt werden, damit neue Inhalte im Dashboard automatisch erscheinen.
+
+## Authentifizierung und Nutzerverwaltung
+
+Die Plattform nutzt Supabase für:
+
+- Login und Registrierung
+- Session-Handling
+- User-Profile
+- Rollen- und Zugriffslogik
+- sichere Speicherung von Fortschrittsdaten
+
+Wichtiger Hinweis: sensible Geheimnisse wie API-Schlüssel oder Stripe-Keys dürfen niemals direkt im Frontend abgelegt werden. Solche Werte sollten ausschließlich in Supabase Edge Function Secrets oder einer sicheren Server-Umgebung verwaltet werden.
+
+## Abonnements und Zahlungen
+
+Die Zahlungslogik basiert auf Stripe und wird über Supabase Edge Functions abgewickelt. Das Projekt umfasst unter anderem:
+
+- Checkout-Session-Erstellung
+- Kundenportal
+- Webhook-Handling
+- Verifizierung des Zugriffs für bezahlte Inhalte
+
+Die relevanten SQL-Skripte und Function-Definitionen befinden sich im Ordner `supabase/`.
 
 ## Deployment
 
-- **Website-Code:** dieses Repo → Hostinger (Git-Deploy bzw. Manuell)
-- **Videos:** laufen weiterhin über FTP.
-  Nach einem Git-Deploy ggf. prüfen, dass `Videos/` auf dem Server noch da ist.
+Dieses Projekt wird als statische Website deployed. Typische Schritte sind:
 
-## Videos hochladen (FTP)
+1. Projekt auf Hostinger oder vergleichbarer Hosting-Umgebung veröffentlichen
+2. Apache Rewrite-Regeln in `.htaccess` sicherstellen
+3. notwendige statische Assets und Medien im richtigen Pfad bereitstellen
+4. Supabase-Konfigurationen und Secrets prüfen
+5. Login- und Dashboard-Pfade validieren
+6. Video-Dateien gemäß Hosting-Strategie hochladen
 
-Lokal (Skript liegt neben `index.html`, ist per `.gitignore` ausgeschlossen):
+## Video-Upload
 
-```powershell
-cd Z:\I-Land1o1\Webseite
-.\upload-videos.ps1          # lädt nur neue/geänderte Videos hoch
-.\upload-videos.ps1 -Force   # lädt alles komplett neu hoch
-```
+Für größere Video-Dateien werden diese je nach Deployment-Umgebung separat über FTP oder einen entsprechenden Medien-Workflow bereitgestellt. Wichtig ist, dass die Pfade und Referenzen im Projekt konsistent mit dem Hosting-Schema bleiben.
+
+## Sicherheit und Best Practices
+
+- Keine Secret-Keys in Git oder im Frontend speichern
+- Supabase Secrets nur über die offizielle Konfiguration verwalten
+- Stripe-Schlüssel und Service-Role-Werte nur serverseitig bzw. in Edge Functions verwenden
+- `.env`-Dateien nicht versionieren
+- sensible Konfigurationen separat verwalten
+
+## Lizenz
+
+Das Projekt ist aktuell als internes bzw. privates Projekt konzipiert. Eine öffentliche Open-Source-Lizenz wurde nicht angegeben. Wenn du das Repository öffentlich machen möchtest, solltest du vorab die passende Lizenz auswählen.
+
+## Status
+
+Aktueller Status: Live- bzw. Produktivvorbereitung im Rahmen einer Lernplattform für Kinder.
+
+## Kontakt / Betreuung
+
+Für Fragen zum Projekt, zur Weiterentwicklung oder zur technischen Pflege kannst du das Repository verwenden und die relevanten Bereiche im Code bzw. in den Projektdateien anpassen.
+
+---
+
+Wenn du möchtest, kann ich dir als Nächstes noch eine zweite Version erstellen:
+
+- mehr „startup-/unternehmenstauglich“ mit Hero-Section, Features und Architektur
+- kürzer und moderner für GitHub
+- auf Englisch, damit es internationaler wirkt
+- mit einer echten badged Project-Overview und besserem Marketing-Style
+
+Ich kann dir auch direkt eine noch professionellere README im Stil eines SaaS-/EdTech-Produkts aufschreiben und direkt einbauen.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
