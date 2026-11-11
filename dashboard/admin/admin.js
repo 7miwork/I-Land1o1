@@ -174,9 +174,141 @@
       tdStatus.innerHTML = statusBadge(s.status);
       const tdDate = document.createElement('td');
       tdDate.textContent = fmtDate(s.current_period_end);
-      tr.append(tdUser, tdPlan, tdStatus, tdDate);
+
+      // Reset-Buttons (nur für Admins)
+      const tdReset = document.createElement('td');
+      const btnReset = document.createElement('button');
+      btnReset.className = 'btn-reset-sub';
+      btnReset.dataset.label = 'Reset';
+      btnReset.textContent = 'Reset';
+      btnReset.title = 'Abo zurücksetzen (Test)';
+      btnReset.addEventListener('click', () => resetSubscription(s.user_id));
+      tdReset.appendChild(btnReset);
+
+      if (myRole === 'admin') {
+        const btnProg = document.createElement('button');
+        btnProg.className = 'btn-reset-progress';
+        btnProg.dataset.label = 'Fortschritt löschen';
+        btnProg.textContent = 'Fortschritt löschen';
+        btnProg.title = 'Lernfortschritt löschen (Test)';
+        btnProg.style.marginLeft = '4px';
+        btnProg.addEventListener('click', () => resetLessonProgress(s.user_id));
+        tdReset.appendChild(btnProg);
+      }
+
+      tr.append(tdUser, tdPlan, tdStatus, tdDate, tdReset);
       tbody.appendChild(tr);
     }
+
+    // Bulk-Reset-Button unter der Tabelle
+    const subsBox = document.getElementById('subsBox');
+    if (subsBox && myRole === 'admin') {
+      let bulk = subsBox.querySelector('.bulk-reset-wrap');
+      if (!bulk) {
+        bulk = document.createElement('div');
+        bulk.className = 'bulk-reset-wrap';
+        bulk.style.marginTop = '12px';
+        bulk.innerHTML = '<hr style="margin:8px 0;border:none;border-top:1px solid var(--sand);"><button class="btn btn-reset-all" style="background:var(--red);color:var(--parchment);padding:6px 14px;border-radius:var(--radius);font-weight:700;" data-label="Alle zurücksetzen">⚠️ Alle Abos zurücksetzen (Test)</button>';
+        subsBox.appendChild(bulk);
+        bulk.querySelector('.btn-reset-all').addEventListener('click', resetAllSubscriptions);
+      }
+    }
+  }
+
+  // ============================================================
+  // Abo-Reset (Testing) – nur für Admins
+  // ============================================================
+  async function resetSubscription(userId) {
+    if (myRole !== 'admin') {
+      showMsg('subsMsg', 'Nur Admins dürfen Abos zurücksetzen.', 'error');
+      return;
+    }
+    if (!confirm('Wirklich das Abo für diesen User zurücksetzen? Der Zugang wird gesperrt und muss neu gekauft werden.')) return;
+
+    setBusySubs(true);
+    const { error } = await client
+      .from('subscriptions')
+      .update({
+        status: 'canceled',
+        cancel_at_period_end: true,
+        current_period_end: new Date(Date.now() - 86400000).toISOString(), // gestern
+        updated_at: new Date().toISOString()
+      })
+      .eq('user_id', userId);
+    setBusySubs(false);
+
+    if (error) {
+      showMsg('subsMsg', 'Fehler beim Zurücksetzen: ' + error.message, 'error');
+    } else {
+      showMsg('subsMsg', 'Abo zurückgesetzt. Der User muss neu kaufen.', 'ok');
+      loadDashboard();
+    }
+  }
+
+  async function resetAllSubscriptions() {
+    if (myRole !== 'admin') {
+      showMsg('subsMsg', 'Nur Admins dürfen Abos zurücksetzen.', 'error');
+      return;
+    }
+    if (!confirm('Wirklich ALLE Abos zurücksetzen? Jeder Nutzer muss neu kaufen.')) return;
+
+    setBusySubs(true);
+    const { data: subs, error: fetchErr } = await client
+      .from('subscriptions')
+      .select('user_id');
+    if (fetchErr) {
+      setBusySubs(false);
+      showMsg('subsMsg', 'Fehler beim Laden: ' + fetchErr.message, 'error');
+      return;
+    }
+
+    let failed = 0;
+    for (const s of (subs || [])) {
+      const { error } = await client
+        .from('subscriptions')
+        .update({
+          status: 'canceled',
+          cancel_at_period_end: true,
+          current_period_end: new Date(Date.now() - 86400000).toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', s.user_id);
+      if (error) failed++;
+    }
+
+    setBusySubs(false);
+    const msg = failed === 0
+      ? 'Alle Abos zurückgesetzt.'
+      : 'Fertig. ' + failed + ' Abos konnten nicht zurückgesetzt werden.';
+    showMsg('subsMsg', msg, failed === 0 ? 'ok' : 'error');
+    loadDashboard();
+  }
+
+  async function resetLessonProgress(userId) {
+    if (myRole !== 'admin') {
+      showMsg('subsMsg', 'Nur Admins dürfen den Fortschritt löschen.', 'error');
+      return;
+    }
+    if (!confirm('Wirklich den gesamten Lernfortschritt dieses Users löschen? Alle Lektionen werden wieder gesperrt.')) return;
+
+    setBusySubs(true);
+    const { error } = await client
+      .from('lesson_progress')
+      .delete()
+      .eq('user_id', userId);
+    setBusySubs(false);
+
+    if (error) {
+      showMsg('subsMsg', 'Fehler beim Löschen: ' + error.message, 'error');
+    } else {
+      showMsg('subsMsg', 'Lernfortschritt gelöscht. Der User startet bei Lektion 1.', 'ok');
+      loadDashboard();
+    }
+  }
+
+  function setBusySubs(busy) {
+    const btns = document.querySelectorAll('.btn-reset-sub, .btn-reset-all, .btn-reset-progress');
+    btns.forEach((b) => { b.disabled = busy; b.textContent = busy ? '…' : b.dataset.label || b.textContent; });
   }
 
   async function renderLinks(links) {
