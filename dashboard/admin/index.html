@@ -49,6 +49,25 @@
     <section class="admin-section">
       <h2 class="section-title">👥 Nutzer</h2>
       <p class="msg" id="usersMsg" hidden></p>
+
+      <!-- Toolbar: Suche + Filter -->
+      <div class="user-toolbar">
+        <div class="user-search">
+          <label for="userSearch" style="display:none;">Suche</label>
+          <input type="search" id="userSearch" placeholder="Nach Name oder E-Mail suchen…" />
+        </div>
+        <div class="user-filter">
+          <label for="userFilter" style="display:none;">Rolle</label>
+          <select id="userFilter">
+            <option value="">Alle Rollen</option>
+            <option value="student">Schüler:in</option>
+            <option value="parent">Elternteil</option>
+            <option value="teacher">Lehrer:in</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+      </div>
+
       <div class="table-wrap">
         <table class="admin-table">
           <thead>
@@ -61,6 +80,13 @@
           </thead>
           <tbody id="usersBody"></tbody>
         </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <button id="pagePrev" disabled>‹ Zurück</button>
+        <span class="page-info" id="pageInfo">Seite <span id="pageCurrent">1</span> von <span id="pageTotal">1</span></span>
+        <button id="pageNext" disabled>Vor ›</button>
       </div>
     </section>
 
@@ -86,6 +112,18 @@
     <section class="admin-section">
       <h2 class="section-title">👨‍👩‍👧 Eltern-Kind-Links</h2>
       <p class="msg" id="linksMsg" hidden></p>
+
+      <!-- Link-Formular: Elternteil + Kind auswählen -->
+      <div class="link-form">
+        <select id="linkParent">
+          <option value="">– Elternteil auswählen –</option>
+        </select>
+        <select id="linkStudent">
+          <option value="">– Kind auswählen –</option>
+        </select>
+        <button type="button" id="btnAddLink">Verknüpfen</button>
+      </div>
+
       <div class="table-wrap">
         <table class="admin-table">
           <thead>
@@ -93,6 +131,7 @@
               <th>Elternteil</th>
               <th>Kind</th>
               <th>Verknüpft am</th>
+              <th>Entfernen</th>
             </tr>
           </thead>
           <tbody id="linksBody"></tbody>

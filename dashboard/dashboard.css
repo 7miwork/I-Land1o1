@@ -1189,3 +1189,148 @@ h1 {
     width: 100%;
   }
 }
+
+/* ---------- Admin: Nutzer-Suche & Filter ---------- */
+.user-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.user-search {
+  flex: 1;
+  min-width: 200px;
+}
+.user-search input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid rgba(228, 221, 207, .3);
+  border-radius: var(--radius);
+  background: rgba(0, 12, 28, .65);
+  color: var(--parchment);
+  font-family: var(--font-body);
+  font-size: 14px;
+  box-sizing: border-box;
+}
+.user-search input:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+.user-filter select {
+  padding: 8px 12px;
+  border: 2px solid rgba(228, 221, 207, .3);
+  border-radius: var(--radius);
+  background: rgba(0, 12, 28, .65);
+  color: var(--parchment);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+/* ---------- Admin: Pagination ---------- */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.pagination .page-info {
+  font-size: 14px;
+  color: var(--sand);
+  font-family: var(--font-body);
+}
+.pagination button {
+  padding: 6px 12px;
+  border: 1px solid rgba(243, 186, 37, .4);
+  border-radius: var(--radius);
+  background: rgba(0, 12, 28, .5);
+  color: var(--gold);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+.pagination button:hover {
+  background: rgba(243, 186, 37, .15);
+  border-color: var(--gold);
+}
+.pagination button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+/* ---------- Admin: Eltern-Kind-Link Formular ---------- */
+.link-form {
+  background: rgba(0, 12, 28, .4);
+  border: 1px solid rgba(243, 186, 37, .25);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.link-form select {
+  flex: 1;
+  min-width: 150px;
+  padding: 8px 12px;
+  border: 2px solid rgba(228, 221, 207, .3);
+  border-radius: var(--radius);
+  background: rgba(0, 12, 28, .65);
+  color: var(--parchment);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+.link-form button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--gold);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+.link-form button:hover {
+  background: var(--gold-dark);
+}
+
+/* ---------- Admin: Lösch-Button ---------- */
+.btn-delete {
+  padding: 5px 10px;
+  border: 1px solid var(--red);
+  border-radius: var(--radius);
+  background: rgba(196, 80, 61, .15);
+  color: var(--red);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  margin-left: 4px;
+}
+.btn-delete:hover {
+  background: rgba(196, 80, 61, .25);
+  border-color: oklch(70% .18 25);
+}
+
+/* ---------- Admin: Mobil ---------- */
+@media (max-width: 640px) {
+  .user-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .user-search, .user-filter {
+    width: 100%;
+  }
+  .link-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .link-form select {
+    width: 100%;
+  }
+}

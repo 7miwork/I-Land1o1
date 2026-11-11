@@ -25,6 +25,12 @@
   // Der Nutzer kann IS_TEST_MODE auf true setzen, wenn er im Test-System läuft.
   const IS_TEST_MODE = (typeof cfg.IS_TEST_MODE === 'boolean') ? cfg.IS_TEST_MODE : false;
 
+  // ---------- Pagination / Suche / Filter ----------
+  const ITEMS_PER_PAGE = 10;
+  let currentPage = 1;
+  let searchTerm = '';
+  let roleFilter = '';
+
   // ---------- Audit-Log ----------
   async function auditLog(action, targetId, targetEmail, details) {
     if (!client) return;
@@ -133,15 +139,81 @@ userMap = {};
     document.getElementById('countSubs').textContent = activeSubs;
     document.getElementById('countLinks').textContent = (linksRes.data || []).length;
 
-    renderUsers(usersRes.data || []);
+    // Link-Dropdowns befuellen (Eltern + Kinder mit echten Namen)
+    const users = usersRes.data || [];
+    const parents = users.filter(u => u.role === 'parent');
+    const students = users.filter(u => u.role === 'student');
+    const parentSel = document.getElementById('linkParent');
+    const studentSel = document.getElementById('linkStudent');
+    parentSel.innerHTML = '<option value="">– Elternteil auswählen –</option>';
+    studentSel.innerHTML = '<option value="">– Kind auswählen –</option>';
+    parents.forEach(p => {
+      const o = document.createElement('option');
+      o.value = p.id;
+      o.textContent = (p.display_name || 'Pirat') + ' <' + (p.email || '–') + '>';
+      parentSel.appendChild(o);
+    });
+    students.forEach(s => {
+      const o = document.createElement('option');
+      o.value = s.id;
+      o.textContent = (s.display_name || 'Pirat') + ' <' + (s.email || '–') + '>';
+      studentSel.appendChild(o);
+    });
+
+    // Event-Listener fuer Suche/Filter/Pagination
+    const searchInp = document.getElementById('userSearch');
+    const filterSel = document.getElementById('userFilter');
+    if (searchInp) {
+      searchInp.oninput = () => { searchTerm = searchInp.value.toLowerCase(); currentPage = 1; renderUsers(filterUsers(users)); };
+    }
+    if (filterSel) {
+      filterSel.onchange = () => { roleFilter = filterSel.value; currentPage = 1; renderUsers(filterUsers(users)); };
+    }
+    const btnPrev = document.getElementById('pagePrev');
+    const btnNext = document.getElementById('pageNext');
+    if (btnPrev) btnPrev.onclick = () => { if (currentPage > 1) { currentPage--; renderUsers(filterUsers(users)); } };
+    if (btnNext) btnNext.onclick = () => { const filtered = filterUsers(users); const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE); if (currentPage < totalPages) { currentPage++; renderUsers(filtered); } };
+
+    const btnAddLink = document.getElementById("btnAddLink");
+    if (btnAddLink) btnAddLink.onclick = createLink;
+
+    renderUsers(filterUsers(users));
     renderSubs(subsRes.data || []);
     renderLinks(linksRes.data || []);
+  }
+
+  // Filtert Nutzer nach Suchbegriff und Rollen-Filter
+  function filterUsers(users) {
+    return users.filter(u => {
+      const matchesSearch = !searchTerm ||
+        (u.display_name && u.display_name.toLowerCase().includes(searchTerm)) ||
+        (u.email && u.email.toLowerCase().includes(searchTerm));
+      const matchesRole = !roleFilter || u.role === roleFilter;
+      return matchesSearch && matchesRole;
+    });
   }
 
   async function renderUsers(users) {
     const tbody = document.getElementById('usersBody');
     tbody.innerHTML = '';
-    for (const u of users) {
+
+    // Pagination: nur aktuelle Seite anzeigen
+    const totalPages = Math.ceil(users.length / ITEMS_PER_PAGE);
+    if (currentPage > totalPages) currentPage = totalPages || 1;
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    const pageUsers = users.slice(start, start + ITEMS_PER_PAGE);
+
+    // Pagination-Controls aktualisieren
+    const pageCurrent = document.getElementById('pageCurrent');
+    const pageTotal = document.getElementById('pageTotal');
+    const btnPrev = document.getElementById('pagePrev');
+    const btnNext = document.getElementById('pageNext');
+    if (pageCurrent) pageCurrent.textContent = currentPage;
+    if (pageTotal) pageTotal.textContent = totalPages || 1;
+    if (btnPrev) btnPrev.disabled = currentPage <= 1;
+    if (btnNext) btnNext.disabled = currentPage >= (totalPages || 1);
+
+    for (const u of pageUsers) {
       const tr = document.createElement('tr');
       const tdName = document.createElement('td');
       tdName.textContent = u.display_name || '–';
@@ -367,14 +439,64 @@ userMap = {};
     tbody.innerHTML = '';
     for (const l of links) {
       const tr = document.createElement('tr');
+      const parent = userMap[l.parent_id] || { display_name: 'Parent ' + (l.parent_id || '–').slice(0, 8), email: '' };
+      const student = userMap[l.student_id] || { display_name: 'Student ' + (l.student_id || '–').slice(0, 8), email: '' };
       const tdP = document.createElement('td');
-      tdP.textContent = 'Parent ' + (l.parent_id || '–').slice(0, 8);
+      tdP.textContent = parent.display_name + (parent.email ? ' <' + parent.email + '>' : '');
       const tdS = document.createElement('td');
-      tdS.textContent = 'Student ' + (l.student_id || '–').slice(0, 8);
+      tdS.textContent = student.display_name + (student.email ? ' <' + student.email + '>' : '');
       const tdD = document.createElement('td');
       tdD.textContent = fmtDate(l.created_at);
-      tr.append(tdP, tdS, tdD);
+      const tdDel = document.createElement('td');
+      const btnDel = document.createElement('button');
+      btnDel.className = 'btn-delete';
+      btnDel.textContent = 'Entfernen';
+      btnDel.addEventListener('click', () => deleteLink(l.parent_id, l.student_id));
+      tdDel.appendChild(btnDel);
+      tr.append(tdP, tdS, tdD, tdDel);
       tbody.appendChild(tr);
+    }
+  }
+
+  async function createLink() {
+    if (myRole !== 'admin') {
+      showMsg('linksMsg', 'Nur Admins dürfen Verknüpfungen anlegen.', 'error');
+      return;
+    }
+    const parentSel = document.getElementById('linkParent');
+    const studentSel = document.getElementById('linkStudent');
+    const parentId = parentSel.value;
+    const studentId = studentSel.value;
+    if (!parentId || !studentId) {
+      showMsg('linksMsg', 'Bitte Elternteil und Kind auswählen.', 'error');
+      return;
+    }
+    if (!confirm('Wirklich diese Verknüpfung anlegen?')) return;
+    const { error } = await client.from('parent_links').insert({ parent_id: parentId, student_id: studentId });
+    if (error) {
+      showMsg('linksMsg', 'Fehler: ' + error.message, 'error');
+    } else {
+      await auditLog('link_create', studentId, null, { parent_id: parentId });
+      showMsg('linksMsg', 'Verknüpfung angelegt.', 'ok');
+      parentSel.value = '';
+      studentSel.value = '';
+      loadDashboard();
+    }
+  }
+
+  async function deleteLink(parentId, studentId) {
+    if (myRole !== 'admin') {
+      showMsg('linksMsg', 'Nur Admins dürfen Verknüpfungen entfernen.', 'error');
+      return;
+    }
+    if (!confirm('Wirklich diese Eltern-Kind-Verknüpfung entfernen?')) return;
+    const { error } = await client.from('parent_links').delete().eq('parent_id', parentId).eq('student_id', studentId);
+    if (error) {
+      showMsg('linksMsg', 'Fehler: ' + error.message, 'error');
+    } else {
+      await auditLog('link_delete', studentId, null, { parent_id: parentId });
+      showMsg('linksMsg', 'Verknüpfung entfernt.', 'ok');
+      loadDashboard();
     }
   }
 
