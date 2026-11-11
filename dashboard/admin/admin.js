@@ -106,6 +106,11 @@
 //
 userMap = {};
 (usersRes && usersRes.data)?.forEach((p) => { userMap[p.id] = { display_name: p.display_name, email: p.email }; };
+//
+// Map user_id -> {display_name, email} fuer die Anzeige im Admin-Dashboard
+//
+userMap = {};
+(usersRes && usersRes.data)?.forEach((p) => { userMap[p.id] = { display_name: p.display_name, email: p.email }; };
     const activeSubs = (subsRes.data || []).filter(s => ['active', 'trialing', 'paid'].includes(s.status)).length;
     document.getElementById('countSubs').textContent = activeSubs;
     document.getElementById('countLinks').textContent = (linksRes.data || []).length;
