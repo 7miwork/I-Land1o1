@@ -101,6 +101,11 @@
     ]);
 
     document.getElementById('countUsers').textContent = (usersRes.data || []).length;
+//
+// Map user_id -> {display_name, email} fuer die Anzeige im Admin-Dashboard
+//
+userMap = {};
+(usersRes && usersRes.data)?.forEach((p) => { userMap[p.id] = { display_name: p.display_name, email: p.email }; };
     const activeSubs = (subsRes.data || []).filter(s => ['active', 'trialing', 'paid'].includes(s.status)).length;
     document.getElementById('countSubs').textContent = activeSubs;
     document.getElementById('countLinks').textContent = (linksRes.data || []).length;
@@ -161,13 +166,18 @@
     }
   }
 
+  // Map user_id -> {display_name, email} für die Anzeige im Admin-Dashboard
+  let userMap = {};
+
   async function renderSubs(subs) {
     const tbody = document.getElementById('subsBody');
     tbody.innerHTML = '';
     for (const s of subs) {
       const tr = document.createElement('tr');
       const tdUser = document.createElement('td');
-      tdUser.textContent = s.user_id ? 'User ' + s.user_id.slice(0, 8) : '–';
+      // Falls userMap noch nicht befüllt (z.B. bei schneller Navigation):
+      const u = userMap[s.user_id] || { email: 'User ' + s.user_id.slice(0, 8), display_name: 'User' };
+      tdUser.textContent = u.email || u.display_name || 'User';
       const tdPlan = document.createElement('td');
       tdPlan.textContent = s.plan || '–';
       const tdStatus = document.createElement('td');
