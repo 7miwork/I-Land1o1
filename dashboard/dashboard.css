@@ -815,6 +815,52 @@ h1 {
 
 .btn-save:hover { background: var(--gold-dark); }
 
+/* ---------- Admin: Reset-Buttons ---------- */
+.btn-reset-all {
+  padding: 8px 16px;
+  border: 1px solid var(--red);
+  border-radius: var(--radius);
+  background: var(--red);
+  color: var(--parchment);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-reset-all:hover {
+  background: oklch(70% .18 25);
+  border-color: oklch(70% .18 25);
+}
+.btn-reset-all:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.btn-reset-sub, .btn-reset-progress {
+  padding: 5px 10px;
+  border: 1px solid rgba(243, 186, 37, .4);
+  border-radius: var(--radius);
+  background: rgba(0, 12, 28, .5);
+  color: var(--gold);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  margin-left: 4px;
+}
+.btn-reset-sub:hover, .btn-reset-progress:hover {
+  background: rgba(243, 186, 37, .15);
+  border-color: var(--gold);
+}
+.btn-reset-sub:disabled, .btn-reset-progress:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
 .msg {
   border-radius: 10px;
   padding: 12px 14px;
