@@ -21,6 +21,25 @@
   let client = null;
   let myRole = 'student';
 
+  // Test-Modus: Nur im Test-System soll "Alle Abos zurücksetzen" sichtbar sein.
+  // Der Nutzer kann IS_TEST_MODE auf true setzen, wenn er im Test-System läuft.
+  const IS_TEST_MODE = (typeof cfg.IS_TEST_MODE === 'boolean') ? cfg.IS_TEST_MODE : false;
+
+  // ---------- Audit-Log ----------
+  async function auditLog(action, targetId, targetEmail, details) {
+    if (!client) return;
+    try {
+      const { data: session } = await client.auth.getSession();
+      const actorEmail = session?.session?.user?.email || 'unknown';
+      const actorId = session?.session?.user?.id || null;
+      await client
+        .from('admin_audit_log')
+        .insert({ actor_id: actorId, actor_email: actorEmail, action, target_id: targetId, target_email: targetEmail, details: details || {} });
+    } catch (e) {
+      console.error('Audit-Log-Fehler:', e);
+    }
+  }
+
   if (isConfigured && window.supabase) {
     client = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
   }
@@ -150,9 +169,20 @@ userMap = {};
       btn.textContent = 'Speichern';
       btn.addEventListener('click', async () => {
         if (myRole !== 'admin') { showMsg('usersMsg', 'Nur Admins dürfen Rollen ändern.', 'error'); return; }
+        // Admin darf sich nicht selbst herabstufen
+        const { data: session } = await client.auth.getSession();
+        if (session?.session?.user?.id === u.id && sel.value !== 'admin') {
+          showMsg('usersMsg', 'Du kannst deine eigene Admin-Rolle nicht ändern.', 'error');
+          return;
+        }
+        const oldRole = u.role;
         const { error } = await client.from('profiles').update({ role: sel.value }).eq('id', u.id);
         if (error) showMsg('usersMsg', error.message, 'error');
-        else { showMsg('usersMsg', 'Rolle gespeichert.', 'ok'); loadDashboard(); }
+        else {
+          await auditLog('role_change', u.id, u.email, { old_role: oldRole, new_role: sel.value });
+          showMsg('usersMsg', 'Rolle gespeichert.', 'ok');
+          loadDashboard();
+        }
       });
 
       tdEdit.appendChild(sel);
@@ -214,9 +244,9 @@ userMap = {};
       tbody.appendChild(tr);
     }
 
-    // Bulk-Reset-Button unter der Tabelle
+    // Bulk-Reset-Button unter der Tabelle (nur im Test-Modus)
     const subsBox = document.getElementById('subsBox');
-    if (subsBox && myRole === 'admin') {
+    if (subsBox && myRole === 'admin' && IS_TEST_MODE) {
       let bulk = subsBox.querySelector('.bulk-reset-wrap');
       if (!bulk) {
         bulk = document.createElement('div');
@@ -254,6 +284,7 @@ userMap = {};
     if (error) {
       showMsg('subsMsg', 'Fehler beim Zurücksetzen: ' + error.message, 'error');
     } else {
+      await auditLog('subscription_reset', userId, null, { plan: null });
       showMsg('subsMsg', 'Abo zurückgesetzt. Der User muss neu kaufen.', 'ok');
       loadDashboard();
     }
@@ -262,6 +293,10 @@ userMap = {};
   async function resetAllSubscriptions() {
     if (myRole !== 'admin') {
       showMsg('subsMsg', 'Nur Admins dürfen Abos zurücksetzen.', 'error');
+      return;
+    }
+    if (!IS_TEST_MODE) {
+      showMsg('subsMsg', 'Dieser Button ist nur im Test-Modus verfügbar.', 'error');
       return;
     }
     if (!confirm('Wirklich ALLE Abos zurücksetzen? Jeder Nutzer muss neu kaufen.')) return;
@@ -291,6 +326,7 @@ userMap = {};
     }
 
     setBusySubs(false);
+    await auditLog('subscription_reset_all', null, null, { failed, total: (subs || []).length });
     const msg = failed === 0
       ? 'Alle Abos zurückgesetzt.'
       : 'Fertig. ' + failed + ' Abos konnten nicht zurückgesetzt werden.';
@@ -315,6 +351,7 @@ userMap = {};
     if (error) {
       showMsg('subsMsg', 'Fehler beim Löschen: ' + error.message, 'error');
     } else {
+      await auditLog('progress_reset', userId, null, {});
       showMsg('subsMsg', 'Lernfortschritt gelöscht. Der User startet bei Lektion 1.', 'ok');
       loadDashboard();
     }
