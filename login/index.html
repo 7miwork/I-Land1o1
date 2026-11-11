@@ -136,6 +136,28 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/dashboard/config.js"></script>
   <script src="login.js?v=fix3"></script>
+
+  <!-- Cookie Consent Banner -->
+  <div id="cookie-banner" class="cookie-banner" role="dialog" aria-modal="true" aria-label="Cookie-Einstellungen">
+    <div class="cookie-banner__content">
+      <div class="cookie-banner__text">
+        <h3>🍪 Cookies &amp; Datenschutz</h3>
+        <p>
+          Wir nutzen technisch notwendige Cookies, damit die Plattform funktioniert
+          (Anmeldung, Lernfortschritt, Warenkorb). Keine Tracking-Cookies von Drittanbietern.
+        </p>
+        <p class="cookie-banner__links">
+          <a href="/datenschutz/">Datenschutzerklärung</a> ·
+          <a href="/impressum/">Impressum</a>
+        </p>
+      </div>
+      <div class="cookie-banner__actions">
+        <button type="button" class="btn btn-primary" id="cookie-accept">Akzeptieren</button>
+        <button type="button" class="btn btn-outline" id="cookie-decline">Nur notwendige</button>
+      </div>
+    </div>
+  </div>
+  <script src="/cookie-consent.js"></script>
 </body>
 
 </html>

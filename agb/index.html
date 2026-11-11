@@ -19,6 +19,7 @@
     .legal a { color: var(--gold); }
     .legal .note { background: rgba(243,186,37,.1); border: 1px dashed var(--gold-dark); padding: 12px 16px; border-radius: 4px; font-size: 13px; color: var(--sand); margin-bottom: 24px; }
     .back { display: inline-block; margin-bottom: 16px; color: var(--gold); text-decoration: none; font-weight: 700; }
+    .placeholder { color: var(--sand); font-style: italic; }
   </style>
 </head>
 <body>
@@ -31,16 +32,19 @@
   <main class="legal">
     <a class="back" href="/">← Zurück zur Startseite</a>
     <h1>Allgemeine Geschäftsbedingungen (AGB)</h1>
-    <p class="note">⚠️ Platzhalter – vor Veröffentlichung von einem Rechtsberater prüfen lassen.</p>
+    <p class="note">⚠️ Bitte vor der Veröffentlichung von einem Rechtsberater prüfen lassen. Platzhalter mit echten Betreiberdaten ersetzen.</p>
 
     <h2>1. Geltungsbereich</h2>
-    <p>Diese AGB gelten für die Nutzung der I-Land1o1 Learning Platform („Plattform") durch registrierte Nutzer. Betreiber ist [Betreiber, Anschrift].</p>
+    <p>Diese AGB gelten für die Nutzung der I-Land1o1 Learning Platform („Plattform") durch registrierte Nutzer. Betreiber ist <span class="placeholder">[Betreiber, Anschrift]</span>.</p>
 
     <h2>2. Leistungsumfang</h2>
     <p>Die Plattform bietet Video-Lektionen und interaktive Aufgaben zum Programmieren (Level 1). Der Zugang zu allen Lektionen erfolgt über ein kostenpflichtiges Abonnement oder eine Einmalzahlung. Die Inhalte werden regelmäßig erweitert; ein Anspruch auf bestimmte Inhalte besteht nicht.</p>
 
     <h2>3. Registrierung und Konto</h2>
     <p>Für die Nutzung ist ein Nutzerkonto erforderlich. Nutzer sind verpflichtet, ihre Zugangsdaten vertraulich zu behandeln. Elternkonten können Kinderkonten über einen Einladungscode verknüpfen.</p>
+
+    <h3>Kind-Accounts</h2>
+    <p>Kind-Accounts (Rolle „student") dürfen nur mit Zustimmung der Erziehungsberechtigten erstellt werden. Eltern sind verantwortlich für die Nutzung durch ihre Kinder und bestätigen mit der Registrierung, dass sie das Einverständnis für die Nutzung der Plattform sowie für die Verarbeitung der notwendigen Kinderdaten (Anzeigename, Lernfortschritt) gegeben haben. Fotos oder Videos von Kindern werden nur mit einer gesonderten Einverständniserklärung verarbeitet (siehe <a href="/eltern-einwilligung/">Eltern-Einverständniserklärung</a>).</p>
 
     <h2>4. Preise und Zahlung</h2>
     <p>Die Preise werden vor Vertragsabschluss in der Kasse (Stripe) angezeigt. Zahlungen erfolgen monatlich oder einmalig. Abonnements sind monatlich kündbar; die Kündigung wirkt zum Ende des bezahlten Zeitraums.</p>
@@ -58,5 +62,27 @@
     <p>🏴‍☠️ I-Land1o1 Learning Platform – Coding-Abenteuer für junge Piraten</p>
     <p><a href="/impressum/">Impressum</a> · <a href="/datenschutz/">Datenschutz</a> · <a href="/agb/">AGB</a></p>
   </footer>
+
+  <!-- Cookie Consent Banner -->
+  <div id="cookie-banner" class="cookie-banner" role="dialog" aria-modal="true" aria-label="Cookie-Einstellungen">
+    <div class="cookie-banner__content">
+      <div class="cookie-banner__text">
+        <h3>🍪 Cookies &amp; Datenschutz</h3>
+        <p>
+          Wir nutzen technisch notwendige Cookies, damit die Plattform funktioniert
+          (Anmeldung, Lernfortschritt, Warenkorb). Keine Tracking-Cookies von Drittanbietern.
+        </p>
+        <p class="cookie-banner__links">
+          <a href="/datenschutz/">Datenschutzerklärung</a> ·
+          <a href="/impressum/">Impressum</a>
+        </p>
+      </div>
+      <div class="cookie-banner__actions">
+        <button type="button" class="btn btn-primary" id="cookie-accept">Akzeptieren</button>
+        <button type="button" class="btn btn-outline" id="cookie-decline">Nur notwendige</button>
+      </div>
+    </div>
+  </div>
+  <script src="/cookie-consent.js"></script>
 </body>
 </html>

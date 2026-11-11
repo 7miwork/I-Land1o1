@@ -1,0 +1,121 @@
+<!-- ============================================================
+   I-Land1o1 – Cookie Consent Banner
+   Einbetten: <div id="cookie-banner"></div> + <script src="/cookie-consent.js"></script>
+   ============================================================ -->
+<div id="cookie-banner" class="cookie-banner" role="dialog" aria-modal="true" aria-label="Cookie-Einstellungen">
+  <div class="cookie-banner__content">
+    <div class="cookie-banner__text">
+      <h3>🍪 Cookies &amp; Datenschutz</h3>
+      <p>
+        Wir nutzen technisch notwendige Cookies, damit die Plattform funktioniert
+        (Anmeldung, Lernfortschritt, Warenkorb). Keine Tracking-Cookies von Drittanbietern.
+      </p>
+      <p class="cookie-banner__links">
+        <a href="/datenschutz/">Datenschutzerklärung</a> ·
+        <a href="/impressum/">Impressum</a>
+      </p>
+    </div>
+    <div class="cookie-banner__actions">
+      <button type="button" class="btn btn-primary" id="cookie-accept">Akzeptieren</button>
+      <button type="button" class="btn btn-outline" id="cookie-decline">Nur notwendige</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Cookie Banner – Standard-Ausblendung */
+  #cookie-banner {
+    display: none;
+    position: fixed;
+    inset: auto 20px 20px 20px;
+    z-index: 10000;
+    max-width: 460px;
+    background: var(--ocean-deeper);
+    border: 1px solid var(--gold);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    font-family: var(--font-body);
+  }
+  #cookie-banner.visible { display: block; animation: cookieSlideIn 0.3s ease; }
+  @keyframes cookieSlideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+  .cookie-banner__content { padding: 20px 24px; }
+  .cookie-banner__text h3 {
+    margin: 0 0 10px 0;
+    font-family: var(--font-pirate);
+    color: var(--gold);
+    font-size: 20px;
+  }
+  .cookie-banner__text p {
+    margin: 0 0 10px 0;
+    color: var(--parchment);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .cookie-banner__links a {
+    color: var(--gold);
+    text-decoration: underline;
+    font-size: 13px;
+  }
+  .cookie-banner__actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 14px;
+  }
+  .btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--radius);
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .btn-primary { background: var(--gold); color: var(--ink); }
+  .btn-outline { background: transparent; color: var(--parchment); border: 1px solid var(--gold); }
+  .btn:hover { opacity: 0.9; }
+
+  /* Übersteuerung, wenn keine dashboard.css geladen ist */
+  :root {
+    --gold: oklch(82% .16 85);
+    --gold-dark: oklch(60% .16 85);
+    --ocean-deeper: oklch(15% .08 250);
+    --parchment: oklch(95% .02 85);
+    --ink: oklch(23.5% .015 65);
+    --radius: 4px;
+    --shadow: 4px 4px 0 oklch(82% .16 85 / .15);
+  }
+</style>
+
+<script>
+(function () {
+  var banner = document.getElementById('cookie-banner');
+  var acceptBtn = document.getElementById('cookie-accept');
+  var declineBtn = document.getElementById('cookie-decline');
+
+  if (!banner || !acceptBtn || !declineBtn) return;
+
+  // Bereits entschieden? Banner ausblenden
+  if (localStorage.getItem('iland:cookieConsent')) {
+    banner.style.display = 'none';
+    return;
+  }
+
+  banner.classList.add('visible');
+
+  acceptBtn.addEventListener('click', function () {
+    localStorage.setItem('iland:cookieConsent', 'accepted');
+    banner.classList.remove('visible');
+    setTimeout(function () { banner.style.display = 'none'; }, 300);
+  });
+
+  declineBtn.addEventListener('click', function () {
+    localStorage.setItem('iland:cookieConsent', 'declined');
+    banner.classList.remove('visible');
+    setTimeout(function () { banner.style.display = 'none'; }, 300);
+  });
+})();
+</script>

@@ -19,6 +19,7 @@
     .legal a { color: var(--gold); }
     .legal .note { background: rgba(243,186,37,.1); border: 1px dashed var(--gold-dark); padding: 12px 16px; border-radius: 4px; font-size: 13px; color: var(--sand); margin-bottom: 24px; }
     .back { display: inline-block; margin-bottom: 16px; color: var(--gold); text-decoration: none; font-weight: 700; }
+    .placeholder { color: var(--sand); font-style: italic; }
   </style>
 </head>
 <body>
@@ -31,24 +32,25 @@
   <main class="legal">
     <a class="back" href="/">← Zurück zur Startseite</a>
     <h1>Impressum</h1>
-    <p class="note">⚠️ Platzhalter – vor Veröffentlichung mit den echten Angaben des Betreibers ausfüllen.</p>
+    <p class="note">⚠️ Bitte vor der Veröffentlichung die Platzhalter mit den echten Betreiberdaten ersetzen.</p>
 
     <h2>Angaben gemäß § 5 TMG</h2>
     <p>
-      [Vor- und Nachname des Betreibers]<br />
-      [Straße und Hausnummer]<br />
-      [PLZ und Ort]<br />
-      [Land]
+      <span class="placeholder">[Vor- und Nachname / Firmenname des Betreibers]</span><br />
+      <span class="placeholder">[Straße und Hausnummer]</span><br />
+      <span class="placeholder">[PLZ und Ort]</span><br />
+      <span class="placeholder">[Land]</span>
     </p>
 
     <h2>Kontakt</h2>
     <p>
-      Telefon: [Telefonnummer]<br />
-      E-Mail: <a href="mailto:[E-Mail]">[E-Mail]</a>
+      Telefon: <span class="placeholder">[Telefonnummer]</span><br />
+      E-Mail: <a href="mailto:">[E-Mail-Adresse]</a><br />
+      USt.-IdNr.: <span class="placeholder">[Umsatzsteuer-Identifikationsnummer, falls vorhanden]</span>
     </p>
 
     <h2>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h2>
-    <p>[Vor- und Nachname], [Anschrift wie oben]</p>
+    <p><span class="placeholder">[Vor- und Nachname]</span>, <span class="placeholder">[Anschrift wie oben]</span></p>
 
     <h2>Haftung für Inhalte</h2>
     <p>Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.</p>
@@ -58,10 +60,35 @@
 
     <h2>Urheberrecht</h2>
     <p>Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.</p>
+
+    <h2>Online-Streitbeilegung (OS)</h2>
+    <p>Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener">https://ec.europa.eu/consumers/odr</a>. Wir sind nicht verpflichtet und nicht bereit, an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
   </main>
   <footer class="footer">
     <p>🏴‍☠️ I-Land1o1 Learning Platform – Coding-Abenteuer für junge Piraten</p>
     <p><a href="/impressum/">Impressum</a> · <a href="/datenschutz/">Datenschutz</a> · <a href="/agb/">AGB</a></p>
   </footer>
+
+  <!-- Cookie Consent Banner -->
+  <div id="cookie-banner" class="cookie-banner" role="dialog" aria-modal="true" aria-label="Cookie-Einstellungen">
+    <div class="cookie-banner__content">
+      <div class="cookie-banner__text">
+        <h3>🍪 Cookies &amp; Datenschutz</h3>
+        <p>
+          Wir nutzen technisch notwendige Cookies, damit die Plattform funktioniert
+          (Anmeldung, Lernfortschritt, Warenkorb). Keine Tracking-Cookies von Drittanbietern.
+        </p>
+        <p class="cookie-banner__links">
+          <a href="/datenschutz/">Datenschutzerklärung</a> ·
+          <a href="/impressum/">Impressum</a>
+        </p>
+      </div>
+      <div class="cookie-banner__actions">
+        <button type="button" class="btn btn-primary" id="cookie-accept">Akzeptieren</button>
+        <button type="button" class="btn btn-outline" id="cookie-decline">Nur notwendige</button>
+      </div>
+    </div>
+  </div>
+  <script src="/cookie-consent.js"></script>
 </body>
 </html>
