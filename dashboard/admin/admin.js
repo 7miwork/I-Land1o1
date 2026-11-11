@@ -38,10 +38,14 @@
     try { return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }); } catch { return iso; }
   }
 
-  function esc(s) {
-    return String(s == null ? '' : s).replace(/[&<>\"']/g, (c) => (
-      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
-    ));
+    function esc(s) {
+    if (s == null) return '';
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   function roleBadge(role) {
@@ -105,12 +109,7 @@
 // Map user_id -> {display_name, email} fuer die Anzeige im Admin-Dashboard
 //
 userMap = {};
-(usersRes && usersRes.data)?.forEach((p) => { userMap[p.id] = { display_name: p.display_name, email: p.email }; };
-//
-// Map user_id -> {display_name, email} fuer die Anzeige im Admin-Dashboard
-//
-userMap = {};
-(usersRes && usersRes.data)?.forEach((p) => { userMap[p.id] = { display_name: p.display_name, email: p.email }; };
+(usersRes && usersRes.data)?.forEach((p) => { userMap[p.id] = { display_name: p.display_name, email: p.email }; });
     const activeSubs = (subsRes.data || []).filter(s => ['active', 'trialing', 'paid'].includes(s.status)).length;
     document.getElementById('countSubs').textContent = activeSubs;
     document.getElementById('countLinks').textContent = (linksRes.data || []).length;
