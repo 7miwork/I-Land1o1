@@ -65,12 +65,6 @@ end $$;
 
 drop trigger if exists sync_profiles_on_auth_users on auth.users;
 
-create trigger sync_profiles_on_auth_users
-  after update of email, last_sign_in_at
-  on auth.users
-  for each row
-  execute function public.sync_auth_user_to_profile();
-
 create or replace function public.sync_auth_user_to_profile()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
@@ -81,6 +75,12 @@ begin
   where p.id = new.id;
   return new;
 end $$;
+
+create trigger sync_profiles_on_auth_users
+  after update of email, last_sign_in_at
+  on auth.users
+  for each row
+  execute function public.sync_auth_user_to_profile();
 
 
 -- ============================================================
