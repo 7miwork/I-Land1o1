@@ -26,8 +26,9 @@ set email = coalesce(
 )
 from auth.users u
 where u.id = p.id
-  and p.email is null
-  and u.email is not null;
+  and (p.email is null
+       or p.email = ''
+       or p.email not like '%@%.%');
 
 
 -- ============================================================
