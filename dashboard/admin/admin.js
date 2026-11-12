@@ -198,7 +198,8 @@
       const user = userMap[s.user_id] || { email: 'User ' + s.user_id.slice(0, 8), display_name: 'User' };
       const tr = document.createElement('tr');
       const tdUser = document.createElement('td');
-      tdUser.textContent = user.email || user.display_name || 'User';
+      tdUser.textContent = user.display_name || user.email || 'User';
+      if (user.email && user.display_name) tdUser.textContent += ' <' + user.email + '>';
       const tdPlan = document.createElement('td');
       tdPlan.textContent = s.plan || '–';
       const tdStatus = document.createElement('td');
