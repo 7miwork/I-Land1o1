@@ -500,11 +500,146 @@ userMap = {};
     }
   }
 
-  // Initialize tables on page load
+  // Load users table data
+async function loadUsersTable() {
+  if (!client) return;
+  try {
+    const { data, error } = await client.from('profiles').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    const tbody = document.getElementById('usersBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:#888;">Keine Nutzer gefunden</td></tr>';
+      return;
+    }
+    for (const u of data) {
+      const tr = document.createElement('tr');
+      const tdName = document.createElement('td');
+      tdName.textContent = u.display_name || u.email || '–';
+      const tdRole = document.createElement('td');
+      tdRole.innerHTML = roleBadge(u.role || 'student');
+      const tdChange = document.createElement('td');
+      const btnChange = document.createElement('button');
+      btnChange.className = 'btn btn-small';
+      btnChange.dataset.action = 'update-role';
+      btnChange.dataset.userId = u.id;
+      btnChange.textContent = 'Edit';
+      tdChange.appendChild(btnChange);
+      const tdDate = document.createElement('td');
+      tdDate.textContent = fmtDate(u.created_at);
+      tr.append(tdName, tdRole, tdChange, tdDate);
+      tbody.appendChild(tr);
+    }
+  } catch (e) {
+    showMsg('usersMsg', 'Fehler beim Laden: ' + e.message, 'error');
+  }
+}
+
+// Load subscriptions table
+async function loadSubsTable() {
+  if (!client) return;
+  try {
+    const { data, error } = await client.from('subscriptions').select('*, profiles!inner(display_name, email)').order('created_at', { ascending: false });
+    if (error) throw error;
+    const tbody = document.getElementById('subsBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:#888;">Keine Abonnements gefunden</td></tr>';
+      return;
+    }
+    for (const s of data) {
+      const tr = document.createElement('tr');
+      const tdUser = document.createElement('td');
+      tdUser.textContent = s.profiles?.display_name || '–';
+      const tdPlan = document.createElement('td');
+      tdPlan.textContent = s.plan_type || '–';
+      const tdStatus = document.createElement('td');
+      tdStatus.innerHTML = statusBadge(s.status || 'incomplete');
+      const tdEnd = document.createElement('td');
+      tdEnd.textContent = fmtDate(s.canceled_at || s.current_period_end);
+      const tdReset = document.createElement('td');
+      const btnReset = document.createElement('button');
+      btnReset.className = 'btn-reset-sub';
+      btnReset.dataset.label = 'Reset (Test)';
+      btnReset.dataset.userId = s.id;
+      btnReset.textContent = 'Reset Test';
+      tdReset.appendChild(btnReset);
+      tr.append(tdUser, tdPlan, tdStatus, tdEnd, tdReset);
+      tbody.appendChild(tr);
+    }
+  } catch (e) {
+    showMsg('subsMsg', 'Fehler beim Laden: ' + e.message, 'error');
+  }
+}
+
+// Load parent-links table
+async function loadLinksTable() {
+  if (!client) return;
+  try {
+    const { data, error } = await client.from('parent_links').select(`
+      *,
+      profiles!parent_links_parent_id_fkey(address:email)
+    `).order('created_at', { ascending: false });
+    if (error) throw error;
+    const tbody = document.getElementById('linksBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:#888;">Keine Verknüpfungen gefunden</td></tr>';
+      return;
+    }
+    for (const l of data) {
+      const tr = document.createElement('tr');
+      const tdP = document.createElement('td');
+      tdP.textContent = l.profiles?.display_name || 'Parent ' + l.parent_id;
+      const tdS = document.createElement('td');
+      tdS.textContent = l.student_id || '–';
+      const tdD = document.createElement('td');
+      tdD.textContent = fmtDate(l.created_at);
+      const tdDel = document.createElement('td');
+      const btnDel = document.createElement('button');
+      btnDel.className = 'btn-delete';
+      btnDel.textContent = 'Entfernen';
+      btnDel.addEventListener('click', () => deleteLink(l.parent_id, l.student_id));
+      tdDel.appendChild(btnDel);
+      tr.append(tdP, tdS, tdD, tdDel);
+      tbody.appendChild(tr);
+    }
+  } catch (e) {
+    showMsg('linksMsg', 'Fehler beim Laden: ' + e.message, 'error');
+  }
+}
+
+// Main dashboard loader
+async function loadDashboard() {
+  await loadUsersTable();
+  await loadSubsTable();
+  await loadLinksTable();
+  // Update counts
+  const countUsers = document.getElementById('countUsers');
+  const countSubs = document.getElementById('countSubs');
+  const countLinks = document.getElementById('countLinks');
+  if (countUsers) {
+    const data = await client.from('profiles').select('id').eq('role', 'student');
+    countUsers.textContent = data?.length || 0;
+  }
+  if (countSubs) {
+    const data = await client.from('subscriptions').select('id').eq('status', 'active');
+    countSubs.textContent = data?.length || 0;
+  }
+  if (countLinks) {
+    const data = await client.from('parent_links').select('id');
+    countLinks.textContent = data?.length || 0;
+  }
+}
+
+// Initialize tables on page load
 async function initTables() {
-  // Tables are populated via loadDashboard() called from boot()
-  // but we can also explicitly load table data here if needed
-  // For now, loadDashboard() handles it
+  if (client) {
+    await loadDashboard();
+  }
 }
 
 // Ensure tables are initialized when dashboard loads
