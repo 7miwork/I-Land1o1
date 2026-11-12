@@ -214,6 +214,7 @@
       btnReset.textContent = 'Reset';
       btnReset.title = 'Abo zurücksetzen (Test)';
       btnReset.addEventListener('click', () => resetSubscription(s.user_id));
+      btnReset.style.marginRight = '8px';
       tdReset.appendChild(btnReset);
 
       if (myRole === 'admin') {
@@ -222,7 +223,6 @@
         btnProg.dataset.label = 'Fortschritt löschen';
         btnProg.textContent = 'Fortschritt löschen';
         btnProg.title = 'Lernfortschritt löschen (Test)';
-        btnProg.style.marginLeft = '4px';
         btnProg.addEventListener('click', () => resetLessonProgress(s.user_id));
         tdReset.appendChild(btnProg);
       }
