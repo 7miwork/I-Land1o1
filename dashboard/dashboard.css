@@ -713,6 +713,7 @@ h1 {
   color: var(--gold);
   background: rgba(0, 12, 28, .6);
   border-top: 2px solid rgba(243, 186, 37, .35);
+}
 
 /* ---------- Admin: Statistik-Karten ---------- */
 .stats {
@@ -1475,8 +1476,107 @@ h1 {
   font-weight: 700;
 }
 
+/* ---------- Admin Section ---------- */
+.admin-section {
+  background: rgba(0, 12, 28, .55);
+  border: 2px solid rgba(243, 186, 37, .3);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+
+.admin-section .section-title {
+  color: var(--gold);
+  margin: 0 0 16px 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(243, 186, 37, .2);
+}
+
+.admin-section .msg {
+  color: var(--parchment);
+  background: rgba(243, 186, 37, .1);
+  border: 1px solid rgba(243, 186, 37, .3);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.admin-section .stat-label {
+  color: var(--skytext);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.admin-section .stat-value {
+  color: var(--parchment);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* ---------- Table: Header, Rows, Hover ---------- */
+.admin-table thead tr {
+  background: rgba(243, 186, 37, .3);
+  color: var(--gold);
+  border-bottom: 2px solid var(--gold);
+}
+
+.admin-table th {
+  padding: 12px 8px;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.admin-table tbody tr {
+  border-bottom: 1px solid rgba(243, 186, 37, .2);
+}
+
+.admin-table tbody tr:nth-child(odd) {
+  background: rgba(0, 12, 28, .5);
+}
+
+.admin-table tbody tr:nth-child(even) {
+  background: rgba(0, 12, 28, .3);
+}
+
+.admin-table tbody tr:hover {
+  background: rgba(243, 186, 37, .1);
+}
+
+.admin-table td {
+  padding: 10px 8px;
+  color: var(--parchment);
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+/* ---------- Status & Role Badges ---------- */
+.admin-section .status--ok {
+  color: var(--green);
+  background: rgba(98, 178, 112, .2);
+  border: 1px solid var(--green);
+  padding: 2px 6px;
+  border-radius: var(--radius);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.admin-section .status--error {
+  color: var(--red);
+  background: rgba(196, 80, 61, .2);
+  border: 1px solid var(--red);
+  padding: 2px 6px;
+  border-radius: var(--radius);
+  font-size: 11px;
+  font-weight: 700;
+}
+
 /* ---------- Role Badges ---------- */
-.role-badge {
+.admin-section .role-badge {
   display: inline-block;
   padding: 3px 8px;
   border-radius: var(--radius);
@@ -1485,32 +1585,141 @@ h1 {
   margin-left: 4px;
 }
 
-.role-student { color: var(--sand); background: rgba(102, 189, 255, .2); }
-.role-parent { color: var(--gold); background: rgba(243, 186, 37, .2); }
-.role-teacher { color: var(--ocean); background: rgba(0, 12, 28, .3); }
-.role-admin { color: var(--gold); background: rgba(243, 186, 37, .3); }
+.admin-section .role-student { color: var(--sand); background: rgba(102, 189, 255, .2); }
+.admin-section .role-parent { color: var(--gold); background: rgba(243, 186, 37, .2); }
+.admin-section .role-teacher { color: var(--ocean); background: rgba(0, 12, 28, .3); }
+.admin-section .role-admin { color: var(--gold); background: rgba(243, 186, 37, .3); }
 
-/* ---------- Table Responsive ---------- */
-.table-responsive {
+/* ---------- Table Responsive (Admin) ---------- */
+.admin-section .table-responsive {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   margin: 0 -16px;
 }
 
-/* ---------- Admin: Mobil ---------- */
-@media (max-width: 640px) {
-  .user-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .user-search, .user-filter {
-    width: 100%;
-  }
-  .link-form {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .link-form select {
-    width: 100%;
-  }
+/* ============================================================ */
+/* Formulare im Admin-Bereich (dunkel, goldener Rand, helle Schrift)
+/* ============================================================ */
+
+/* Allgemeine Formularelemente */
+.admin-section select,
+.admin-section input[type="search"],
+.admin-section input[type="text"],
+.admin-section input[type="password"],
+.admin-section input[type="number"] {
+  background: rgba(0, 12, 28, .7);
+  border: 2px solid rgba(243, 186, 37, .4);
+  border-radius: var(--radius);
+  color: var(--parchment);
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: var(--font-body);
+  width: 100%;
+  transition: border-color .2s ease;
+}
+
+.admin-section select:focus,
+.admin-section input[type="search"]:focus,
+.admin-section input[type="text"]:focus,
+.admin-section input[type="password"]:focus,
+.admin-section input[type="number"]:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(243, 186, 37, .2);
+}
+
+/* Primärbasis-Buttons (gelb) */
+.admin-section .btn-primary,
+.admin-section button.btn-primary {
+  background: var(--gold);
+  color: var(--gold-ink);
+  border: 2px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+.admin-section .btn-primary:hover {
+  background: var(--gold-dark);
+  border-color: var(--gold-dark);
+}
+
+/* Lösch-Buttons (rot) */
+.admin-section .btn-delete,
+.admin-section button.btn-delete {
+  background: rgba(196, 80, 61, .3);
+  color: var(--red);
+  border: 2px solid var(--red);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+.admin-section .btn-delete:hover {
+  background: rgba(196, 80, 61, .5);
+  border-color: var(--red);
+}
+
+/* Reset/Abos-Buttons */
+.admin-section .btn-reset-sub {
+  background: rgba(243, 186, 37, .2);
+  color: var(--gold);
+  border: 2px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+.admin-section .btn-reset-sub:hover {
+  background: rgba(243, 186, 37, .3);
+}
+
+/* Pagination-Buttons */
+.admin-section .pagination button {
+  background: rgba(0, 12, 28, .7);
+  border: 2px solid rgba(243, 186, 37, .4);
+  border-radius: var(--radius);
+  color: var(--parchment);
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+.admin-section .pagination button:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.admin-section .pagination button:not(:disabled):hover {
+  background: rgba(243, 186, 37, .2);
+  border-color: var(--gold);
+}
+
+/* Link-Formular */
+.admin-section .link-form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.admin-section .link-form select {
+  min-width: 200px;
+}
+
+.admin-section .link-form button {
+  min-width: 100px;
 }
