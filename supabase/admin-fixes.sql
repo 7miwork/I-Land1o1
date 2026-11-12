@@ -20,7 +20,7 @@ alter table public.profiles
 
 -- Neue Profile sollen auch email bekommen (falls im Metadaten)
 update public.profiles p
-set email = coalece(
+set email = coalesce(
   nullif(u.raw_user_meta_data ->> 'email', ''),
   nullif(split_part(coalesce(u.email, ''), '@', 1), '')
 )
