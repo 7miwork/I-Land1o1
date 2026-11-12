@@ -198,8 +198,9 @@
       const user = userMap[s.user_id] || { email: 'User ' + s.user_id.slice(0, 8), display_name: 'User' };
       const tr = document.createElement('tr');
       const tdUser = document.createElement('td');
-      tdUser.textContent = user.display_name || user.email || 'User';
-      if (user.email && user.display_name) tdUser.textContent += ' <' + user.email + '>';
+      tdUser.textContent = user.display_name || 'User';
+      const tdEmail = document.createElement('td');
+      tdEmail.textContent = user.email || '–';
       const tdPlan = document.createElement('td');
       tdPlan.textContent = s.plan || '–';
       const tdStatus = document.createElement('td');
@@ -227,7 +228,7 @@
         tdReset.appendChild(btnProg);
       }
 
-      tr.append(tdUser, tdPlan, tdStatus, tdDate, tdReset);
+      tr.append(tdUser, tdEmail, tdPlan, tdStatus, tdDate, tdReset);
       tbody.appendChild(tr);
     }
 
@@ -254,9 +255,13 @@
       const student = userMap[l.student_id] || { display_name: 'Student ' + (l.student_id || '–').slice(0, 8), email: '' };
       const tr = document.createElement('tr');
       const tdP = document.createElement('td');
-      tdP.textContent = parent.display_name + (parent.email ? ' <' + parent.email + '>' : '');
+      tdP.textContent = parent.display_name || 'Parent';
+      const tdEmailParent = document.createElement('td');
+      tdEmailParent.textContent = parent.email || '–';
       const tdS = document.createElement('td');
-      tdS.textContent = student.display_name + (student.email ? ' <' + student.email + '>' : '');
+      tdS.textContent = student.display_name || 'Student';
+      const tdEmailStudent = document.createElement('td');
+      tdEmailStudent.textContent = student.email || '–';
       const tdD = document.createElement('td');
       tdD.textContent = fmtDate(l.created_at);
       const tdDel = document.createElement('td');
@@ -265,7 +270,7 @@
       btnDel.textContent = 'Entfernen';
       btnDel.addEventListener('click', () => deleteLink(l.parent_id, l.student_id));
       tdDel.appendChild(btnDel);
-      tr.append(tdP, tdS, tdD, tdDel);
+      tr.append(tdP, tdEmailParent, tdS, tdEmailStudent, tdD, tdDel);
       tbody.appendChild(tr);
     }
   }
