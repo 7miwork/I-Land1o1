@@ -500,5 +500,15 @@ userMap = {};
     }
   }
 
-  boot();
+  // Initialize tables on page load
+async function initTables() {
+  // Tables are populated via loadDashboard() called from boot()
+  // but we can also explicitly load table data here if needed
+  // For now, loadDashboard() handles it
+}
+
+// Ensure tables are initialized when dashboard loads
+document.addEventListener('DOMContentLoaded', initTables);
+
+boot();
 })();
